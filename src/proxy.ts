@@ -1,0 +1,87 @@
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
+
+import {
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
+  LOCALE_HEADER,
+  isLocalizedRoute,
+  localizePath,
+  splitLocale,
+} from "@/i18n/config";
+
+const PROTECTED = ["/admin", "/account"];
+/** Paths that read the Supabase session here (refresh + route protection). */
+const NEEDS_SESSION = ["/admin", "/account", "/login"];
+
+const startsWithAny = (path: string, prefixes: string[]) =>
+  prefixes.some((p) => path === p || path.startsWith(`${p}/`));
+
+export async function proxy(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  const { locale, path } = splitLocale(pathname);
+
+  // English exists for the public pages only; /en/datenschutz, /en/admin … use the German page.
+  if (locale !== DEFAULT_LOCALE && !isLocalizedRoute(path)) {
+    return NextResponse.redirect(new URL(`${path}${search}`, request.url));
+  }
+
+  // Someone who picked English in the switcher gets it again on the plain URL (e.g. a QR code).
+  if (
+    locale === DEFAULT_LOCALE &&
+    isLocalizedRoute(path) &&
+    request.cookies.get(LOCALE_COOKIE)?.value === "en" &&
+    request.method === "GET"
+  ) {
+    return NextResponse.redirect(new URL(localizePath("en", `${path}${search}`), request.url));
+  }
+
+  // Pages learn the language from this header; any value sent by the client is replaced.
+  const respond = () => {
+    const headers = new Headers(request.headers);
+    headers.set(LOCALE_HEADER, locale);
+    if (locale === DEFAULT_LOCALE) return NextResponse.next({ request: { headers } });
+    const url = request.nextUrl.clone();
+    url.pathname = path;
+    return NextResponse.rewrite(url, { request: { headers } });
+  };
+  let response = respond();
+
+  if (!startsWithAny(path, NEEDS_SESSION)) return response;
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          response = respond();
+          cookiesToSet.forEach(({ name, value, options }) =>
+            response.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
+
+  // Refreshes the session cookie when it is close to expiring.
+  const { data } = await supabase.auth.getClaims();
+
+  if (!data?.claims && startsWithAny(path, PROTECTED)) {
+    const url = request.nextUrl.clone();
+    url.pathname = localizePath(locale, "/login");
+    url.search = `?mode=login&next=${encodeURIComponent(pathname)}`;
+    return NextResponse.redirect(url);
+  }
+
+  return response;
+}
+
+export const config = {
+  // Everything except Next internals, the auth callback and files with an extension.
+  matcher: ["/((?!_next/|auth/callback|.*\\.[a-z0-9]+$).*)"],
+};

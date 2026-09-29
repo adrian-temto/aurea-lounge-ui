@@ -1,0 +1,337 @@
+import type { Dictionary } from "./de";
+
+/** English. Every key from de.ts is required. Marketing copy here still wants a native review. */
+const en: Dictionary = {
+  meta: {
+    homeTitle: "Auréa — Breakfast, Café & Lounge in Beelitz",
+    homeDescription:
+      "A golden hour from dawn to late. Breakfast, specialty coffee and an intimate evening lounge in Beelitz.",
+    homeOgTitle: "Auréa — Breakfast, Café & Lounge",
+    homeOgDescription:
+      "Where morning light meets candlelight. Breakfast, coffee and candlelit evenings in Beelitz.",
+    joinTitle: "Account — Auréa",
+    joinDescription: "Join Auréa — create an account or sign in.",
+    accountTitle: "My account — Auréa",
+    notFoundTitle: "Page not found — Auréa",
+  },
+
+  language: {
+    label: "Language",
+    names: { de: "Deutsch", en: "English" },
+    switchTo: (name: string) => `Switch language: ${name}`,
+  },
+
+  nav: {
+    items: [
+      ["Home", "#top"],
+      ["Breakfast", "#tag"],
+      ["Café", "#tag"],
+      ["Lounge", "#tag"],
+      ["Menu", "#menu"],
+      ["Our Story", "#story"],
+      ["Visit", "#visit"],
+    ],
+    home: "Auréa — home",
+    logoAlt: "Auréa — Breakfast · Café · Lounge",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    reserve: "Reserve a table",
+    account: { join: "Login", account: "My account", dashboard: "Dashboard" },
+    address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
+  },
+
+  hero: {
+    imageAlt: "Auréa café in the morning light with brass details and candles",
+    eyebrow: "Breakfast · Café · Lounge",
+    title: "A golden hour,",
+    titleEm: "from dawn to late.",
+    text: "Where morning light meets candlelight. A warm retreat for unhurried coffees, cosy breakfasts and quiet conversations.",
+    reserve: "Reserve a table",
+    menu: "Explore the menu",
+  },
+
+  intro: {
+    eyebrow: "Three moments, one place",
+    title: "A day at",
+    titleEm: "Auréa",
+    text: "From the first espresso to the last glass of wine — we keep the stove warm through every moment of the day.",
+  },
+
+  chapters: [
+    {
+      time: "From 08:00",
+      title: "Breakfast",
+      alt: "Breakfast table with eggs Benedict and sourdough bread",
+      copy: "Sourdough, soft eggs, stone-fruit jam and more — a good start to the day.",
+    },
+    {
+      time: "From 11:00",
+      title: "Café",
+      alt: "Flat white and croissant on a marble table",
+      copy: "Specialty coffee, fresh pastries and a full lunch menu for long afternoons.",
+    },
+    {
+      time: "From 18:00",
+      title: "Lounge",
+      alt: "Candlelight, a cocktail and a record player in the evening",
+      copy: "Candlelight, small plates, classic cocktails and vinyl playing softly.",
+    },
+  ],
+
+  story: {
+    imageAlt: "Brass counter with freshly baked sourdough bread",
+    eyebrow: "Our story",
+    title: "Rooted in warmth,",
+    titleEm: "gilded with care.",
+    p1: "Auréa grew from a simple wish — to create a place that carries you through the whole day. A place where mornings smell of cardamom and dark-roasted beans, where afternoons hum quietly over good books, and where evenings flicker golden in candlelight.",
+    p2: "Every detail — from the brass we polish each morning to the bread we bake before sunrise — is chosen with care.",
+  },
+
+  menu: {
+    eyebrow: "A selection from",
+    title: "the menu",
+    subtitle: "Seasonal, honest and freshly prepared every day.",
+    empty: "The menu is being updated.",
+    legend: "V vegetarian · VG vegan · Our team is happy to answer questions about allergens.",
+    fullMenu: "Full menu",
+    unavailable: "Currently unavailable",
+    allergens: "Allergens",
+    tags: { V: "vegetarian", VG: "vegan" },
+    allergenNames: {
+      gluten: "Gluten",
+      crustaceans: "Crustaceans",
+      eggs: "Eggs",
+      fish: "Fish",
+      peanuts: "Peanuts",
+      soy: "Soy",
+      milk: "Milk",
+      nuts: "Tree nuts",
+      celery: "Celery",
+      mustard: "Mustard",
+      sesame: "Sesame",
+      sulphites: "Sulphites",
+      lupin: "Lupin",
+      molluscs: "Molluscs",
+    },
+  },
+
+  atmosphere: {
+    eyebrow: "The atmosphere",
+    title: "Slow mornings.",
+    titleEm: "Golden evenings.",
+    alts: [
+      "Candlelit table at golden hour",
+      "Pistachio porridge and croissant",
+      "Coffee and croissant",
+      "Cocktail by candlelight",
+    ],
+  },
+
+  visit: {
+    eyebrow: "Find us",
+    title: "Come by,",
+    titleEm: "stay a while.",
+    hours: [
+      ["Monday — Sunday", "08:00 – 20:00"],
+    ],
+    address: "Address",
+    country: "Germany",
+    phone: "Phone",
+    directions: "Get directions →",
+  },
+
+  reservation: {
+    eyebrow: "Reservations",
+    title: "Reserve",
+    titleEm: "a table",
+    intro: "Tell us when you'd like to come by. We confirm within an hour.",
+    name: "Name",
+    namePlaceholder: "First and last name",
+    phone: "Phone",
+    email: "Email",
+    emailPlaceholder: "name@example.com",
+    remember: "Save my details for my next reservations.",
+    terms: "I accept the terms and conditions.",
+    required: "required",
+    marketingEmail: "Send me offers and news by email.",
+    marketingSms: "Send me offers and news by SMS.",
+    date: "Date",
+    time: "Time",
+    guests: "Guests",
+    seating: "Area",
+    requests: "Special requests",
+    requestsPlaceholder: "Occasion, allergies, a favourite spot by the window…",
+    submit: "Send request",
+    sending: "Sending…",
+    persons: (n: number) => `${n} ${n === 1 ? "guest" : "guests"}`,
+    atTime: (t: string) => t,
+    seatingOptions: {
+      any: "No preference",
+      cafe: "Café",
+      lounge: "Lounge",
+      window: "Window seat",
+    },
+    groupHint: (max: number) => `More than ${max} guests? Give us a call:`,
+    privacy:
+      "We use your details to handle your reservation and to contact you about it by phone, SMS, WhatsApp or email. We only send offers and news if you tick that above. If you're signed in, the request also appears in your account. More in our",
+    privacyLink: "privacy policy (German)",
+    newTab: "(opens in a new tab)",
+    modalTitle: "Reserve",
+    modalTitleEm: "a table",
+    modalDescription: "Choose guests, date and time.",
+    continue: "Reserve",
+    noSlotsToday: "Online booking is closed for today. Please choose another date.",
+    back: "Back",
+    contactTitle: "Almost",
+    contactTitleEm: "done",
+    sentTitle: "Request",
+    sentTitleEm: "sent",
+    sentNote: "Your reservation is valid once we have confirmed it.",
+    close: "Close",
+    errors: {
+      name: "Please enter your name.",
+      phone: "Please enter a phone number.",
+      email: "Please enter a valid email address.",
+      terms: "Please accept the terms and conditions.",
+      date: "Please choose a date.",
+      time: "Please choose a time.",
+      tooMany: (max: number, phone: string) =>
+        `For groups of ${max + 1} or more, please call us: ${phone}`,
+      invalid: "Please check your details.",
+      past: "That date is in the past.",
+      failed: (phone: string) => `Something went wrong. Please call us: ${phone}`,
+    },
+    success: "Thank you — we'll be in touch shortly.",
+  },
+
+  footer: {
+    tagline: "A golden retreat from dawn to late.",
+    links: { home: "Home", menu: "Menu", story: "Story", visit: "Visit", reserve: "Reservations", join: "Login" },
+    contact: "Contact",
+    hours: "Opening hours",
+    hoursLines: ["Mon–Sun 08–20"],
+    copyright: "© 2026 Auréa Café & Lounge. All rights reserved.",
+    privacy: "Privacy policy",
+    germanOnly: "(German)",
+    cookieSettings: "Cookie settings",
+  },
+
+  consent: {
+    eyebrow: "Privacy",
+    summaryTitle: "Cookies & services",
+    settingsTitle: "Cookie settings",
+    text: "Essential technologies keep the website and your table reservation working. We only load optional services such as statistics, marketing or external content with your consent. You can change your choice at any time via “Cookie settings” in the footer.",
+    learnMore: "Learn more (German)",
+    acceptAll: "Accept all",
+    rejectOptional: "Reject optional",
+    settings: "Settings",
+    save: "Save selection",
+    categories: "Categories",
+    alwaysActive: "Always active",
+    services: "Services",
+    none: "We don't currently use any services in this category.",
+    categoryInfo: {
+      necessary: {
+        title: "Essential",
+        description:
+          "Keep the website, table reservations and sign-in working. These are always active.",
+      },
+      analytics: {
+        title: "Statistics",
+        description: "Help us understand how the website is used, e.g. which pages are visited.",
+      },
+      marketing: {
+        title: "Marketing",
+        description: "Advertising and social media pixels that recognise you on other websites.",
+      },
+      media: {
+        title: "External content",
+        description:
+          "Content embedded from other providers, e.g. maps, videos or booking widgets, which send data to those providers when loaded.",
+      },
+    },
+    gate: (provider: string, category: string) =>
+      `This content is loaded from ${provider}. It appears once you allow “${category}” in the cookie settings.`,
+  },
+
+  auth: {
+    eyebrow: "Account",
+    imageAlt: "Candlelight and cocktails in the Auréa lounge",
+    imageTitle: "Come for breakfast.",
+    imageTitleEm: "Return for the evening.",
+    homeAria: "Back to the home page",
+    signupTitle: "Become part",
+    signupTitleEm: "of Auréa",
+    loginTitle: "Welcome",
+    loginTitleEm: "back",
+    tabs: { signup: "Sign up", login: "Sign in" },
+    name: "Name",
+    namePlaceholder: "First and last name",
+    email: "Email",
+    emailPlaceholder: "you@example.com",
+    password: "Password",
+    passwordPlaceholder: "At least 8 characters",
+    submitSignup: "Create account",
+    submitLogin: "Sign in",
+    wait: "One moment…",
+    checkInboxEyebrow: "Almost there",
+    checkInboxTitle: "Check your inbox",
+    checkInboxText: (email: string) =>
+      [`We've sent a confirmation email to `, email, `. Click the link in it to activate your account.`],
+    toLogin: "Go to sign in",
+    haveAccount: "Already have an account?",
+    noAccount: "No account yet?",
+    notices: {
+      confirmed: "Email confirmed — please sign in now.",
+      "link-invalid": "The confirmation link is invalid or has expired.",
+    },
+    errors: {
+      invalid_credentials: "Wrong email or password.",
+      email_not_confirmed: "Please confirm your email address first.",
+      user_already_exists: "There is already an account for this email. Please sign in.",
+      weak_password: "That password is too weak — use at least 8 characters.",
+      over_email_send_rate_limit: "Too many emails in a short time. Please try again later.",
+      unknown: "Something went wrong. Please try again.",
+    },
+  },
+
+  account: {
+    signOut: "Sign out",
+    forbidden: "Your account doesn't have access to the dashboard.",
+    eyebrow: "My account",
+    welcome: "Welcome,",
+    name: "Name",
+    email: "Email",
+    memberSince: "Member since",
+    role: "Role",
+    roles: { admin: "Administrator", staff: "Team", guest: "Guest" },
+    reserve: "Reserve a table",
+    dashboard: "Dashboard",
+    reservations: "My reservations",
+    none: "No reservations yet. Reservations you request while signed in appear here — together with our reply.",
+    status: {
+      new: "Requested",
+      confirmed: "Confirmed",
+      declined: "Declined",
+      cancelled: "Cancelled",
+    },
+    message: "Message from Auréa",
+  },
+
+  notFound: {
+    title: "Page not found",
+    text: "This page doesn't exist or has moved.",
+    home: "Back to the home page",
+  },
+
+  error: {
+    title: "This page didn't load",
+    text: "Something went wrong on our end. Refresh the page or go back to the home page.",
+    retry: "Try again",
+    home: "Back to the home page",
+  },
+
+  intl: "en-GB",
+};
+
+export default en;
