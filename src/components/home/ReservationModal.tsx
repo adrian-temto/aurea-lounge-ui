@@ -27,7 +27,7 @@ import {
 } from "react";
 
 import { createReservation } from "@/app/actions/reservations";
-import { PRIVACY_PATH, useConsent } from "@/components/consent/ConsentProvider";
+import { PRIVACY_PATH } from "@/components/consent/ConsentProvider";
 import { useI18n } from "@/i18n/client";
 import { EuDateInput } from "./EuDateInput";
 import {
@@ -39,25 +39,6 @@ import {
   todayInBerlin,
   type Seating,
 } from "@/lib/reservation";
-
-/** Set once the modal has been shown in this tab, so scrolling never brings it back. */
-export const PROMPTED_KEY = "aurea_reserve_prompted";
-
-function wasPrompted() {
-  try {
-    return sessionStorage.getItem(PROMPTED_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function markPrompted() {
-  try {
-    sessionStorage.setItem(PROMPTED_KEY, "1");
-  } catch {
-    // Private mode or blocked storage: the in-memory flag still covers this page view.
-  }
-}
 
 /** Name, phone and email, kept on this device only when the guest ticks "remember". */
 export const SAVED_CONTACT_KEY = "aurea_guest_contact";
@@ -106,52 +87,18 @@ export function useSavedContact(form: RefObject<HTMLFormElement | null>) {
 type Ctx = { open: (returnFocus?: HTMLElement | null) => void };
 const ReservationContext = createContext<Ctx | null>(null);
 
-/** How far a visitor scrolls down before the modal offers itself. */
-const triggerDistance = () => Math.min(280, Math.max(160, window.innerHeight * 0.25));
-
 export function ReservationModalProvider({ children }: { children: ReactNode }) {
   const { t } = useI18n();
-  const { ready, dialogOpen: consentOpen } = useConsent();
   const [open, setOpen] = useState(false);
   // Each opening starts a fresh form.
   const [session, setSession] = useState(0);
-  const prompted = useRef(false);
   const returnFocus = useRef<HTMLElement | null>(null);
 
   const show = useCallback((target: HTMLElement | null = null) => {
-    prompted.current = true;
-    markPrompted();
     returnFocus.current = target;
     setSession((n) => n + 1);
     setOpen(true);
   }, []);
-
-  // Open once on the first deliberate scroll down, and only after the cookie choice is made:
-  // the listener starts fresh when the consent dialog closes, so it takes a later scroll.
-  useEffect(() => {
-    if (!ready || consentOpen || open || prompted.current || wasPrompted()) return;
-    let start = window.scrollY;
-    let quietUntil = 0;
-    const onScroll = () => {
-      const y = window.scrollY;
-      // Scrolling up, an in-page link jump, or a restored scroll position isn't browsing.
-      if (y < start || performance.now() < quietUntil || y - start > window.innerHeight) {
-        start = y;
-        return;
-      }
-      if (y - start >= triggerDistance()) show(null);
-    };
-    const onClick = (e: MouseEvent) => {
-      if ((e.target as Element | null)?.closest?.('a[href^="#"]'))
-        quietUntil = performance.now() + 1500;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    document.addEventListener("click", onClick, true);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      document.removeEventListener("click", onClick, true);
-    };
-  }, [ready, consentOpen, open, show]);
 
   return (
     <ReservationContext.Provider value={{ open: show }}>

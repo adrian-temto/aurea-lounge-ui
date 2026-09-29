@@ -93,15 +93,6 @@ export const SERVICES: Record<Category, Service[]> = {
       scope: "nur wenn du „Informationen speichern“ ankreuzt",
     },
     {
-      name: "Reservierungshinweis",
-      nameEn: "Reservation prompt",
-      provider: "Auréa (diese Website)",
-      purpose:
-        "Merkt sich, dass wir dir das Reservierungsfenster in diesem Tab schon angeboten haben, damit es nicht erneut erscheint.",
-      storage: "Session Storage aurea_reserve_prompted",
-      retention: "bis du den Tab schließt",
-    },
-    {
       name: "Spracheinstellung",
       nameEn: "Language preference",
       provider: "Auréa (diese Website)",

@@ -8,7 +8,6 @@ import type { Locale } from "@/i18n/config";
 import { ALL, CONSENT_COOKIE, CONSENT_VERSION, serializeConsent } from "@/lib/consent";
 
 import {
-  PROMPTED_KEY,
   ReservationModalProvider,
   ReserveLink,
   SAVED_CONTACT_KEY,
@@ -64,70 +63,14 @@ beforeEach(() => {
 
 afterEach(() => vi.useRealTimers());
 
-describe("automatic prompt", () => {
+describe("no automatic prompt", () => {
   beforeEach(decideCookies);
 
-  it("does not open on load or on a small accidental scroll", () => {
+  it("never opens by itself, however far the visitor scrolls", () => {
     render(<Page />);
     expect(modal()).toBeNull();
-    scrollTo(60);
+    for (const y of [60, 240, 700, 3000]) scrollTo(y);
     expect(modal()).toBeNull();
-  });
-
-  it("opens after a deliberate scroll down", () => {
-    render(<Page />);
-    scrollTo(120);
-    scrollTo(240);
-    expect(modal()).toBeInTheDocument();
-  });
-
-  it("stays closed for the rest of the session once dismissed", async () => {
-    const { unmount } = render(<Page />);
-    scrollTo(300);
-    await userEvent.keyboard("{Escape}");
-    expect(modal()).toBeNull();
-
-    scrollTo(0);
-    scrollTo(900);
-    expect(modal()).toBeNull();
-
-    // A reload in the same tab keeps the flag.
-    unmount();
-    render(<Page />);
-    scrollTo(0);
-    scrollTo(900);
-    expect(modal()).toBeNull();
-    expect(sessionStorage.getItem(PROMPTED_KEY)).toBe("1");
-  });
-
-  it("ignores the jump from an in-page link", () => {
-    render(<Page />);
-    fireEvent.click(screen.getByRole("link", { name: "Karte" }));
-    scrollTo(400);
-    expect(modal()).toBeNull();
-  });
-
-  it("ignores a restored scroll position", () => {
-    render(<Page />);
-    scrollTo(3000);
-    expect(modal()).toBeNull();
-  });
-});
-
-describe("cookie consent", () => {
-  it("waits for the cookie choice, then needs a fresh scroll", async () => {
-    render(<Page />);
-    const consent = await screen.findByRole("dialog", { name: "Cookies & Dienste" });
-    scrollTo(400);
-    expect(modal()).toBeNull();
-
-    await userEvent.click(within(consent).getByRole("button", { name: "Alle akzeptieren" }));
-    expect(modal()).toBeNull();
-
-    scrollTo(500);
-    expect(modal()).toBeNull();
-    scrollTo(700);
-    expect(modal()).toBeInTheDocument();
   });
 });
 
@@ -136,9 +79,6 @@ describe("reservation buttons", () => {
 
   it("open the modal at any time and return focus when closed", async () => {
     render(<Page />);
-    scrollTo(300);
-    await userEvent.click(screen.getByRole("button", { name: "Schließen" }));
-
     const link = screen.getByRole("link", { name: "Tisch reservieren" });
     await userEvent.click(link);
     expect(modal()).toBeInTheDocument();

@@ -294,8 +294,7 @@ export default function PrivacyPage() {
           </h3>
           <p>
             {CATEGORY_INFO.necessary.description} Besucher ohne Konto erhalten auf der öffentlichen
-            Website nur das Cookie für die Cookie-Einstellungen, sobald wir das Reservierungsfenster
-            angeboten haben, einen Eintrag im Session Storage und – nur wenn du es bei einer
+            Website nur das Cookie für die Cookie-Einstellungen und – nur wenn du es bei einer
             Reservierung ankreuzt – deine gespeicherten Kontaktdaten im Local Storage.
           </p>
           <ServiceList services={SERVICES.necessary} />
