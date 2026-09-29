@@ -1,5 +1,5 @@
 @import "tailwindcss" source(none);
-@source "../src";
+@source "..";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -63,8 +63,8 @@
   --color-olive: var(--olive);
   --color-espresso: var(--espresso);
   --color-cream: var(--cream);
-  --font-serif: "Cormorant Garamond", Georgia, serif;
-  --font-sans: "Manrope", system-ui, sans-serif;
+  --font-serif: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
 }
 
 :root {

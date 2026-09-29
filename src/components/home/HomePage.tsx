@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+"use client";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import hero from "@/assets/hero.jpg";
 import breakfast from "@/assets/breakfast.jpg";
@@ -8,20 +9,6 @@ import story from "@/assets/story.jpg";
 import atmos from "@/assets/atmos.jpg";
 import pastry from "@/assets/pastry.jpg";
 import cocktail from "@/assets/cocktail.jpg";
-
-export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Auréa — Frühstück, Café & Lounge in Beelitz" },
-      { name: "description", content: "Eine goldene Stunde, von früh bis spät. Frühstück, Specialty Coffee und eine intime Abend-Lounge in Beelitz." },
-      { property: "og:title", content: "Auréa — Frühstück, Café & Lounge" },
-      { property: "og:description", content: "Wo Morgenlicht auf Kerzenschein trifft. Come for breakfast, stay for coffee, return for the evening." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-  }),
-  component: Index,
-});
 
 function useReveal() {
   useEffect(() => {
@@ -71,8 +58,15 @@ function Header() {
         }`}
       >
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <a href="#top" className={`font-serif text-2xl tracking-[0.3em] ${open ? "text-foreground" : ""}`}>
-            AURÉA
+          <a href="#top" aria-label="Auréa — Startseite" className="block shrink-0">
+            {/* The logo's tagline is dark brown, so swap to the cream variant over the dark hero. */}
+            <img
+              src={solid ? "/logo.svg" : "/logo-light.svg"}
+              alt="Auréa — Breakfast · Café · Lounge"
+              width={645}
+              height={167}
+              className={`w-auto transition-all duration-700 ${scrolled ? "h-9 md:h-10" : "h-10 md:h-12"}`}
+            />
           </a>
           <nav className="hidden items-center gap-9 lg:flex">
             {NAV.map(([l, h]) => (
@@ -132,7 +126,7 @@ function Header() {
 function Hero() {
   return (
     <section id="top" className="relative h-[100svh] min-h-[640px] overflow-hidden bg-espresso text-cream">
-      <img src={hero} alt="Auréa Café im Morgenlicht mit Messingdetails und Kerzen" width={1920} height={1088} className="absolute inset-0 h-full w-full scale-105 object-cover animate-[heroZoom_14s_ease-out_forwards]" />
+      <img src={hero.src} alt="Auréa Café im Morgenlicht mit Messingdetails und Kerzen" width={1920} height={1088} className="absolute inset-0 h-full w-full scale-105 object-cover animate-[heroZoom_14s_ease-out_forwards]" />
       <div className="absolute inset-0 bg-gradient-to-t from-espresso/85 via-espresso/30 to-espresso/20" />
       <div className="relative mx-auto flex h-full max-w-[1440px] flex-col justify-end px-6 pb-16 md:px-12 md:pb-24">
         <p className="eyebrow mb-8 text-gold">Breakfast · Café · Lounge</p>
@@ -201,7 +195,7 @@ function Chapters() {
             <Reveal key={c.title} delay={i * 150} className={i === 1 ? "md:mt-32" : i === 2 ? "md:mt-64" : ""}>
               <article className="group">
                 <div className={`relative overflow-hidden ${i === 2 ? "bg-espresso" : "bg-muted"}`}>
-                  <img src={c.img} alt={c.alt} loading="lazy" width={896} height={1152} className="aspect-[4/5] w-full object-cover transition-transform duration-[1800ms] ease-out group-hover:scale-105" />
+                  <img src={c.img.src} alt={c.alt} loading="lazy" width={896} height={1152} className="aspect-[4/5] w-full object-cover transition-transform duration-[1800ms] ease-out group-hover:scale-105" />
                   <span className="absolute left-5 top-5 font-serif text-lg italic text-cream">{c.n}</span>
                 </div>
                 <div className="mt-7 flex items-baseline justify-between border-b border-border pb-4">
@@ -223,7 +217,7 @@ function Story() {
     <section id="story" className="bg-card">
       <div className="mx-auto grid max-w-[1440px] md:grid-cols-2">
         <div className="relative min-h-[70vh] overflow-hidden">
-          <img src={story} alt="Messingtresen mit frisch gebackenem Sauerteigbrot" loading="lazy" width={1024} height={1280} className="absolute inset-0 h-full w-full object-cover" />
+          <img src={story.src} alt="Messingtresen mit frisch gebackenem Sauerteigbrot" loading="lazy" width={1024} height={1280} className="absolute inset-0 h-full w-full object-cover" />
         </div>
         <div className="flex items-center px-6 py-24 md:px-20 md:py-36">
           <Reveal>
@@ -365,7 +359,7 @@ function Atmosphere() {
           </h2>
         </Reveal>
         <div ref={ref} className="relative h-[60vh] overflow-hidden md:h-[80vh]">
-          <img src={atmos} alt="Kerzenbeleuchteter Tisch zur goldenen Stunde" loading="lazy" width={1920} height={1088} className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover" style={{ transform: `translateY(${y}px)` }} />
+          <img src={atmos.src} alt="Kerzenbeleuchteter Tisch zur goldenen Stunde" loading="lazy" width={1920} height={1088} className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover" style={{ transform: `translateY(${y}px)` }} />
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 md:mt-8 md:grid-cols-12 md:gap-8">
           {[
@@ -374,7 +368,7 @@ function Atmosphere() {
             { src: cocktail, alt: "Cocktail bei Kerzenlicht", cls: "col-span-2 md:col-span-5 aspect-[4/5] md:-mt-32" },
           ].map((im, i) => (
             <Reveal key={i} delay={i * 120} className={`group overflow-hidden ${im.cls}`}>
-              <img src={im.src} alt={im.alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-[1800ms] group-hover:scale-105" />
+              <img src={im.src.src} alt={im.alt} loading="lazy" className="h-full w-full object-cover transition-transform duration-[1800ms] group-hover:scale-105" />
             </Reveal>
           ))}
         </div>
@@ -554,7 +548,7 @@ function Footer() {
   );
 }
 
-function Index() {
+export default function HomePage() {
   useReveal();
   return (
     <main className="bg-background">
