@@ -318,7 +318,7 @@ function Menu() {
         ))}
       </div>
       <div key={cat} className="grid animate-in fade-in slide-in-from-bottom-2 duration-700 md:grid-cols-2 md:gap-x-20">
-        {MENU[cat].map((it) => (
+        {(MENU[cat] ?? []).map((it) => (
           <div key={it.name} className="group border-b border-border py-8 transition-colors duration-500">
             <div className="flex items-baseline gap-4">
               <h3 className="font-serif text-2xl transition-colors duration-500 group-hover:text-gold md:text-[1.7rem]">{it.name}</h3>
