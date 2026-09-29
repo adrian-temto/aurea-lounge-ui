@@ -97,14 +97,15 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.975 0.012 85);
-  --sidebar-foreground: oklch(0.2 0.018 55);
-  --sidebar-primary: oklch(0.2 0.018 55);
-  --sidebar-primary-foreground: oklch(0.965 0.015 85);
-  --sidebar-accent: oklch(0.92 0.025 80);
-  --sidebar-accent-foreground: oklch(0.2 0.018 55);
-  --sidebar-border: oklch(0.2 0.018 55 / 14%);
-  --sidebar-ring: oklch(0.72 0.085 78);
+  /* Admin sidebar: espresso panel with cream text and gold for the active item. */
+  --sidebar: oklch(0.19 0.016 52);
+  --sidebar-foreground: oklch(0.87 0.02 82);
+  --sidebar-primary: oklch(0.74 0.08 80);
+  --sidebar-primary-foreground: oklch(0.17 0.015 50);
+  --sidebar-accent: oklch(0.26 0.018 55);
+  --sidebar-accent-foreground: oklch(0.955 0.02 85);
+  --sidebar-border: oklch(0.955 0.02 85 / 10%);
+  --sidebar-ring: oklch(0.74 0.08 80);
 }
 
 .dark {
@@ -171,11 +172,156 @@ html { scroll-behavior: smooth; }
     background: currentColor; transform: scaleX(0); transform-origin: right;
     transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   }
-  &:hover::after { transform: scaleX(1); transform-origin: left; }
+  &:hover::after, &:focus-visible::after { transform: scaleX(1); transform-origin: left; }
 }
 
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity 1.2s cubic-bezier(0.22,1,0.36,1), transform 1.2s cubic-bezier(0.22,1,0.36,1); }
-.reveal.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { .reveal { opacity: 1; transform: none; } }
+/* ============================ Motion ============================
+ * One rhythm for the whole site: things arrive with a soft deceleration and leave a little
+ * faster than they came. Only opacity and transform are animated, and everything collapses to
+ * an instant change for visitors who ask for reduced motion.
+ */
+@theme {
+  --ease-aurea: cubic-bezier(0.22, 1, 0.36, 1); /* arriving */
+  --ease-aurea-in: cubic-bezier(0.55, 0, 0.8, 0.35); /* leaving */
+}
+
+:root {
+  --motion-fast: 180ms; /* hover, press, colour changes */
+  --motion-base: 320ms; /* dialogs, menu panels, tabs */
+  --motion-slow: 560ms; /* content swaps, mobile navigation */
+  --motion-reveal: 800ms; /* sections entering the viewport */
+}
+
+/* Sections fade up as they enter the viewport. Hidden only when JavaScript can reveal them
+   again, so the content never stays invisible without it. */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0);
+    transition:
+      opacity var(--motion-reveal) var(--ease-aurea),
+      transform var(--motion-reveal) var(--ease-aurea);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Small gilded details draw themselves in after their section arrives. */
+  .reveal .gild-line {
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 900ms var(--ease-aurea) 250ms;
+  }
+  .reveal.in .gild-line {
+    transform: scaleX(1);
+  }
+  /* "scale", not "transform": Tailwind rotate-* already uses the separate "rotate" property. */
+  .reveal .gild-dot {
+    scale: 0;
+    transition: scale var(--motion-slow) var(--ease-aurea) 700ms;
+  }
+  .reveal.in .gild-dot {
+    scale: 1;
+  }
+}
+
+/* Hero: a short, staggered rise on first paint — pure CSS, so it never waits for JavaScript. */
+@keyframes aurea-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+  }
+}
+@keyframes aurea-settle {
+  from {
+    transform: scale(1.06);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-rise {
+    animation: aurea-rise 900ms var(--ease-aurea) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .hero-settle {
+    animation: aurea-settle 2800ms var(--ease-aurea) both;
+  }
+}
+
+/* Dishes step in one after another when a menu category changes. */
+@keyframes aurea-dish {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dish-in {
+    animation: aurea-dish 460ms var(--ease-aurea) both;
+    animation-delay: calc(min(var(--i, 0), 8) * 40ms);
+  }
+}
+
+/* Buttons lift a hair on hover and settle when pressed. */
+@utility press {
+  transition-property: color, background-color, border-color, transform;
+  transition-duration: var(--motion-fast);
+  transition-timing-function: var(--ease-aurea);
+  @media (hover: hover) {
+    &:hover:not(:disabled) {
+      transform: translate3d(0, -1px, 0);
+    }
+  }
+  &:active:not(:disabled) {
+    transform: translate3d(0, 0, 0) scale(0.985);
+  }
+}
+
+/* Confirmation tick in the reservation dialog draws itself once. */
+@keyframes aurea-draw {
+  from {
+    stroke-dashoffset: var(--len, 40);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .draw {
+    stroke-dasharray: var(--len, 40);
+    animation: aurea-draw 700ms var(--ease-aurea) 200ms both;
+  }
+}
+
+/* Language switch: the old page fades out before leaving; the new one fades in once its
+   scroll position is restored. The fallback animation un-hides it even if scripts fail. */
+@keyframes aurea-unhide {
+  to {
+    opacity: 1;
+  }
+}
+html.locale-leaving body {
+  opacity: 0;
+  transition: opacity var(--motion-fast) var(--ease-aurea-in);
+}
+html.locale-arriving body {
+  opacity: 0;
+  animation: aurea-unhide 0s 1.5s forwards;
+}
+html.locale-arrived body {
+  transition: opacity var(--motion-base) var(--ease-aurea);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
