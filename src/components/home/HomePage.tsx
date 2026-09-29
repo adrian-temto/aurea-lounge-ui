@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { Fragment, useActionState, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { createReservation } from "@/app/actions/reservations";
 import { CookieSettingsButton } from "@/components/consent/CookieSettingsButton";
@@ -12,10 +13,13 @@ import type { Localized, PublicCategory, PublicItem } from "@/lib/menu";
 import type { AccountLink } from "@/lib/types";
 import {
   GroupHint,
+  ReservationConsents,
   ReservationModalProvider,
   ReservationPrivacyNote,
   ReserveLink,
+  useSavedContact,
 } from "./ReservationModal";
+import { EuDateInput } from "./EuDateInput";
 import hero from "@/assets/hero.jpg";
 import breakfast from "@/assets/breakfast.jpg";
 import cafe from "@/assets/cafe.jpg";
@@ -29,8 +33,17 @@ function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
     const io = new IntersectionObserver(
-      (es) => es.forEach((e) => e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target))),
-      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
+      (es) =>
+        es.forEach((e) => {
+          // Also reveal sections that were scrolled past (anchor jump, restored scroll position,
+          // fast scroll): they never intersect, so they would stay invisible when scrolling back up.
+          const passed = !!e.rootBounds && e.boundingClientRect.bottom <= e.rootBounds.top;
+          if (e.isIntersecting || passed) {
+            e.target.classList.add("in");
+            io.unobserve(e.target);
+          }
+        }),
+      { threshold: 0.05, rootMargin: "0px 0px -6% 0px" },
     );
     els.forEach((el) => io.observe(el));
     return () => io.disconnect();
@@ -65,9 +78,23 @@ function Header({ account }: { account: AccountLink }) {
   const accountLink = useAccountLink(account);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  // Slides away while reading downwards and returns on the first scroll up.
+  const [hidden, setHidden] = useState(false);
   const menuButton = useRef<HTMLButtonElement>(null);
+  const lastY = useRef(0);
+  const openRef = useRef(false);
+  openRef.current = open;
   useEffect(() => {
-    const f = () => setScrolled(window.scrollY > 60);
+    lastY.current = window.scrollY;
+    const f = () => {
+      const y = window.scrollY;
+      setScrolled(y > 60);
+      const dy = y - lastY.current;
+      if (openRef.current || y < 240) setHidden(false);
+      else if (dy > 8) setHidden(true);
+      else if (dy < -8) setHidden(false);
+      if (Math.abs(dy) > 8) lastY.current = y;
+    };
     f();
     window.addEventListener("scroll", f, { passive: true });
     return () => window.removeEventListener("scroll", f);
@@ -88,10 +115,12 @@ function Header({ account }: { account: AccountLink }) {
     <>
       <header
         // right-scroll-bar-position: keeps the header still when a dialog locks page scroll.
-        className={`right-scroll-bar-position fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,color,padding] duration-500 ease-aurea ${
-          scrolled ? "bg-background/95 py-4 text-foreground backdrop-blur-md border-b border-border" : "py-7 text-cream"
-        }`}
+        onFocusCapture={() => setHidden(false)}
+        className={`nav-drop right-scroll-bar-position fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,color,padding,translate] duration-500 ease-aurea ${
+          hidden ? "-translate-y-full" : "translate-y-0"
+        } ${scrolled ? "bg-background/95 py-4 text-foreground backdrop-blur-md border-b border-border" : "py-7 text-cream"}`}
       >
+        <span aria-hidden className="nav-progress absolute inset-x-0 bottom-0 h-px origin-left bg-gold" />
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
           <a href="#top" aria-label={t.nav.home} className="block shrink-0">
             {/* The logo's tagline is dark brown, so swap to the cream variant over the dark hero. */}
@@ -104,8 +133,8 @@ function Header({ account }: { account: AccountLink }) {
             />
           </a>
           <nav className="hidden items-center gap-6 lg:flex xl:gap-9">
-            {t.nav.items.map(([l, h]) => (
-              <a key={l} href={h} className="link-line whitespace-nowrap text-[0.72rem] uppercase tracking-[0.18em] xl:tracking-[0.22em]">
+            {t.nav.items.map(([l, h], i) => (
+              <a key={l} href={h} style={step(i)} className="nav-in link-line whitespace-nowrap text-[0.72rem] uppercase tracking-[0.18em] xl:tracking-[0.22em]">
                 {l}
               </a>
             ))}
@@ -140,9 +169,8 @@ function Header({ account }: { account: AccountLink }) {
       </header>
       <div
         inert={!open}
-        className={`fixed inset-0 z-40 flex flex-col justify-between bg-background px-8 pb-10 pt-32 transition-opacity lg:hidden ${
-          open ? "opacity-100 duration-[400ms] ease-aurea" : "pointer-events-none opacity-0 duration-200 ease-aurea-in"
-        }`}
+        data-open={open}
+        className="menu-sheet fixed inset-0 z-40 flex flex-col justify-between bg-background px-8 pb-10 pt-32 lg:hidden"
       >
         <nav className="flex flex-col gap-4">
           {t.nav.items.map(([l, h], i) => (
@@ -150,17 +178,23 @@ function Header({ account }: { account: AccountLink }) {
               key={l}
               href={h}
               onClick={() => setOpen(false)}
-              className={`w-fit font-serif text-5xl font-light transition-[opacity,transform,color] ease-aurea hover:text-gold focus-visible:text-gold focus-visible:outline-none ${
-                open ? "translate-y-0 opacity-100 duration-500" : "translate-y-3 opacity-0 duration-150"
+              className={`group/link flex w-fit items-baseline gap-4 font-serif text-5xl font-light transition-[opacity,transform,color,filter] ease-aurea hover:text-gold focus-visible:text-gold focus-visible:outline-none ${
+                open ? "translate-y-0 opacity-100 blur-0 duration-700" : "translate-y-6 opacity-0 blur-md duration-150"
               }`}
-              style={{ transitionDelay: open ? `${120 + i * 45}ms` : "0ms" }}
+              style={{ transitionDelay: open ? `${260 + i * 70}ms` : "0ms" }}
             >
+              <span aria-hidden className="font-sans text-[0.65rem] tracking-[0.2em] text-gold">
+                {String(i + 1).padStart(2, "0")}
+              </span>
               {l}
             </a>
           ))}
         </nav>
-        <div>
-          <div className="mb-6 h-px w-16 bg-gold" />
+        <div
+          className={`transition-[opacity,transform] ease-aurea ${open ? "translate-y-0 opacity-100 duration-700" : "translate-y-6 opacity-0 duration-150"}`}
+          style={{ transitionDelay: open ? `${260 + t.nav.items.length * 70 + 60}ms` : "0ms" }}
+        >
+          <div className={`mb-6 h-px w-16 origin-left bg-gold transition-transform duration-1000 ease-aurea ${open ? "scale-x-100 delay-700" : "scale-x-0 delay-0"}`} />
           <ReserveLink returnFocus={menuButton} onClick={() => setOpen(false)} className="press block bg-foreground py-4 text-center text-xs uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground">
             {t.nav.reserve}
           </ReserveLink>
@@ -177,8 +211,52 @@ function Header({ account }: { account: AccountLink }) {
 /** Stagger offset for the hero's entrance (see .hero-rise in globals.css). */
 const rise = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
 
+/** Letters rise one after another out of a blur. Screen readers get the whole text, not single letters. */
+function SplitText({ text, start = 0, step = 38, letterClass = "hero-letter" }: { text: string; start?: number; step?: number; letterClass?: string }) {
+  let n = 0;
+  return (
+    <span aria-label={text}>
+      {text.split(" ").map((word, w, words) => (
+        <Fragment key={w}>
+          <span aria-hidden className="inline-block whitespace-nowrap">
+            {Array.from(word).map((ch, i) => (
+              <span key={i} className={letterClass} style={{ "--d": `${start + n++ * step}ms` } as CSSProperties}>
+                {ch}
+              </span>
+            ))}
+          </span>
+          {w < words.length - 1 && " "}
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+/** Pulls its child a few pixels toward the cursor, then springs back. Mouse and pen only. */
+/** Words fade in one by one, sliding up out of a soft blur. Screen readers get the whole sentence. */
+function WordReveal({ text, start = 0, step = 32 }: { text: string; start?: number; step?: number }) {
+  const words = text.split(" ");
+  return (
+    <span aria-label={text}>
+      {words.map((word, i) => (
+        <Fragment key={i}>
+          <span aria-hidden className="hero-word" style={{ "--d": `${start + i * step}ms` } as CSSProperties}>
+            {word}
+          </span>
+          {i < words.length - 1 && " "}
+        </Fragment>
+      ))}
+    </span>
+  );
+}
+
+const HERO_TEXT_START = 1300;
+const HERO_WORD_STEP = 32;
+
 function Hero() {
   const { t } = useI18n();
+  // The buttons follow once the last word of the description has nearly settled.
+  const buttonsAt = HERO_TEXT_START + (t.hero.text.split(" ").length - 1) * HERO_WORD_STEP + 550;
   return (
     <section id="top" className="relative h-[100svh] min-h-[640px] overflow-hidden bg-espresso text-cream">
       <img src={hero.src} alt={t.hero.imageAlt} width={1920} height={1088} fetchPriority="high" className="hero-settle absolute inset-0 h-full w-full object-cover" />
@@ -186,20 +264,31 @@ function Hero() {
       <div className="relative mx-auto flex h-full max-w-[1440px] flex-col justify-end px-6 pb-16 md:px-12 md:pb-24">
         <p className="hero-rise eyebrow mb-8 text-gold" style={rise(80)}>{t.hero.eyebrow}</p>
         <h1 className="max-w-4xl font-serif text-[3.2rem] font-light leading-[0.98] md:text-[6.5rem]">
-          <span className="hero-rise block" style={rise(180)}>{t.hero.title}</span>
-          <em className="hero-rise block font-light" style={rise(300)}>{t.hero.titleEm}</em>
+          <span className="block">
+            <SplitText text={t.hero.title} start={250} />
+          </span>
+          <em className="block font-light">
+            <SplitText text={t.hero.titleEm} start={250 + Array.from(t.hero.title.replace(/ /g, "")).length * 38 + 120} />
+          </em>
         </h1>
         <div className="mt-10 grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-          <p className="hero-rise max-w-md text-[0.95rem] leading-relaxed text-cream/80" style={rise(440)}>{t.hero.text}</p>
-          <div className="hero-rise flex flex-col gap-3 sm:flex-row" style={rise(540)}>
-            <ReserveLink className="press bg-cream px-8 py-4 text-center text-[0.7rem] uppercase tracking-[0.25em] text-espresso hover:bg-gold">
-              {t.hero.reserve}
+          <p className="max-w-md text-[0.95rem] leading-relaxed text-cream/80">
+            <WordReveal text={t.hero.text} start={HERO_TEXT_START} step={HERO_WORD_STEP} />
+          </p>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <ReserveLink style={rise(buttonsAt)} className="hero-btn btn-modern btn-sheen press bg-cream px-8 py-4 text-center text-[0.7rem] uppercase tracking-[0.25em] text-espresso [--btn-fill:var(--gold)]">
+              <span>{t.hero.reserve}</span>
+              <ArrowRight className="btn-arrow size-3.5" aria-hidden />
             </ReserveLink>
-            <a href="#menu" className="press border border-cream/50 px-8 py-4 text-center text-[0.7rem] uppercase tracking-[0.25em] hover:border-gold hover:text-gold">
-              {t.hero.menu}
+            <a href="#menu" style={rise(buttonsAt + 140)} className="hero-btn btn-modern press border border-cream/50 px-8 py-4 text-center text-[0.7rem] uppercase tracking-[0.25em] transition-[color,border-color,transform] duration-500 ease-aurea [--btn-fill:var(--cream)] hover:border-cream hover:text-espresso focus-visible:text-espresso">
+              <span>{t.hero.menu}</span>
+              <ArrowDown className="btn-arrow-down size-3.5" aria-hidden />
             </a>
           </div>
         </div>
+      </div>
+      <div className="hero-cue pointer-events-none absolute bottom-0 right-6 hidden h-24 w-px overflow-hidden bg-cream/15 md:right-12 md:block" aria-hidden>
+        <span className="hero-cue-dot block h-8 w-px bg-gold" />
       </div>
     </section>
   );
@@ -215,14 +304,17 @@ function Intro() {
           <div className="gild-line mt-6 h-px w-24 bg-gold" />
         </Reveal>
         <Reveal className="md:col-span-8" delay={150}>
-          <h2 className="font-serif text-6xl font-light leading-none md:text-8xl">
-            {t.intro.title} <em>{t.intro.titleEm}</em>
+          <h2 className="story-ink font-serif text-6xl font-light leading-none md:text-8xl">
+            <Words text={t.intro.title} />
+            <em>
+              <Words text={t.intro.titleEm} start={t.intro.title.split(" ").length} shimmer />
+            </em>
           </h2>
-          <p className="mt-10 max-w-xl font-serif text-2xl font-light leading-snug text-muted-foreground md:text-3xl">{t.intro.text}</p>
-          <div className="mt-14 flex items-center gap-6 text-[0.7rem] uppercase tracking-[0.3em] text-muted-foreground">
-            <span>07:00</span>
+          <p className="story-fade mt-10 max-w-xl font-serif text-2xl font-light leading-snug text-muted-foreground md:text-3xl" style={{ "--f": 0 } as CSSProperties}>{t.intro.text}</p>
+          <div className="story-fade mt-14 flex items-center gap-6 text-[0.7rem] uppercase tracking-[0.3em] text-muted-foreground" style={{ "--f": 1 } as CSSProperties}>
+            <span>08:00</span>
             <span className="gild-line h-px flex-1 bg-gradient-to-r from-gold/20 via-gold to-espresso" />
-            <span>01:00</span>
+            <span>20:00</span>
           </div>
         </Reveal>
       </div>
@@ -246,16 +338,22 @@ function Chapters() {
             const pic = CHAPTER_IMAGES[i]!;
             return (
               <Reveal key={pic.n} delay={i * 120} className={i === 1 ? "md:mt-32" : i === 2 ? "md:mt-64" : ""}>
-                <article className="group">
-                  <div className={`relative overflow-hidden ${i === 2 ? "bg-espresso" : "bg-muted"}`}>
-                    <img src={pic.img.src} alt={c.alt} loading="lazy" width={896} height={1152} className="aspect-[4/5] w-full object-cover transition-transform duration-[1200ms] ease-aurea group-hover:scale-[1.04]" />
-                    <span className="absolute left-5 top-5 font-serif text-lg italic text-cream">{pic.n}</span>
+                <article className="group" style={{ "--c": i } as CSSProperties}>
+                  <div className={`story-media relative overflow-hidden ${i === 2 ? "bg-espresso" : "bg-muted"}`}>
+                    {/* Entry zoom on the wrapper, hover zoom on the photo: both use `scale`. */}
+                    <div className="story-zoom">
+                      <img src={pic.img.src} alt={c.alt} loading="lazy" width={896} height={1152} className="aspect-[4/5] w-full object-cover transition-transform duration-[1200ms] ease-aurea group-hover:scale-[1.04]" />
+                    </div>
+                    <div className="story-curtain absolute inset-0 bg-background" aria-hidden />
+                    <span className="story-fade absolute left-5 top-5 font-serif text-lg italic text-cream">{pic.n}</span>
                   </div>
                   <div className="mt-7 flex items-baseline justify-between border-b border-border pb-4">
-                    <h3 className="font-serif text-4xl font-light md:text-5xl">{c.title}</h3>
-                    <span className="eyebrow text-gold">{c.time}</span>
+                    <h3 className="font-serif text-4xl font-light md:text-5xl">
+                      <Words text={c.title} />
+                    </h3>
+                    <span className="story-fade eyebrow text-gold">{c.time}</span>
                   </div>
-                  <p className="mt-5 max-w-sm text-[0.92rem] leading-relaxed text-muted-foreground">{c.copy}</p>
+                  <p className="story-fade mt-5 max-w-sm text-[0.92rem] leading-relaxed text-muted-foreground" style={{ "--f": 1 } as CSSProperties}>{c.copy}</p>
                 </article>
               </Reveal>
             );
@@ -266,28 +364,75 @@ function Chapters() {
   );
 }
 
+/** Headline words rise out of a mask one after another once the block is revealed. */
+function Words({ text, start = 0, shimmer = false }: { text: string; start?: number; shimmer?: boolean }) {
+  return (
+    <>
+      {text.split(" ").map((w, i) => (
+        // The space sits outside the inline-block word: inside it, it collapses and the words run together.
+        <Fragment key={i}>
+          <span className="story-word">
+            <span className={shimmer ? "story-shimmer" : undefined} style={{ "--w": start + i } as CSSProperties}>
+              {w}
+            </span>
+          </span>{" "}
+        </Fragment>
+      ))}
+    </>
+  );
+}
+
 function Story() {
   const { t } = useI18n();
+  const section = useRef<HTMLElement>(null);
+  // A soft gold light follows the pointer across the section (see .story-glow in globals.css).
+  const follow = (e: React.PointerEvent<HTMLElement>) => {
+    const el = section.current;
+    if (!el || e.pointerType !== "mouse") return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty("--mx", `${e.clientX - r.left}px`);
+    el.style.setProperty("--my", `${e.clientY - r.top}px`);
+  };
+  const titleWords = t.story.title.split(" ").length;
   return (
-    <section id="story" className="bg-card">
-      <div className="mx-auto grid max-w-[1440px] md:grid-cols-2">
-        <div className="relative min-h-[70vh] overflow-hidden">
-          <img src={story.src} alt={t.story.imageAlt} loading="lazy" width={1024} height={1280} className="absolute inset-0 h-full w-full object-cover" />
+    <section id="story" ref={section} onPointerMove={follow} className="relative isolate overflow-hidden bg-espresso text-cream">
+      <div className="story-grid absolute inset-0 -z-10" aria-hidden />
+      <div className="story-orb story-orb-a absolute -z-10" aria-hidden />
+      <div className="story-orb story-orb-b absolute -z-10" aria-hidden />
+      <div className="story-glow absolute inset-0 -z-10" aria-hidden />
+      <div className="mx-auto grid max-w-[1440px] items-center gap-4 md:grid-cols-2">
+        <div className="px-6 pt-24 md:px-16 md:py-36">
+          <div className="reveal story-media relative aspect-[4/5] w-full overflow-hidden md:mx-auto md:max-w-[560px]">
+            <div className="story-parallax absolute inset-x-0 -inset-y-[8%]">
+              <img src={story.src} alt={t.story.imageAlt} loading="lazy" width={1024} height={1280} className="story-zoom h-full w-full object-cover" />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-espresso/60 via-transparent to-transparent" aria-hidden />
+            <div className="story-curtain absolute inset-0 bg-espresso" aria-hidden />
+            <div className="pointer-events-none absolute inset-4 border border-gold/40" aria-hidden />
+          </div>
+          <div className="story-orbit pointer-events-none absolute right-[4%] top-[14%] hidden h-40 w-40 rounded-full border border-gold/25 md:block" aria-hidden>
+            <span className="absolute -top-1 left-1/2 h-2 w-2 -translate-x-1/2 rotate-45 bg-gold" />
+          </div>
         </div>
-        <div className="flex items-center px-6 py-24 md:px-20 md:py-36">
+        <div className="px-6 pb-24 pt-12 md:px-16 md:py-36">
           <Reveal>
-            <p className="eyebrow text-muted-foreground">{t.story.eyebrow}</p>
+            <p className="eyebrow flex items-center gap-4 text-gold">
+              <span className="gild-line h-px w-10 bg-gold" aria-hidden />
+              {t.story.eyebrow}
+            </p>
             <h2 className="mt-8 font-serif text-5xl font-light leading-[1.02] md:text-7xl">
-              {t.story.title}
+              <Words text={t.story.title} />
               <br />
-              <em>{t.story.titleEm}</em>
+              <em>
+                <Words text={t.story.titleEm} start={titleWords} shimmer />
+              </em>
             </h2>
             <div className="my-10 flex items-center gap-3" aria-hidden>
-              <span className="gild-line h-px w-12 bg-gold" />
+              <span className="gild-line h-px w-16 bg-gold" />
               <span className="gild-dot h-1.5 w-1.5 rotate-45 bg-gold" />
             </div>
-            <p className="max-w-lg leading-relaxed text-muted-foreground">{t.story.p1}</p>
-            <p className="mt-6 max-w-lg leading-relaxed text-muted-foreground">{t.story.p2}</p>
+            <p className="story-fade max-w-lg leading-relaxed text-cream/75" style={{ "--f": 0 } as CSSProperties}>{t.story.p1}</p>
+            <p className="story-fade mt-6 max-w-lg leading-relaxed text-cream/75" style={{ "--f": 1 } as CSSProperties}>{t.story.p2}</p>
           </Reveal>
         </div>
       </div>
@@ -314,20 +459,22 @@ function Menu({ menu }: { menu: PublicCategory[] }) {
       <Reveal className="grid gap-8 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
           <p className="eyebrow text-muted-foreground">{t.menu.eyebrow}</p>
-          <h2 className="mt-4 font-serif text-7xl font-light italic leading-none md:text-9xl">{t.menu.title}</h2>
+          <h2 className="mt-4 font-serif text-7xl font-light italic leading-none md:text-9xl">
+            <SplitText text={t.menu.title} start={150} step={40} letterClass="reveal-letter" />
+          </h2>
         </div>
-        <p className="max-w-sm text-muted-foreground md:col-span-5 md:justify-self-end">{t.menu.subtitle}</p>
       </Reveal>
-      <div className="no-scrollbar -mx-6 mt-16 flex gap-8 overflow-x-auto border-b border-border px-6 md:mx-0 md:px-0">
-        {menu.map((c) => (
+      <Reveal className="no-scrollbar -mx-6 mt-16 flex gap-8 overflow-x-auto border-b border-border px-6 md:mx-0 md:px-0" delay={200}>
+        {menu.map((c, i) => (
           <button
             key={c.id}
+            style={{ "--i": i } as CSSProperties}
             onClick={() => {
               setCatId(c.id);
               setChanged(true);
             }}
             aria-pressed={cat?.id === c.id}
-            className={`group relative shrink-0 pb-5 text-[0.72rem] uppercase tracking-[0.22em] transition-colors duration-300 focus-visible:text-foreground focus-visible:outline-none ${
+            className={`menu-tab group relative shrink-0 pb-5 text-[0.72rem] uppercase tracking-[0.22em] transition-colors duration-300 focus-visible:text-foreground focus-visible:outline-none ${
               cat?.id === c.id ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -341,7 +488,8 @@ function Menu({ menu }: { menu: PublicCategory[] }) {
             />
           </button>
         ))}
-      </div>
+      </Reveal>
+      <Reveal>
       <div key={cat?.id} className={changed ? "animate-in fade-in duration-300" : undefined}>
         {!cat && <p className="py-16 font-serif text-2xl italic text-muted-foreground">{t.menu.empty}</p>}
         {cat && cat.items.length > 0 && <DishGrid items={cat.items} animate={changed} />}
@@ -355,8 +503,8 @@ function Menu({ menu }: { menu: PublicCategory[] }) {
           </div>
         ))}
       </div>
+      </Reveal>
       <div className="mt-16 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-        <p className="text-xs text-muted-foreground">{t.menu.legend}</p>
         <a href="#menu" className="group inline-flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.25em]">
           <span className="link-line">{t.menu.fullMenu}</span>
           <span className="h-px w-10 origin-left bg-gold transition-transform duration-500 ease-aurea group-hover:scale-x-150 group-focus-visible:scale-x-150" />
@@ -373,15 +521,16 @@ function DishGrid({ items, animate = false }: { items: PublicItem[]; animate?: b
       {items.map((it, i) => (
         <li
           key={it.id}
-          className={`group flex gap-4 border-b border-border py-8 ${animate ? "dish-in" : ""}`}
-          style={animate ? ({ "--i": i } as CSSProperties) : undefined}
+          className={`group relative flex gap-4 border-b border-border py-8 ${animate ? "dish-in" : "dish-item"}`}
+          style={{ "--i": i } as CSSProperties}
         >
           {it.image && (
             <span className="size-16 shrink-0 overflow-hidden md:size-20">
               <img src={it.image} alt="" loading="lazy" className={`size-full object-cover transition-transform duration-700 ease-aurea group-hover:scale-105 ${it.available ? "" : "opacity-50 grayscale"}`} />
             </span>
           )}
-          <div className="min-w-0 flex-1">
+          <span aria-hidden className="dish-line" />
+          <div className="min-w-0 flex-1 transition-transform duration-500 ease-aurea group-hover:translate-x-1.5">
             <div className="flex items-baseline gap-4">
               <h4 className={`font-serif text-2xl transition-colors duration-300 group-hover:text-gold md:text-[1.7rem] ${it.available ? "" : "text-muted-foreground"}`}>
                 <Text value={it.name} />
@@ -392,7 +541,7 @@ function DishGrid({ items, animate = false }: { items: PublicItem[]; animate?: b
                 </span>
               )}
               <span className="flex-1 translate-y-[-4px] border-b border-dotted border-border transition-colors duration-300 group-hover:border-gold/50" />
-              <span className={`whitespace-nowrap text-sm tabular-nums ${it.available ? "" : "text-muted-foreground line-through"}`}>€{it.price}</span>
+              <span className={`whitespace-nowrap text-sm tabular-nums transition-colors duration-300 ${it.available ? "group-hover:text-gold" : "text-muted-foreground line-through"}`}>€{it.price}</span>
             </div>
             {!it.available && <p className="mt-1 text-[0.65rem] uppercase tracking-[0.2em] text-gold">{t.menu.unavailable}</p>}
             {it.desc.text && (
@@ -449,13 +598,19 @@ function Atmosphere() {
         <Reveal className="mb-16 grid gap-6 md:grid-cols-12">
           <p className="eyebrow text-gold md:col-span-4">{t.atmosphere.eyebrow}</p>
           <h2 className="font-serif text-5xl font-light leading-[1.02] md:col-span-8 md:text-8xl">
-            {t.atmosphere.title}
+            <SplitText text={t.atmosphere.title} start={150} step={36} letterClass="reveal-letter" />
             <br />
-            <em className="text-gold">{t.atmosphere.titleEm}</em>
+            <em className="text-gold">
+              <SplitText text={t.atmosphere.titleEm} start={150 + t.atmosphere.title.length * 36 + 100} step={36} letterClass="reveal-letter" />
+            </em>
           </h2>
         </Reveal>
-        <div ref={ref} className="relative h-[60vh] overflow-hidden md:h-[80vh]">
-          <img src={atmos.src} alt={t.atmosphere.alts[0]} loading="lazy" width={1920} height={1088} ref={img} className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover will-change-transform" />
+        <div ref={ref} className="reveal atmos-media relative h-[60vh] overflow-hidden md:h-[80vh]">
+          {/* The clip lives on this inner layer: the observed .reveal box itself is never clipped away. */}
+          <div className="atmos-clip absolute inset-0 overflow-hidden">
+            <img src={atmos.src} alt={t.atmosphere.alts[0]} loading="lazy" width={1920} height={1088} ref={img} className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover will-change-transform" />
+            <span aria-hidden className="atmos-frame pointer-events-none absolute inset-4 border border-cream/40 md:inset-8" />
+          </div>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 md:mt-8 md:grid-cols-12 md:gap-8">
           {GALLERY.map((im, i) => (
@@ -477,20 +632,22 @@ function Visit() {
         <Reveal className="md:col-span-5">
           <p className="eyebrow text-muted-foreground">{t.visit.eyebrow}</p>
           <h2 className="mt-6 font-serif text-5xl font-light leading-[1.02] md:text-7xl">
-            {t.visit.title}
+            <SplitText text={t.visit.title} start={150} step={36} letterClass="reveal-letter" />
             <br />
-            <em>{t.visit.titleEm}</em>
+            <em>
+              <SplitText text={t.visit.titleEm} start={150 + t.visit.title.length * 36 + 100} step={36} letterClass="reveal-letter" />
+            </em>
           </h2>
           <dl className="mt-14 divide-y divide-border border-y border-border">
-            {t.visit.hours.map(([d, time]) => (
-              <div key={d} className="flex justify-between py-5 text-sm">
+            {t.visit.hours.map(([d, time], i) => (
+              <div key={d} className="visit-in flex justify-between py-5 text-sm" style={step(i)}>
                 <dt className="text-muted-foreground">{d}</dt>
                 <dd className="tabular-nums">{time}</dd>
               </div>
             ))}
           </dl>
           <div className="mt-10 grid grid-cols-2 gap-8 text-sm">
-            <div>
+            <div className="visit-in" style={step(2)}>
               <p className="eyebrow mb-3 text-gold">{t.visit.address}</p>
               <p className="leading-relaxed">
                 {CONTACT.street}
@@ -498,28 +655,31 @@ function Visit() {
                 {CONTACT.city}, {t.visit.country}
               </p>
             </div>
-            <div>
+            <div className="visit-in" style={step(3)}>
               <p className="eyebrow mb-3 text-gold">{t.visit.phone}</p>
               <a href={CONTACT.phoneHref} className="link-line">{CONTACT.phone}</a>
             </div>
           </div>
         </Reveal>
         <Reveal className="md:col-span-7" delay={150}>
-          <div className="relative aspect-[4/5] overflow-hidden bg-card md:aspect-auto md:h-full md:min-h-[560px]">
+          <div className="map-card relative aspect-[4/5] overflow-hidden bg-card md:aspect-auto md:h-full md:min-h-[560px]">
             <svg className="absolute inset-0 h-full w-full text-foreground/15" preserveAspectRatio="none" viewBox="0 0 400 500" fill="none" stroke="currentColor">
-              <path d="M-10 120 C 120 140, 200 60, 420 110" strokeWidth="6" className="text-cream" stroke="currentColor" />
-              <path d="M-10 120 C 120 140, 200 60, 420 110" strokeWidth="0.6" />
-              <path d="M150 -10 C 170 150, 230 300, 210 520" strokeWidth="10" className="text-background" stroke="currentColor" />
-              <path d="M150 -10 C 170 150, 230 300, 210 520" strokeWidth="0.6" />
-              <path d="M-10 360 L 420 300" strokeWidth="0.5" />
-              <path d="M300 -10 L 330 520" strokeWidth="0.5" />
-              <path d="M60 -10 L 20 520" strokeWidth="0.4" />
-              <path d="M-10 440 C 100 420, 300 470, 420 430" strokeWidth="0.4" />
+              <path pathLength={1} style={step(0)} className="map-path text-cream" d="M-10 120 C 120 140, 200 60, 420 110" strokeWidth="6" stroke="currentColor" />
+              <path pathLength={1} style={step(0)} className="map-path" d="M-10 120 C 120 140, 200 60, 420 110" strokeWidth="0.6" />
+              <path pathLength={1} style={step(1)} className="map-path text-background" d="M150 -10 C 170 150, 230 300, 210 520" strokeWidth="10" stroke="currentColor" />
+              <path pathLength={1} style={step(1)} className="map-path" d="M150 -10 C 170 150, 230 300, 210 520" strokeWidth="0.6" />
+              <path pathLength={1} style={step(2)} className="map-path" d="M-10 360 L 420 300" strokeWidth="0.5" />
+              <path pathLength={1} style={step(3)} className="map-path" d="M300 -10 L 330 520" strokeWidth="0.5" />
+              <path pathLength={1} style={step(3)} className="map-path" d="M60 -10 L 20 520" strokeWidth="0.4" />
+              <path pathLength={1} style={step(4)} className="map-path" d="M-10 440 C 100 420, 300 470, 420 430" strokeWidth="0.4" />
               <rect x="240" y="150" width="70" height="60" className="text-olive/20" fill="currentColor" stroke="none" />
             </svg>
-            <div className="absolute left-[52%] top-[44%] -translate-x-1/2 -translate-y-full text-center">
+            <div className="map-pin absolute left-[52%] top-[44%] -translate-x-1/2 -translate-y-full text-center">
               <span className="mb-2 block font-serif text-lg italic">Auréa</span>
-              <span className="mx-auto block h-3 w-3 rotate-45 bg-gold ring-8 ring-gold/20" />
+              <span className="relative mx-auto block h-3 w-3">
+                <span aria-hidden className="map-ping absolute inset-0 rotate-45 bg-gold" />
+                <span className="relative block h-3 w-3 rotate-45 bg-gold ring-8 ring-gold/20" />
+              </span>
             </div>
             <p className="eyebrow absolute left-6 top-6 text-muted-foreground">Beelitz · 52.23° N</p>
             <a href="#visit" className="press absolute bottom-6 right-6 bg-foreground px-7 py-4 text-[0.7rem] uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground">
@@ -532,16 +692,20 @@ function Visit() {
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: ReactNode; className?: string }) {
+/** Index for the form's staggered entrance (see .res-field in globals.css). */
+const step = (i: number) => ({ "--i": i }) as CSSProperties;
+
+function Field({ label, children, className = "", i = 0 }: { label: string; children: ReactNode; className?: string; i?: number }) {
   return (
-    <label className={`block ${className}`}>
-      <span className="eyebrow text-cream/50">{label}</span>
+    <label className={`res-field relative block ${className}`} style={step(i)}>
+      <span className="res-label eyebrow text-cream/50">{label}</span>
       {children}
+      <span aria-hidden className="res-line" />
     </label>
   );
 }
 const inputCls =
-  "mt-3 w-full border-0 border-b border-cream/25 bg-transparent pb-3 text-base text-cream outline-none transition-colors duration-500 placeholder:text-cream/30 focus:border-gold [color-scheme:dark]";
+  "mt-1 w-full min-w-0 border-0 border-b border-cream/25 bg-transparent pb-2 text-base md:mt-3 md:pb-3 text-cream outline-none transition-colors duration-500 placeholder:text-cream/30 focus:border-gold [color-scheme:dark]";
 
 type Selection = { date: string; time: string; guests: string };
 
@@ -549,7 +713,9 @@ function Reservation() {
   const { locale, t } = useI18n();
   const [state, formAction, pending] = useActionState(createReservation, null);
   const form = useRef<HTMLFormElement>(null);
-  // Date, time and guest count survive a language switch; name and phone are not stored.
+  const saveContact = useSavedContact(form);
+  const [date, setDate] = useState("");
+  // Date, time and guest count survive a language switch; contact details are not carried over.
   useCarryOver<Selection | null>(
     "reservation",
     () => {
@@ -562,39 +728,44 @@ function Reservation() {
       const f = form.current;
       if (!f || !s) return;
       const el = f.elements;
-      (el.namedItem("date") as HTMLInputElement).value = s.date;
+      setDate(s.date);
       if (TIME_SLOTS.includes(s.time)) (el.namedItem("time") as HTMLSelectElement).value = s.time;
-      const guest = f.querySelector<HTMLInputElement>(`input[name="guests"][value="${CSS.escape(s.guests)}"]`);
-      if (guest) guest.checked = true;
+      const guests = el.namedItem("guests") as HTMLSelectElement;
+      if (Array.from(guests.options).some((o) => o.value === s.guests)) guests.value = s.guests;
     },
   );
   return (
     <section id="reserve" className="bg-espresso text-cream">
-      <div className="mx-auto grid max-w-[1440px] gap-16 px-6 py-28 md:grid-cols-12 md:px-12 md:py-40">
+      <div className="mx-auto grid max-w-[1440px] gap-6 px-6 py-10 md:grid-cols-12 md:gap-16 md:px-12 md:py-40">
         <Reveal className="md:col-span-5">
           <p className="eyebrow text-gold">{t.reservation.eyebrow}</p>
-          <h2 className="mt-6 font-serif text-6xl font-light leading-none md:text-8xl">
-            {t.reservation.title} <em>{t.reservation.titleEm}</em>
+          <h2 className="mt-3 font-serif text-4xl font-light leading-none md:mt-6 md:text-8xl">
+            <SplitText text={t.reservation.title} start={150} step={34} letterClass="reveal-letter" />{" "}
+            <em>
+              <SplitText text={t.reservation.titleEm} start={150 + t.reservation.title.length * 34 + 80} step={34} letterClass="reveal-letter" />
+            </em>
           </h2>
-          <p className="mt-8 max-w-sm leading-relaxed text-cream/70">{t.reservation.intro}</p>
-          <div className="mt-12 flex items-center gap-3" aria-hidden>
+          <div className="mt-12 hidden items-center gap-3 md:flex" aria-hidden>
             <span className="gild-line h-px w-12 bg-gold" />
             <span className="gild-dot h-1.5 w-1.5 rotate-45 bg-gold" />
           </div>
         </Reveal>
         <Reveal className="md:col-span-7" delay={150}>
-          <form ref={form} action={formAction} className="grid gap-x-10 gap-y-10 sm:grid-cols-2">
+          <form ref={form} action={formAction} onSubmit={saveContact} className="grid grid-cols-2 gap-x-5 gap-y-5 md:gap-x-10 md:gap-y-10">
             <input type="hidden" name="locale" value={locale} />
-            <Field label={t.reservation.name}>
+            <Field label={t.reservation.name} i={0}>
               <input name="name" required minLength={2} maxLength={100} autoComplete="name" className={inputCls} placeholder={t.reservation.namePlaceholder} />
             </Field>
-            <Field label={t.reservation.phone}>
+            <Field label={t.reservation.phone} i={1}>
               <input name="phone" type="tel" required minLength={5} maxLength={30} autoComplete="tel" className={inputCls} placeholder="+49" />
             </Field>
-            <Field label={t.reservation.date}>
-              <input name="date" type="date" required className={inputCls} />
+            <Field label={t.reservation.email} className="col-span-2" i={2}>
+              <input name="email" type="email" required maxLength={254} autoComplete="email" className={inputCls} placeholder={t.reservation.emailPlaceholder} />
             </Field>
-            <Field label={t.reservation.time}>
+            <Field label={t.reservation.date} i={3}>
+              <EuDateInput name="date" value={date} onChange={setDate} required className={inputCls} />
+            </Field>
+            <Field label={t.reservation.time} i={4}>
               <select name="time" className={inputCls} defaultValue="19:00">
                 {TIME_SLOTS.map((time) => (
                   <option key={time} value={time} className="bg-espresso">
@@ -603,28 +774,28 @@ function Reservation() {
                 ))}
               </select>
             </Field>
-            <Field label={t.reservation.guests} className="sm:col-span-2">
-              <div className="mt-4 flex flex-wrap gap-2">
-                {Array.from({ length: MAX_ONLINE_GUESTS }, (_, i) => String(i + 1)).map((g) => (
-                  <label key={g} className="cursor-pointer">
-                    <input type="radio" name="guests" value={g} defaultChecked={g === "2"} aria-label={t.reservation.persons(Number(g))} className="peer sr-only" />
-                    <span aria-hidden className="grid h-11 w-11 place-items-center border border-cream/25 text-sm transition-colors duration-200 hover:border-gold peer-checked:border-gold peer-checked:bg-gold peer-checked:text-espresso peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold">
-                      {g}
-                    </span>
-                  </label>
-                ))}
-              </div>
-              <GroupHint dark className="mt-4" />
+            <div className="col-span-2">
+              <Field label={t.reservation.guests} i={5}>
+                <select name="guests" className={inputCls} defaultValue="2">
+                  {Array.from({ length: MAX_ONLINE_GUESTS }, (_, i) => i + 1).map((g) => (
+                    <option key={g} value={g} className="bg-espresso">
+                      {t.reservation.persons(g)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <GroupHint dark className="res-field mt-3" />
+            </div>
+            <Field label={t.reservation.requests} className="col-span-2" i={6}>
+              <textarea name="special_requests" rows={2} maxLength={500} className={`${inputCls} resize-none`} placeholder={t.reservation.requestsPlaceholder} />
             </Field>
-            <Field label={t.reservation.requests} className="sm:col-span-2">
-              <textarea name="special_requests" rows={3} maxLength={500} className={`${inputCls} resize-none`} placeholder={t.reservation.requestsPlaceholder} />
-            </Field>
-            <ReservationPrivacyNote dark className="-mb-4 max-w-xl sm:col-span-2" />
-            <div className="flex flex-col gap-4 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between">
+            <ReservationConsents dark className="res-field col-span-2" />
+            <ReservationPrivacyNote dark className="res-field -mb-2 col-span-2 max-w-xl md:-mb-4" />
+            <div className="res-field col-span-2 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" style={step(9)}>
               <button
                 type="submit"
                 disabled={pending}
-                className="press bg-gold px-10 py-5 text-[0.72rem] uppercase tracking-[0.28em] text-espresso hover:bg-cream disabled:opacity-60"
+                className="res-cta press relative w-full overflow-hidden bg-gold px-10 py-4 text-[0.72rem] sm:w-auto md:py-5 uppercase tracking-[0.28em] text-espresso hover:bg-cream disabled:opacity-60"
               >
                 {pending ? t.reservation.sending : t.reservation.submit}
               </button>
@@ -649,7 +820,7 @@ function Footer() {
     [t.footer.links.story, "#story"],
     [t.footer.links.visit, "#visit"],
     [t.footer.links.reserve, "#reserve"],
-    [t.footer.links.join, href("/join")],
+    [t.footer.links.join, href("/login")],
   ];
   return (
     <footer className="border-t border-cream/10 bg-espresso text-cream/70">
@@ -702,6 +873,32 @@ function Footer() {
   );
 }
 
+/** Bottom-left shortcut to the reservation dialog; appears as soon as the page is scrolled. */
+function FloatingReserve() {
+  const { t } = useI18n();
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const f = () => setShown(window.scrollY > 0);
+    f();
+    window.addEventListener("scroll", f, { passive: true });
+    return () => window.removeEventListener("scroll", f);
+  }, []);
+
+  return (
+    <ReserveLink
+      aria-hidden={!shown}
+      tabIndex={shown ? undefined : -1}
+      className={`press fixed bottom-5 left-5 z-40 flex items-center gap-3 border border-gold/40 bg-espresso px-5 py-3.5 text-[0.68rem] uppercase tracking-[0.25em] text-cream shadow-2xl transition-[opacity,transform,background-color,color] duration-500 ease-aurea hover:bg-gold hover:text-espresso md:bottom-8 md:left-8 ${
+        shown ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
+      }`}
+    >
+      <span className="size-1.5 rounded-full bg-gold" aria-hidden />
+      <span>{t.nav.reserve}</span>
+    </ReserveLink>
+  );
+}
+
 export default function HomePage({ menu, account }: { menu: PublicCategory[]; account: AccountLink }) {
   useReveal();
   useRestoreScroll();
@@ -712,12 +909,13 @@ export default function HomePage({ menu, account }: { menu: PublicCategory[]; ac
         <Hero />
         <Intro />
         <Chapters />
+        <Reservation />
         <Story />
         <Menu menu={menu} />
         <Atmosphere />
         <Visit />
-        <Reservation />
         <Footer />
+        <FloatingReserve />
       </main>
     </ReservationModalProvider>
   );

@@ -24,8 +24,8 @@ type Props = {
 const focusRing =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold";
 // Accept and reject share one style so neither is nudged.
-const primary = `bg-foreground px-4 py-3.5 text-[0.68rem] uppercase tracking-[0.2em] text-background transition-colors duration-300 hover:bg-gold hover:text-foreground ${focusRing}`;
-const secondary = `border border-foreground/30 px-4 py-3.5 text-[0.68rem] uppercase tracking-[0.2em] transition-colors duration-300 hover:border-foreground ${focusRing}`;
+const primary = `bg-foreground px-4 py-2.5 text-[0.68rem] uppercase tracking-[0.2em] text-background transition-colors duration-300 hover:bg-gold hover:text-foreground ${focusRing}`;
+const secondary = `border border-foreground/30 px-4 py-2.5 text-[0.68rem] uppercase tracking-[0.2em] transition-colors duration-300 hover:border-foreground ${focusRing}`;
 
 export function ConsentDialog({
   view,
@@ -69,20 +69,20 @@ export function ConsentDialog({
         e.preventDefault();
         if (dismissible) onClose();
       }}
-      className="fixed inset-x-0 bottom-0 top-auto m-0 max-h-[88svh] w-full max-w-none overflow-y-auto border-t border-gold/40 bg-background p-0 text-foreground shadow-2xl backdrop:bg-espresso/40 sm:bottom-6 sm:left-6 sm:right-auto sm:w-[30rem] sm:border"
+      className="liquid-glass fixed inset-x-0 bottom-0 top-auto m-0 max-h-[88svh] w-full max-w-none overflow-y-auto rounded-t-3xl p-0 text-foreground backdrop:bg-espresso/25 sm:bottom-6 sm:left-6 sm:right-auto sm:w-[26rem] sm:rounded-3xl"
     >
       {view && (
-        <div className="p-6 sm:p-8">
+        <div className="p-5 sm:p-6">
           <p className="eyebrow text-gold">{t.consent.eyebrow}</p>
           <h2
             id="consent-title"
             ref={titleRef}
             tabIndex={-1}
-            className="mt-2 font-serif text-3xl font-light leading-tight outline-none"
+            className="mt-1 font-serif text-2xl font-light leading-tight outline-none"
           >
             {view === "summary" ? t.consent.summaryTitle : t.consent.settingsTitle}
           </h2>
-          <p id="consent-desc" className="mt-3 text-sm leading-relaxed text-muted-foreground">
+          <p id="consent-desc" className="mt-2 text-[0.8rem] leading-normal text-muted-foreground">
             {t.consent.text}{" "}
             {/* German-only until a verified translation exists. */}
             <Link
@@ -119,7 +119,7 @@ export function ConsentDialog({
             </fieldset>
           )}
 
-          <div className="mt-6 grid gap-2 sm:grid-cols-2">
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
             <button type="button" onClick={onRejectOptional} className={primary}>
               {t.consent.rejectOptional}
             </button>

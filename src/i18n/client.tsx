@@ -8,7 +8,7 @@ import { getDictionary } from "./dictionaries";
 type I18n = {
   locale: Locale;
   t: ReturnType<typeof getDictionary>;
-  /** Localizes an internal path: href("/join") is "/en/join" on the English site. */
+  /** Localizes an internal path: href("/login") is "/en/login" on the English site. */
   href: (path: string) => string;
 };
 

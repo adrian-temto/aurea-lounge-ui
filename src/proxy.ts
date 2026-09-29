@@ -12,7 +12,7 @@ import {
 
 const PROTECTED = ["/admin", "/account"];
 /** Paths that read the Supabase session here (refresh + route protection). */
-const NEEDS_SESSION = ["/admin", "/account", "/join"];
+const NEEDS_SESSION = ["/admin", "/account", "/login"];
 
 const startsWithAny = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || path.startsWith(`${p}/`));
@@ -73,7 +73,7 @@ export async function proxy(request: NextRequest) {
 
   if (!data?.claims && startsWithAny(path, PROTECTED)) {
     const url = request.nextUrl.clone();
-    url.pathname = localizePath(locale, "/join");
+    url.pathname = localizePath(locale, "/login");
     url.search = `?mode=login&next=${encodeURIComponent(pathname)}`;
     return NextResponse.redirect(url);
   }

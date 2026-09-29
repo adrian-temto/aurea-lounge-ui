@@ -12,6 +12,11 @@ const schemaFor = (e: Dictionary["reservation"]["errors"]) =>
   z.object({
     name: z.string().trim().min(2, e.name).max(100),
     phone: z.string().trim().min(5, e.phone).max(30),
+    email: z.string().trim().toLowerCase().email(e.email).max(254),
+    // Checkboxes send "on" when ticked and nothing otherwise.
+    terms: z.literal("on", { errorMap: () => ({ message: e.terms }) }),
+    marketing_email: z.literal("on").optional(),
+    marketing_sms: z.literal("on").optional(),
     date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, e.date),
     time: z.string().regex(/^\d{2}:\d{2}$/, e.time),
     guests: z.coerce
@@ -37,7 +42,8 @@ export async function createReservation(
     return { ok: false, message: parsed.error.issues[0]?.message ?? t.errors.invalid };
   }
 
-  const { date, time, seating, special_requests, ...rest } = parsed.data;
+  const { date, time, seating, special_requests, terms, marketing_email, marketing_sms, ...rest } =
+    parsed.data;
   if (date < todayInBerlin()) {
     return { ok: false, message: t.errors.past };
   }
@@ -57,6 +63,9 @@ export async function createReservation(
     reservation_date: date,
     reservation_time: time,
     special_requests: notes || null,
+    terms_accepted_at: terms ? new Date().toISOString() : null,
+    marketing_email: !!marketing_email,
+    marketing_sms: !!marketing_sms,
     user_id: auth?.claims.sub ?? null,
   });
 

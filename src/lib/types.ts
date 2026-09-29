@@ -36,6 +36,8 @@ export type Reservation = {
   id: number;
   name: string;
   phone: string;
+  /** Null on requests made before guests gave an email address. */
+  email: string | null;
   reservation_date: string;
   reservation_time: string;
   guests: number;
@@ -47,6 +49,10 @@ export type Reservation = {
   admin_response: string | null;
   responded_at: string | null;
   responded_by: string | null;
+  terms_accepted_at: string | null;
+  /** Opt-ins ticked in the booking form. */
+  marketing_email: boolean;
+  marketing_sms: boolean;
 };
 
 export type Role = "admin" | "staff";

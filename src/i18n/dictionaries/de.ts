@@ -37,7 +37,7 @@ const de = {
     openMenu: "Menü öffnen",
     closeMenu: "Menü schließen",
     reserve: "Tisch reservieren",
-    account: { join: "Konto", account: "Mein Konto", dashboard: "Dashboard" },
+    account: { join: "Login", account: "Mein Konto", dashboard: "Dashboard" },
     address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
   },
 
@@ -60,7 +60,7 @@ const de = {
 
   chapters: [
     {
-      time: "Ab 07:00",
+      time: "Ab 08:00",
       title: "Frühstück",
       alt: "Frühstückstisch mit Eggs Benedict und Sauerteigbrot",
       copy: "Sauerteigbrot, weiche Eier, Steinobstmarmelade und mehr — für einen guten Start in den Tag.",
@@ -134,9 +134,7 @@ const de = {
     title: "Komm vorbei,",
     titleEm: "bleib eine Weile.",
     hours: [
-      ["Montag — Donnerstag", "07:00 – 23:00"],
-      ["Freitag — Samstag", "07:00 – 01:00"],
-      ["Sonntag", "08:00 – 22:00"],
+      ["Montag — Sonntag", "08:00 – 20:00"],
     ] as [string, string][],
     address: "Adresse",
     country: "Deutschland",
@@ -152,6 +150,13 @@ const de = {
     name: "Name",
     namePlaceholder: "Vor- und Nachname",
     phone: "Telefon",
+    email: "E-Mail",
+    emailPlaceholder: "name@beispiel.de",
+    remember: "Speichern Sie die Informationen für meine nächsten Reservierungen.",
+    terms: "Ich akzeptiere die Allgemeinen Geschäftsbedingungen.",
+    required: "Pflichtfeld",
+    marketingEmail: "Senden Sie mir Angebote und Neuigkeiten per E-Mail.",
+    marketingSms: "Senden Sie mir Angebote und Neuigkeiten per SMS",
     date: "Datum",
     time: "Uhrzeit",
     guests: "Personen",
@@ -170,7 +175,7 @@ const de = {
     } as Record<string, string>,
     groupHint: (max: number) => `Mehr als ${max} Personen? Ruf uns an:`,
     privacy:
-      "Wir nutzen deine Angaben nur, um deine Reservierung zu bearbeiten und dich dazu per Anruf, SMS oder WhatsApp zu kontaktieren. Bist du angemeldet, erscheint die Anfrage auch in deinem Konto. Mehr in unserer",
+      "Wir nutzen deine Angaben, um deine Reservierung zu bearbeiten und dich dazu per Anruf, SMS, WhatsApp oder E-Mail zu kontaktieren. Angebote und Neuigkeiten schicken wir nur, wenn du das oben ankreuzt. Bist du angemeldet, erscheint die Anfrage auch in deinem Konto. Mehr in unserer",
     privacyLink: "Datenschutzerklärung",
     newTab: "(öffnet in neuem Tab)",
     // Quick reservation modal
@@ -183,7 +188,6 @@ const de = {
     back: "Zurück",
     contactTitle: "Fast",
     contactTitleEm: "geschafft",
-    contactDescription: "Wie können wir dich erreichen, um die Reservierung zu bestätigen?",
     sentTitle: "Anfrage",
     sentTitleEm: "gesendet",
     sentNote: "Deine Reservierung gilt, sobald wir sie bestätigt haben.",
@@ -192,6 +196,8 @@ const de = {
     errors: {
       name: "Bitte gib deinen Namen an.",
       phone: "Bitte gib eine Telefonnummer an.",
+      email: "Bitte gib eine gültige E-Mail-Adresse an.",
+      terms: "Bitte akzeptiere die Allgemeinen Geschäftsbedingungen.",
       date: "Bitte wähle ein Datum.",
       time: "Bitte wähle eine Uhrzeit.",
       tooMany: (max: number, phone: string) =>
@@ -205,10 +211,10 @@ const de = {
 
   footer: {
     tagline: "A golden retreat from dawn to late.",
-    links: { home: "Start", menu: "Karte", story: "Story", visit: "Anfahrt", reserve: "Reservierung", join: "Konto" },
+    links: { home: "Start", menu: "Karte", story: "Story", visit: "Anfahrt", reserve: "Reservierung", join: "Login" },
     contact: "Kontakt",
     hours: "Öffnungszeiten",
-    hoursLines: ["Mo–Do 07–23", "Fr–Sa 07–01", "So 08–22"],
+    hoursLines: ["Mo–So 08–20"],
     copyright: "© 2026 Auréa Café & Lounge. Alle Rechte vorbehalten.",
     privacy: "Datenschutz",
     /** Shown after legal links whose page exists only in German. Empty in German. */

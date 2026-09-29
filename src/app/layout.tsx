@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           }}
         />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         <Providers locale={locale}>{children}</Providers>
       </body>
     </html>

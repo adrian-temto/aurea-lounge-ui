@@ -77,9 +77,20 @@ export const SERVICES: Record<Category, Service[]> = {
       nameEn: "Reservations & menu",
       provider: "Supabase Inc.",
       purpose:
-        "Speichert deine Reservierungsanfrage (Name, Telefon, Datum, Uhrzeit, Personen, Wünsche) und liefert die Speisekarte aus.",
+        "Speichert deine Reservierungsanfrage (Name, Telefon, E-Mail, Datum, Uhrzeit, Personen, Wünsche, deine Häkchen zu AGB und Werbung) und liefert die Speisekarte aus.",
       storage: "— (keine Cookies)",
       retention: "Reservierungen, bis wir sie löschen",
+    },
+    {
+      name: "Gespeicherte Kontaktdaten",
+      nameEn: "Saved contact details",
+      provider: "Auréa (diese Website)",
+      purpose:
+        "Füllt Name, Telefon und E-Mail bei deiner nächsten Reservierung auf diesem Gerät automatisch aus. Die Daten bleiben in deinem Browser und werden nicht an uns gesendet.",
+      storage: "Local Storage aurea_guest_contact",
+      retention:
+        "bis du das Häkchen bei einer Reservierung entfernst oder die Browserdaten löschst",
+      scope: "nur wenn du „Informationen speichern“ ankreuzt",
     },
     {
       name: "Reservierungshinweis",
@@ -105,7 +116,7 @@ export const SERVICES: Record<Category, Service[]> = {
       nameEn: "Language switch",
       provider: "Auréa (diese Website)",
       purpose:
-        "Übergibt beim Sprachwechsel die Scrollposition, den geöffneten Reiter der Karte sowie Datum, Uhrzeit und Personenzahl des Reservierungsformulars an die Seite in der anderen Sprache. Name und Telefonnummer werden nicht gespeichert.",
+        "Übergibt beim Sprachwechsel die Scrollposition, den geöffneten Reiter der Karte sowie Datum, Uhrzeit und Personenzahl des Reservierungsformulars an die Seite in der anderen Sprache. Name, Telefonnummer und E-Mail werden dabei nicht übergeben.",
       storage: "Session Storage aurea_locale_switch",
       retention: "wird beim Laden der neuen Seite sofort gelöscht",
       scope: "nur beim Sprachwechsel",

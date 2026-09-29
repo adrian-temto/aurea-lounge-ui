@@ -50,7 +50,7 @@ export const canUseDashboard = (session: Session) => session.permissions.length 
 
 export async function requireUser(next = "/account") {
   const session = await getSession();
-  if (!session.user) redirect(`/join?mode=login&next=${encodeURIComponent(next)}`);
+  if (!session.user) redirect(`/login?mode=login&next=${encodeURIComponent(next)}`);
   return { ...session, user: session.user };
 }
 
@@ -62,7 +62,7 @@ export async function requireDashboard() {
 }
 
 export function accountLink(session: Session): AccountLink {
-  if (!session.user) return { href: "/join", kind: "join" };
+  if (!session.user) return { href: "/login", kind: "join" };
   if (canUseDashboard(session)) return { href: "/admin", kind: "dashboard" };
   return { href: "/account", kind: "account" };
 }

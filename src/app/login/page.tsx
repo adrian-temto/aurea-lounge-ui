@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: t.meta.joinTitle,
     description: t.meta.joinDescription,
-    alternates: languageAlternates(locale, "/join"),
+    alternates: languageAlternates(locale, "/login"),
   };
 }
 
@@ -23,7 +23,7 @@ export default async function JoinPage({ searchParams }: { searchParams: SearchP
   const [sp, { locale }] = await Promise.all([searchParams, getI18n()]);
   const nextParam = one(sp["next"]);
   const safe = nextParam?.startsWith("/") && !nextParam.startsWith("//") ? nextParam : null;
-  // After signing in, stay in the language of this page (e.g. ?next=/account on /en/join).
+  // After signing in, stay in the language of this page (e.g. ?next=/account on /en/login).
   const target = safe ? splitLocale(safe).path : null;
   const next = target ? (isLocalizedRoute(target) ? localizePath(locale, target) : target) : null;
 
@@ -34,7 +34,7 @@ export default async function JoinPage({ searchParams }: { searchParams: SearchP
 
   return (
     <JoinForm
-      initialMode={one(sp["mode"]) === "login" ? "login" : "signup"}
+      initialMode={one(sp["mode"]) === "signup" ? "signup" : "login"}
       next={next}
       notice={one(sp["notice"]) ?? null}
     />

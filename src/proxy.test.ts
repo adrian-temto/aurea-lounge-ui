@@ -46,16 +46,16 @@ beforeEach(() => {
 describe("paths", () => {
   it("adds and removes the /en prefix, keeping query and hash", () => {
     expect(localizePath("en", "/")).toBe("/en");
-    expect(localizePath("en", "/join?mode=login")).toBe("/en/join?mode=login");
+    expect(localizePath("en", "/login?mode=login")).toBe("/en/login?mode=login");
     expect(localizePath("en", "/#reserve")).toBe("/en#reserve");
-    expect(localizePath("de", "/join")).toBe("/join");
+    expect(localizePath("de", "/login")).toBe("/login");
     expect(splitLocale("/en")).toEqual({ locale: "en", path: "/" });
     expect(splitLocale("/en/account")).toEqual({ locale: "en", path: "/account" });
     expect(splitLocale("/english-menu")).toEqual({ locale: "de", path: "/english-menu" });
   });
 
   it("knows which pages exist in English", () => {
-    expect(["/", "/join", "/account"].every(isLocalizedRoute)).toBe(true);
+    expect(["/", "/login", "/account"].every(isLocalizedRoute)).toBe(true);
     expect(["/datenschutz", "/admin", "/admin/menu"].some(isLocalizedRoute)).toBe(false);
   });
 });
@@ -80,8 +80,8 @@ describe("proxy", () => {
   });
 
   it("brings back English for visitors who chose it", async () => {
-    const res = await proxy(request("/join?mode=login", { cookie: `${LOCALE_COOKIE}=en` }));
-    expect(redirectedTo(res)).toBe("/en/join?mode=login");
+    const res = await proxy(request("/login?mode=login", { cookie: `${LOCALE_COOKIE}=en` }));
+    expect(redirectedTo(res)).toBe("/en/login?mode=login");
   });
 
   it("keeps German for visitors who chose German, or chose nothing", async () => {
@@ -106,10 +106,10 @@ describe("proxy", () => {
 
   it("asks signed-out visitors to log in, in their language", async () => {
     expect(redirectedTo(await proxy(request("/en/account")))).toBe(
-      `/en/join?mode=login&next=${encodeURIComponent("/en/account")}`,
+      `/en/login?mode=login&next=${encodeURIComponent("/en/account")}`,
     );
     expect(redirectedTo(await proxy(request("/account")))).toBe(
-      `/join?mode=login&next=${encodeURIComponent("/account")}`,
+      `/login?mode=login&next=${encodeURIComponent("/account")}`,
     );
   });
 

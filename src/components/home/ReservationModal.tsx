@@ -5,6 +5,7 @@ import {
   Armchair,
   ArrowLeft,
   CalendarDays,
+  Check,
   ChevronDown,
   Clock,
   Phone,
@@ -28,6 +29,7 @@ import {
 import { createReservation } from "@/app/actions/reservations";
 import { PRIVACY_PATH, useConsent } from "@/components/consent/ConsentProvider";
 import { useI18n } from "@/i18n/client";
+import { EuDateInput } from "./EuDateInput";
 import {
   CONTACT,
   MAX_ONLINE_GUESTS,
@@ -55,6 +57,50 @@ function markPrompted() {
   } catch {
     // Private mode or blocked storage: the in-memory flag still covers this page view.
   }
+}
+
+/** Name, phone and email, kept on this device only when the guest ticks "remember". */
+export const SAVED_CONTACT_KEY = "aurea_guest_contact";
+const CONTACT_FIELDS = ["name", "phone", "email"] as const;
+
+/**
+ * Fills a booking form with the details saved on this device, and returns the submit handler
+ * that saves them again (or forgets them when "remember" is unticked).
+ */
+export function useSavedContact(form: RefObject<HTMLFormElement | null>) {
+  useEffect(() => {
+    const f = form.current;
+    if (!f) return;
+    let saved: Partial<Record<(typeof CONTACT_FIELDS)[number], string>> | null = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(SAVED_CONTACT_KEY) ?? "null");
+    } catch {
+      return;
+    }
+    if (!saved) return;
+    for (const key of CONTACT_FIELDS) {
+      const el = f.elements.namedItem(key) as HTMLInputElement | null;
+      if (el && !el.value && typeof saved[key] === "string") el.value = saved[key];
+    }
+    const remember = f.elements.namedItem("remember") as HTMLInputElement | null;
+    if (remember) remember.checked = true;
+  }, [form]);
+
+  return useCallback(() => {
+    const f = form.current;
+    if (!f) return;
+    const data = new FormData(f);
+    try {
+      if (data.get("remember") === "on") {
+        const entry = Object.fromEntries(CONTACT_FIELDS.map((k) => [k, String(data.get(k) ?? "")]));
+        localStorage.setItem(SAVED_CONTACT_KEY, JSON.stringify(entry));
+      } else {
+        localStorage.removeItem(SAVED_CONTACT_KEY);
+      }
+    } catch {
+      // Blocked storage: the booking still goes through, it just isn't remembered.
+    }
+  }, [form]);
 }
 
 type Ctx = { open: (returnFocus?: HTMLElement | null) => void };
@@ -252,12 +298,11 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
           </select>
         </Field>
         <Field label={t.reservation.date} icon={CalendarDays}>
-          <input
-            type="date"
+          <EuDateInput
             required
             min={today}
             value={details.date}
-            onChange={(e) => set({ date: e.target.value })}
+            onChange={(date) => set({ date })}
             className={`${input} pl-10`}
           />
         </Field>
@@ -323,6 +368,8 @@ function ContactStep({
   const { locale, t } = useI18n();
   const [state, formAction, pending] = useActionState(createReservation, null);
   const errorRef = useRef<HTMLParagraphElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const saveContact = useSavedContact(formRef);
 
   useEffect(() => {
     if (state?.ok) titleRef.current?.focus();
@@ -355,7 +402,7 @@ function ContactStep({
   }
 
   return (
-    <form action={formAction} className={stepIn("right")}>
+    <form ref={formRef} action={formAction} onSubmit={saveContact} className={stepIn("right")}>
       <button
         type="button"
         onClick={onBack}
@@ -371,9 +418,6 @@ function ContactStep({
       >
         {t.reservation.contactTitle} <em>{t.reservation.contactTitleEm}</em>
       </DialogPrimitive.Title>
-      <DialogPrimitive.Description className="mt-3 text-sm text-muted-foreground">
-        {t.reservation.contactDescription}
-      </DialogPrimitive.Description>
       <Summary details={details} className="mt-5" />
 
       <input type="hidden" name="locale" value={locale} />
@@ -408,7 +452,21 @@ function ContactStep({
             className={`${input} mt-2`}
           />
         </label>
+        <label className="block">
+          <span className="eyebrow text-muted-foreground">{t.reservation.email}</span>
+          <input
+            name="email"
+            type="email"
+            required
+            maxLength={254}
+            autoComplete="email"
+            placeholder={t.reservation.emailPlaceholder}
+            className={`${input} mt-2`}
+          />
+        </label>
       </div>
+
+      <ReservationConsents className="mt-5" />
 
       {state && !state.ok && (
         <p
@@ -431,9 +489,55 @@ function ContactStep({
 }
 
 /**
- * What happens with the booking details. Keep it in step with /datenschutz: the site has no
- * booking terms, no "remember me" and sends no marketing, so there is nothing to tick here.
+ * The booking form's checkboxes. Only the terms are required; "remember" stays on this device
+ * (see useSavedContact) and the two opt-ins are stored with the request.
  */
+export function ReservationConsents({
+  className = "",
+  dark = false,
+}: {
+  className?: string;
+  dark?: boolean;
+}) {
+  const { t } = useI18n();
+  const boxes = [
+    { name: "remember", label: t.reservation.remember },
+    { name: "terms", label: t.reservation.terms, required: true },
+    { name: "marketing_email", label: t.reservation.marketingEmail },
+  ];
+  return (
+    <div className={`grid gap-3 ${className}`}>
+      {boxes.map((b) => (
+        <label
+          key={b.name}
+          className={`flex cursor-pointer items-start gap-3 text-sm leading-snug ${dark ? "text-cream/80" : "text-foreground"}`}
+        >
+          <input type="checkbox" name={b.name} required={b.required} className="peer sr-only" />
+          <span
+            aria-hidden
+            className={`mt-px grid size-[1.125rem] shrink-0 place-items-center border transition-colors duration-200 peer-checked:border-gold peer-checked:bg-gold peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100 ${dark ? "border-cream/40 text-espresso" : "border-foreground/30 text-espresso"}`}
+          >
+            <Check className="size-3.5" strokeWidth={2.5} />
+          </span>
+          <span>
+            {b.label}
+            {b.required && (
+              <>
+                {" "}
+                <span className="text-gold" aria-hidden>
+                  *
+                </span>
+                <span className="sr-only">({t.reservation.required})</span>
+              </>
+            )}
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+/** What happens with the booking details. Keep it in step with /datenschutz. */
 export function ReservationPrivacyNote({
   className = "",
   dark = false,

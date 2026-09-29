@@ -27,7 +27,16 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { Reservation, ReservationStatus } from "@/lib/types";
 
-import { FILTER_KEYS, byDateTime, guests, relativeDay, time, timeAgo, todayISO, type Filter } from "./format";
+import {
+  FILTER_KEYS,
+  byDateTime,
+  guests,
+  relativeDay,
+  time,
+  timeAgo,
+  todayISO,
+  type Filter,
+} from "./format";
 import { PageHeader } from "./PageHeader";
 import { RespondDialog } from "./RespondDialog";
 import { StatusBadge } from "./StatusBadge";
@@ -91,6 +100,7 @@ export default function ReservationsView({ reservations, initialFilter, openId }
           (r) =>
             !q ||
             r.name.toLowerCase().includes(q) ||
+            !!r.email?.includes(q) ||
             r.phone.replace(/\s/g, "").includes(q.replace(/\s/g, "")),
         )
         .sort(byDateTime),
@@ -186,7 +196,9 @@ export default function ReservationsView({ reservations, initialFilter, openId }
       {days.length === 0 ? (
         <div className="grid place-items-center rounded-lg border border-dashed border-border px-6 py-20 text-center">
           <CalendarX2 className="size-10 text-muted-foreground/60" aria-hidden />
-          <p className="mt-4 text-lg font-semibold">{q ? "Keine Treffer" : "Keine Reservierungen"}</p>
+          <p className="mt-4 text-lg font-semibold">
+            {q ? "Keine Treffer" : "Keine Reservierungen"}
+          </p>
           <p className="mt-1 max-w-sm text-sm text-muted-foreground">
             {q
               ? `Niemand passt zu „${query.trim()}“.`
@@ -256,7 +268,9 @@ export default function ReservationsView({ reservations, initialFilter, openId }
                             r.status === "new" && "bg-gold/[0.06]",
                           )}
                         >
-                          <td className="px-4 py-3 text-base font-semibold tabular-nums">{time(r)}</td>
+                          <td className="px-4 py-3 text-base font-semibold tabular-nums">
+                            {time(r)}
+                          </td>
                           <td className="px-4 py-3">
                             <GuestCell r={r} />
                           </td>
@@ -348,6 +362,20 @@ function GuestCell({ r }: { r: Reservation }) {
       >
         {r.phone}
       </a>
+      {r.email && (
+        <a
+          href={`mailto:${r.email}`}
+          className="block truncate text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          {r.email}
+        </a>
+      )}
+      {(r.marketing_email || r.marketing_sms) && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          Werbung erlaubt:{" "}
+          {[r.marketing_email && "E-Mail", r.marketing_sms && "SMS"].filter(Boolean).join(", ")}
+        </p>
+      )}
       {r.special_requests && (
         <p className="mt-1.5 line-clamp-2 text-sm italic text-muted-foreground">
           „{r.special_requests}“

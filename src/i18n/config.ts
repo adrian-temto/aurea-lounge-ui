@@ -1,5 +1,5 @@
 /**
- * Languages of the public site. German lives at the root (/, /join, /account), English under
+ * Languages of the public site. German lives at the root (/, /login, /account), English under
  * /en. proxy.ts maps /en/... onto the same routes and tells them the language through
  * LOCALE_HEADER, so pages and components never parse the URL themselves.
  */
@@ -15,21 +15,21 @@ export const LOCALE_HEADER = "x-aurea-locale";
 export const LOCALE_SWITCH_KEY = "aurea_locale_switch";
 
 /** Routes that exist in both languages. Everything else (admin, legal pages) is German only. */
-export const LOCALIZED_ROUTES = ["/", "/join", "/account"] as const;
+export const LOCALIZED_ROUTES = ["/", "/login", "/account"] as const;
 
 export const isLocale = (v: unknown): v is Locale => LOCALES.includes(v as Locale);
 
 export const isLocalizedRoute = (path: string) =>
   LOCALIZED_ROUTES.some((r) => path === r || (r !== "/" && path.startsWith(`${r}/`)));
 
-/** "/join" → "/en/join" for English; unchanged for German. Keeps ?query and #hash. */
+/** "/login" → "/en/login" for English; unchanged for German. Keeps ?query and #hash. */
 export function localizePath(locale: Locale, path: string) {
   if (locale === DEFAULT_LOCALE) return path;
   const [, pathname = "/", rest = ""] = /^([^?#]*)(.*)$/.exec(path) ?? [];
   return `/${locale}${pathname === "/" ? "" : pathname}${rest}`;
 }
 
-/** Splits "/en/join" into { locale: "en", path: "/join" }; unprefixed paths are German. */
+/** Splits "/en/login" into { locale: "en", path: "/login" }; unprefixed paths are German. */
 export function splitLocale(pathname: string): { locale: Locale; path: string } {
   const m = /^\/(en)(\/.*)?$/.exec(pathname);
   if (m) return { locale: "en", path: m[2] || "/" };

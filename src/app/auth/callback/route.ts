@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const safeNext = next.startsWith("/") && !next.startsWith("//") ? next : "/account";
 
   // Send people back in the language they signed up in (next is /en/… on the English site).
-  const join = localizePath(splitLocale(safeNext).locale, "/join");
+  const join = localizePath(splitLocale(safeNext).locale, "/login");
   if (!code) return NextResponse.redirect(`${origin}${join}?mode=login&notice=link-invalid`);
 
   const supabase = await createClient();

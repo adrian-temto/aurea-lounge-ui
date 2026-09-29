@@ -226,6 +226,113 @@ html { scroll-behavior: smooth; }
   }
 }
 
+/* ---- Story: dark, gilded, slightly futuristic ---- */
+.story-grid {
+  background-image:
+    linear-gradient(oklch(0.74 0.08 80 / 7%) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(0.74 0.08 80 / 7%) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse at 50% 40%, #000 20%, transparent 75%);
+}
+.story-orb {
+  width: 38rem;
+  height: 38rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.35;
+  background: radial-gradient(circle, oklch(0.74 0.08 80 / 60%), transparent 65%);
+}
+.story-orb-a { left: -12rem; top: -10rem; }
+.story-orb-b { right: -14rem; bottom: -14rem; opacity: 0.22; background: radial-gradient(circle, oklch(0.5 0.05 115 / 70%), transparent 65%); }
+.story-glow {
+  background: radial-gradient(420px circle at var(--mx, 70%) var(--my, 30%), oklch(0.74 0.08 80 / 12%), transparent 70%);
+}
+.story-shimmer {
+  background: linear-gradient(100deg, var(--gold) 20%, var(--cream) 45%, var(--gold) 70%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.story-word {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+  vertical-align: top;
+}
+.story-word > span { display: inline-block; }
+.story-curtain { transform: scaleY(0); transform-origin: bottom; }
+/* On light sections the sheen runs through dark ink instead of cream. */
+.story-ink .story-shimmer {
+  background-image: linear-gradient(100deg, var(--gold) 20%, var(--foreground) 45%, var(--gold) 70%);
+}
+
+@keyframes aurea-drift {
+  to { transform: translate3d(6rem, 4rem, 0) scale(1.15); }
+}
+@keyframes aurea-sheen {
+  to { background-position: -220% 0; }
+}
+@keyframes aurea-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes aurea-parallax {
+  from { transform: translate3d(0, -6%, 0); }
+  to { transform: translate3d(0, 6%, 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .story-orb { animation: aurea-drift 16s ease-in-out infinite alternate; }
+  .story-orb-b { animation-duration: 22s; animation-direction: alternate-reverse; }
+  .story-shimmer { animation: aurea-sheen 7s linear infinite; }
+  .story-orbit { animation: aurea-spin 28s linear infinite; }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .story-parallax {
+      animation: aurea-parallax linear both;
+      animation-timeline: view();
+    }
+  }
+}
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  /* The photo is uncovered from the top while it settles from a slight zoom. A curtain does the
+     uncovering, not clip-path: a fully clipped element never intersects, so neither the reveal
+     observer nor the lazy-loaded image would ever fire. */
+  .reveal.story-media {
+    opacity: 1;
+    transform: none;
+  }
+  /* .story-media is either the .reveal itself (Story) or sits inside one (the three moments).
+     --c staggers cards in a row: each one starts 120ms after the previous. */
+  .story-media .story-curtain {
+    transform: scaleY(1);
+    transition: transform 1400ms var(--ease-aurea) calc(var(--c, 0) * 120ms);
+  }
+  .reveal.story-media.in .story-curtain,
+  .reveal.in .story-media .story-curtain { transform: scaleY(0); }
+  .story-media .story-zoom {
+    scale: 1.25;
+    transition: scale 2200ms var(--ease-aurea) calc(var(--c, 0) * 120ms);
+  }
+  .reveal.story-media.in .story-zoom,
+  .reveal.in .story-media .story-zoom { scale: 1; }
+  .story-word > span {
+    transform: translate3d(0, 110%, 0);
+    transition: transform 1000ms var(--ease-aurea)
+      calc(var(--w, 0) * 90ms + var(--c, 0) * 120ms + 200ms);
+  }
+  .reveal.in .story-word > span { transform: none; }
+  .story-fade {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+    transition:
+      opacity 900ms var(--ease-aurea) calc(700ms + var(--f, 0) * 160ms + var(--c, 0) * 120ms),
+      transform 900ms var(--ease-aurea) calc(700ms + var(--f, 0) * 160ms + var(--c, 0) * 120ms);
+  }
+  .reveal.in .story-fade { opacity: 1; transform: none; }
+}
+
 /* Hero: a short, staggered rise on first paint — pure CSS, so it never waits for JavaScript. */
 @keyframes aurea-rise {
   from {
@@ -233,6 +340,96 @@ html { scroll-behavior: smooth; }
     transform: translate3d(0, 18px, 0);
   }
 }
+@keyframes aurea-letter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.55em, 0);
+    filter: blur(14px);
+  }
+}
+@keyframes aurea-word {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.6em, 0);
+    filter: blur(8px);
+  }
+}
+/* Hero buttons: a fill wipes in from the left on hover, the arrow nudges forward, and the
+   primary one catches a slow sheen every few seconds. --btn-fill sets the wipe colour. */
+.btn-modern {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.btn-modern::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--btn-fill, var(--gold));
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 650ms var(--ease-aurea);
+}
+.btn-modern:hover::before,
+.btn-modern:focus-visible::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.btn-arrow,
+.btn-arrow-down { transition: transform 500ms var(--ease-aurea); }
+.btn-modern:hover .btn-arrow { transform: translateX(4px); }
+.btn-modern:hover .btn-arrow-down { transform: translateY(3px); }
+@keyframes aurea-btn-sheen {
+  0% { transform: translateX(-130%) skewX(-18deg); }
+  28%, 100% { transform: translateX(230%) skewX(-18deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 45%;
+    pointer-events: none;
+    background: linear-gradient(90deg, transparent, oklch(1 0 0 / 55%), transparent);
+    /* First sheen shortly after the button has arrived (--d is its entrance delay). */
+    animation: aurea-btn-sheen 5.5s var(--ease-aurea) calc(var(--d, 0ms) + 1400ms) infinite both;
+  }
+}
+/* Hero buttons arrive after the description: they rise out of a blur while a clip opens them
+   from the left. Only `backwards` fill, so hover and press can still move them afterwards. */
+@keyframes aurea-btn-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    filter: blur(6px);
+    clip-path: inset(0 100% 0 0);
+  }
+  60% {
+    filter: blur(0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    clip-path: inset(0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hero-btn {
+    animation: aurea-btn-in 1000ms var(--ease-aurea) backwards;
+    animation-delay: var(--d, 0ms);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-modern::before,
+  .btn-arrow,
+  .btn-arrow-down { transition: none; }
+}
+
 @keyframes aurea-settle {
   from {
     transform: scale(1.06);
@@ -246,6 +443,23 @@ html { scroll-behavior: smooth; }
   .hero-settle {
     animation: aurea-settle 2800ms var(--ease-aurea) both;
   }
+
+  /* Headline letters rise out of a blur, one after another (see SplitText). */
+  .hero-letter {
+    display: inline-block;
+    animation: aurea-letter 900ms var(--ease-aurea) both;
+    animation-delay: var(--d, 0ms);
+  }
+  .hero-word {
+    display: inline-block;
+    animation: aurea-word 800ms var(--ease-aurea) both;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes aurea-cue {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(300%); }
+  }
+  .hero-cue-dot { animation: aurea-cue 2.2s var(--ease-aurea) infinite; }
 }
 
 /* Dishes step in one after another when a menu category changes. */
@@ -325,3 +539,310 @@ html.locale-arrived body {
 }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { scrollbar-width: none; }
+
+/* Liquid glass: the cookie dialog only. Frosted, saturated backdrop with a bright rim and a soft
+   specular highlight in the top-left corner. Falls back to a mostly opaque surface without backdrop-filter. */
+.liquid-glass {
+  background:
+    radial-gradient(120% 70% at 0% 0%, rgb(255 255 255 / 0.5), transparent 55%),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--background) 86%, transparent),
+      color-mix(in oklab, var(--background) 70%, transparent)
+    );
+  border: 1px solid rgb(255 255 255 / 0.55);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -1px 0 rgb(255 255 255 / 0.2),
+    inset 0 0 28px rgb(255 255 255 / 0.22),
+    0 28px 70px -18px rgb(0 0 0 / 0.45);
+}
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-glass {
+    -webkit-backdrop-filter: blur(24px) saturate(1.8) brightness(1.08);
+    backdrop-filter: blur(24px) saturate(1.8) brightness(1.08);
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .liquid-glass {
+    background: color-mix(in oklab, var(--background) 96%, transparent);
+  }
+}
+/* Content stays legible: the glass is kept mostly opaque behind text (>= 70% surface), and people who
+   ask for reduced transparency get a solid surface. */
+@media (prefers-reduced-transparency: reduce) {
+  .liquid-glass {
+    background: var(--background);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* A light blur on the page behind the dialog reinforces that it floats above it. */
+.liquid-glass::backdrop {
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+
+/* ---- Reservation: the form assembles itself when the section arrives ---- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  /* Fields rise in one after another, after the headline has started. */
+  .reveal .res-field {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0);
+    transition:
+      opacity 700ms var(--ease-aurea) calc(350ms + var(--i, 8) * 70ms),
+      transform 700ms var(--ease-aurea) calc(350ms + var(--i, 8) * 70ms);
+  }
+  .reveal.in .res-field {
+    opacity: 1;
+    transform: none;
+  }
+  /* Headline letters: same blur-rise as the hero, triggered by the section's own reveal. */
+  .reveal .reveal-letter {
+    display: inline-block;
+    opacity: 0;
+    transform: translate3d(0, 0.55em, 0);
+    filter: blur(14px);
+    transition:
+      opacity 800ms var(--ease-aurea) var(--d, 0ms),
+      transform 800ms var(--ease-aurea) var(--d, 0ms),
+      filter 800ms var(--ease-aurea) var(--d, 0ms);
+  }
+  .reveal.in .reveal-letter {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+/* Focus: the label turns gold and a gold line draws itself under the field. */
+.res-label {
+  transition: color 300ms var(--ease-aurea);
+}
+.res-field:focus-within .res-label {
+  color: var(--gold);
+}
+.res-line {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .res-line {
+    transition: transform 500ms var(--ease-aurea);
+  }
+  /* A light sheen sweeps across the submit button on hover. */
+  .res-cta::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+  .res-cta:hover:not(:disabled)::after {
+    transform: translateX(120%);
+    transition: transform 800ms var(--ease-aurea);
+  }
+  .res-cta:disabled {
+    animation: aurea-pulse 1.4s ease-in-out infinite;
+  }
+}
+.res-field:focus-within .res-line {
+  transform: scaleX(1);
+}
+@keyframes aurea-pulse {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+/* ---- Menu: tabs and dishes step in when the section arrives ---- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal .menu-tab {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    transition:
+      opacity 600ms var(--ease-aurea) calc(300ms + var(--i, 0) * 60ms),
+      transform 600ms var(--ease-aurea) calc(300ms + var(--i, 0) * 60ms),
+      color var(--motion-base) var(--ease-aurea);
+  }
+  .reveal.in .menu-tab {
+    opacity: 1;
+    transform: none;
+  }
+  /* Two columns on desktop, so neighbours share a delay step and the grid reads left to right. */
+  .reveal .dish-item {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    transition:
+      opacity 700ms var(--ease-aurea) calc(200ms + min(var(--i, 0), 9) * 70ms),
+      transform 700ms var(--ease-aurea) calc(200ms + min(var(--i, 0), 9) * 70ms);
+  }
+  .reveal.in .dish-item {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* A gold line draws itself under a dish on hover. */
+.dish-line {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 1px;
+  background: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .dish-line {
+    transition: transform 600ms var(--ease-aurea);
+  }
+}
+.group:hover > .dish-line {
+  transform: scaleX(1);
+}
+
+/* ---- Visit: hours and contact step in, the map draws itself, the pin drops ---- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal .visit-in {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+    transition:
+      opacity 700ms var(--ease-aurea) calc(450ms + var(--i, 0) * 90ms),
+      transform 700ms var(--ease-aurea) calc(450ms + var(--i, 0) * 90ms);
+  }
+  .reveal.in .visit-in {
+    opacity: 1;
+    transform: none;
+  }
+  /* pathLength="1" on each path, so one dash length works for every line. */
+  .reveal .map-path {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    transition: stroke-dashoffset 1600ms var(--ease-aurea) calc(300ms + var(--i, 0) * 180ms);
+  }
+  .reveal.in .map-path {
+    stroke-dashoffset: 0;
+  }
+  /* The map card is uncovered from the left as it arrives. */
+  .reveal .map-card {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1200ms var(--ease-aurea) 150ms;
+  }
+  .reveal.in .map-card {
+    clip-path: inset(0);
+  }
+  .reveal .map-pin {
+    opacity: 0;
+    transform: translate3d(0, -28px, 0);
+    transition:
+      opacity 400ms var(--ease-aurea) 1300ms,
+      transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1) 1300ms;
+  }
+  .reveal.in .map-pin {
+    opacity: 1;
+    transform: none;
+  }
+  /* A soft ring keeps pulsing under the pin, so the place stays alive. */
+  .reveal.in .map-ping {
+    animation: aurea-ping 2.4s var(--ease-aurea) 2s infinite;
+  }
+}
+@keyframes aurea-ping {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(4.5);
+  }
+}
+
+/* ---- Atmosphere: the big photo is drawn up like a curtain while it settles from a zoom ---- */
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  .reveal.atmos-media {
+    opacity: 1;
+    transform: none;
+  }
+  .reveal.atmos-media .atmos-clip {
+    clip-path: inset(100% 0 0 0);
+    transition: clip-path 1500ms var(--ease-aurea);
+  }
+  .reveal.atmos-media.in .atmos-clip {
+    clip-path: inset(0);
+  }
+  /* "scale", not "transform": the scroll parallax owns the image's transform. */
+  .reveal.atmos-media img {
+    scale: 1.3;
+    transition: scale 2400ms var(--ease-aurea);
+  }
+  .reveal.atmos-media.in img {
+    scale: 1;
+  }
+  /* A thin frame closes in around the photo once it is uncovered. */
+  .reveal.atmos-media .atmos-frame {
+    opacity: 0;
+    scale: 1.05;
+    transition:
+      opacity 900ms var(--ease-aurea) 1200ms,
+      scale 1200ms var(--ease-aurea) 1200ms;
+  }
+  .reveal.atmos-media.in .atmos-frame {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ---- Navigation ---- */
+/* Mobile menu: a circle grows out of the menu button and closes back into it. */
+.menu-sheet {
+  clip-path: circle(0% at calc(100% - 2.75rem) 2.75rem);
+  pointer-events: none;
+}
+.menu-sheet[data-open="true"] {
+  clip-path: circle(150% at calc(100% - 2.75rem) 2.75rem);
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .menu-sheet {
+    transition: clip-path 450ms var(--ease-aurea-in);
+  }
+  .menu-sheet[data-open="true"] {
+    transition: clip-path 800ms var(--ease-aurea);
+  }
+  /* On first paint the bar drops in and the links follow one by one. */
+  .nav-drop {
+    animation: aurea-drop 800ms var(--ease-aurea) both;
+  }
+  .nav-in {
+    animation: aurea-word 700ms var(--ease-aurea) calc(350ms + var(--i, 0) * 70ms) both;
+  }
+}
+@keyframes aurea-drop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -100%, 0);
+  }
+}
+/* Reading progress: a gold hairline along the bottom edge of the bar, driven by the page scroll. */
+.nav-progress {
+  transform: scaleX(0);
+}
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-progress {
+      animation: aurea-progress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+@keyframes aurea-progress {
+  to {
+    transform: scaleX(1);
+  }
+}

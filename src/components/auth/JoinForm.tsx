@@ -115,9 +115,9 @@ export default function JoinForm({
               </h1>
               <div className="my-8 h-px w-16 bg-gold" />
               <p className="leading-relaxed text-muted-foreground">
-                {t.auth.checkInboxText(sentTo)[0]}
+                <span>{t.auth.checkInboxText(sentTo)[0]}</span>
                 <span className="text-foreground">{sentTo}</span>
-                {t.auth.checkInboxText(sentTo)[2]}
+                <span>{t.auth.checkInboxText(sentTo)[2]}</span>
               </p>
               <button
                 onClick={() => {
@@ -134,21 +134,21 @@ export default function JoinForm({
               <p className="eyebrow text-gold">{t.auth.eyebrow}</p>
               <h1 className="mt-4 font-serif text-5xl font-light leading-none md:text-6xl">
                 {mode === "signup" ? (
-                  <>
+                  <span key="signup">
                     {t.auth.signupTitle} <em>{t.auth.signupTitleEm}</em>
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span key="login">
                     {t.auth.loginTitle} <em>{t.auth.loginTitleEm}</em>
-                  </>
+                  </span>
                 )}
               </h1>
 
               <div className="mt-10 flex gap-8 border-b border-border">
                 {(
                   [
-                    ["signup", t.auth.tabs.signup],
                     ["login", t.auth.tabs.login],
+                    ["signup", t.auth.tabs.signup],
                   ] as const
                 ).map(([m, label]) => (
                   <button
@@ -159,7 +159,7 @@ export default function JoinForm({
                       mode === m ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
-                    {label}
+                    <span>{label}</span>
                     <span
                       className={`absolute inset-x-0 -bottom-px h-px bg-gold transition-transform duration-700 ${mode === m ? "scale-x-100" : "scale-x-0"}`}
                     />
@@ -216,18 +216,18 @@ export default function JoinForm({
                   disabled={loading}
                   className="w-full bg-foreground py-5 text-[0.72rem] uppercase tracking-[0.28em] text-background transition-colors duration-500 hover:bg-gold hover:text-foreground disabled:opacity-60"
                 >
-                  {loading ? t.auth.wait : mode === "signup" ? t.auth.submitSignup : t.auth.submitLogin}
+                  <span>{loading ? t.auth.wait : mode === "signup" ? t.auth.submitSignup : t.auth.submitLogin}</span>
                 </button>
               </form>
 
               <p className="mt-8 text-sm text-muted-foreground">
-                {mode === "signup" ? t.auth.haveAccount : t.auth.noAccount}{" "}
+                <span>{mode === "signup" ? t.auth.haveAccount : t.auth.noAccount}</span>{" "}
                 <button
                   type="button"
                   onClick={() => switchTo(mode === "signup" ? "login" : "signup")}
                   className="link-line text-foreground"
                 >
-                  {mode === "signup" ? t.auth.tabs.login : t.auth.tabs.signup}
+                  <span>{mode === "signup" ? t.auth.tabs.login : t.auth.tabs.signup}</span>
                 </button>
               </p>
             </>

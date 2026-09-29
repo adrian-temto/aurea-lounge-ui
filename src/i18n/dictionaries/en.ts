@@ -36,7 +36,7 @@ const en: Dictionary = {
     openMenu: "Open menu",
     closeMenu: "Close menu",
     reserve: "Reserve a table",
-    account: { join: "Account", account: "My account", dashboard: "Dashboard" },
+    account: { join: "Login", account: "My account", dashboard: "Dashboard" },
     address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
   },
 
@@ -59,7 +59,7 @@ const en: Dictionary = {
 
   chapters: [
     {
-      time: "From 07:00",
+      time: "From 08:00",
       title: "Breakfast",
       alt: "Breakfast table with eggs Benedict and sourdough bread",
       copy: "Sourdough, soft eggs, stone-fruit jam and more — a good start to the day.",
@@ -132,9 +132,7 @@ const en: Dictionary = {
     title: "Come by,",
     titleEm: "stay a while.",
     hours: [
-      ["Monday — Thursday", "07:00 – 23:00"],
-      ["Friday — Saturday", "07:00 – 01:00"],
-      ["Sunday", "08:00 – 22:00"],
+      ["Monday — Sunday", "08:00 – 20:00"],
     ],
     address: "Address",
     country: "Germany",
@@ -150,6 +148,13 @@ const en: Dictionary = {
     name: "Name",
     namePlaceholder: "First and last name",
     phone: "Phone",
+    email: "Email",
+    emailPlaceholder: "name@example.com",
+    remember: "Save my details for my next reservations.",
+    terms: "I accept the terms and conditions.",
+    required: "required",
+    marketingEmail: "Send me offers and news by email.",
+    marketingSms: "Send me offers and news by SMS.",
     date: "Date",
     time: "Time",
     guests: "Guests",
@@ -168,7 +173,7 @@ const en: Dictionary = {
     },
     groupHint: (max: number) => `More than ${max} guests? Give us a call:`,
     privacy:
-      "We only use your details to handle your reservation and to contact you about it by phone, SMS or WhatsApp. If you're signed in, the request also appears in your account. More in our",
+      "We use your details to handle your reservation and to contact you about it by phone, SMS, WhatsApp or email. We only send offers and news if you tick that above. If you're signed in, the request also appears in your account. More in our",
     privacyLink: "privacy policy (German)",
     newTab: "(opens in a new tab)",
     modalTitle: "Reserve",
@@ -179,7 +184,6 @@ const en: Dictionary = {
     back: "Back",
     contactTitle: "Almost",
     contactTitleEm: "done",
-    contactDescription: "How can we reach you to confirm your reservation?",
     sentTitle: "Request",
     sentTitleEm: "sent",
     sentNote: "Your reservation is valid once we have confirmed it.",
@@ -187,6 +191,8 @@ const en: Dictionary = {
     errors: {
       name: "Please enter your name.",
       phone: "Please enter a phone number.",
+      email: "Please enter a valid email address.",
+      terms: "Please accept the terms and conditions.",
       date: "Please choose a date.",
       time: "Please choose a time.",
       tooMany: (max: number, phone: string) =>
@@ -200,10 +206,10 @@ const en: Dictionary = {
 
   footer: {
     tagline: "A golden retreat from dawn to late.",
-    links: { home: "Home", menu: "Menu", story: "Story", visit: "Visit", reserve: "Reservations", join: "Account" },
+    links: { home: "Home", menu: "Menu", story: "Story", visit: "Visit", reserve: "Reservations", join: "Login" },
     contact: "Contact",
     hours: "Opening hours",
-    hoursLines: ["Mon–Thu 07–23", "Fri–Sat 07–01", "Sun 08–22"],
+    hoursLines: ["Mon–Sun 08–20"],
     copyright: "© 2026 Auréa Café & Lounge. All rights reserved.",
     privacy: "Privacy policy",
     germanOnly: "(German)",

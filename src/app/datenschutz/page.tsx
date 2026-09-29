@@ -155,7 +155,7 @@ export default function PrivacyPage() {
             rows={[
               [
                 "Daten",
-                "Name, Telefonnummer, Datum, Uhrzeit, Anzahl der Personen, Sitzwunsch und – freiwillig – besondere Wünsche. Bist du angemeldet, verknüpfen wir die Anfrage mit deinem Konto.",
+                "Name, Telefonnummer, E-Mail-Adresse, Datum, Uhrzeit, Anzahl der Personen, Sitzwunsch, der Zeitpunkt, zu dem du die AGB akzeptiert hast, deine Auswahl zu Angeboten per E-Mail oder SMS und – freiwillig – besondere Wünsche. Bist du angemeldet, verknüpfen wir die Anfrage mit deinem Konto.",
               ],
               [
                 "Zweck",
@@ -167,7 +167,7 @@ export default function PrivacyPage() {
               ],
               [
                 "Pflichtangaben",
-                "Name und Telefonnummer brauchen wir, um die Reservierung bestätigen zu können. Ohne sie ist eine Online-Reservierung nicht möglich; du kannst uns aber jederzeit anrufen.",
+                "Name, Telefonnummer und E-Mail-Adresse brauchen wir, um die Reservierung bestätigen zu können. Ohne sie ist eine Online-Reservierung nicht möglich; du kannst uns aber jederzeit anrufen.",
               ],
               [
                 "Speicherdauer",
@@ -196,16 +196,31 @@ export default function PrivacyPage() {
             (Art. 9 Abs. 2 lit. a DSGVO) ausschließlich, um deinen Besuch vorzubereiten. Du kannst
             die Einwilligung jederzeit widerrufen, z. B. telefonisch.
           </p>
+          <h3 className="pt-2 font-serif text-2xl font-light text-foreground">
+            Angebote und Neuigkeiten
+          </h3>
           <p>
-            Wir versenden keine Werbung und nutzen deine Kontaktdaten nicht für andere Zwecke. Es
-            gibt keine Funktion, mit der die Website deine Angaben für künftige Reservierungen
-            speichert.
+            Angebote und Neuigkeiten per E-Mail oder SMS schicken wir dir nur, wenn du das im
+            Reservierungsformular ausdrücklich ankreuzt (Art. 6 Abs. 1 lit. a DSGVO, § 7 Abs. 2
+            UWG). Beide Häkchen sind freiwillig; ohne sie kannst du genauso reservieren. Du kannst
+            deine Einwilligung jederzeit mit Wirkung für die Zukunft widerrufen, z. B. telefonisch.
+            Ansonsten nutzen wir deine Kontaktdaten nur für deine Reservierung.
+          </p>
+          <h3 className="pt-2 font-serif text-2xl font-light text-foreground">
+            Angaben für künftige Reservierungen speichern
+          </h3>
+          <p>
+            Kreuzt du „Speichern Sie die Informationen für meine nächsten Reservierungen“ an,
+            speichert dein Browser Name, Telefonnummer und E-Mail-Adresse im Local Storage dieses
+            Geräts, damit das Formular beim nächsten Mal schon ausgefüllt ist. Diese Kopie erreicht
+            uns nicht. Entfernst du das Häkchen bei einer späteren Reservierung, löschen wir sie
+            wieder; du kannst sie auch über die Browserdaten löschen.
           </p>
         </Section>
 
         <Section id="konto">
           <p>
-            Unter „Join Us“ kannst du ein Kundenkonto anlegen. Dann siehst du deine Reservierungen
+            Unter „Login“ kannst du ein Kundenkonto anlegen. Dann siehst du deine Reservierungen
             und unsere Antworten an einem Ort.
           </p>
           <Facts
@@ -279,8 +294,9 @@ export default function PrivacyPage() {
           </h3>
           <p>
             {CATEGORY_INFO.necessary.description} Besucher ohne Konto erhalten auf der öffentlichen
-            Website nur das Cookie für die Cookie-Einstellungen und, sobald wir das
-            Reservierungsfenster angeboten haben, einen Eintrag im Session Storage.
+            Website nur das Cookie für die Cookie-Einstellungen, sobald wir das Reservierungsfenster
+            angeboten haben, einen Eintrag im Session Storage und – nur wenn du es bei einer
+            Reservierung ankreuzt – deine gespeicherten Kontaktdaten im Local Storage.
           </p>
           <ServiceList services={SERVICES.necessary} />
 
