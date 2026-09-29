@@ -505,23 +505,32 @@ The design should feel bespoke, atmospheric and expensive — not like a generic
 
 Again: BUILD UI ONLY. No backend, database, API, authentication, payment processing, reservation functionality, or CMS.
 
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/ef1702bb-44fa-4825-ae03-2ac394ebc9dc).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+> The brief above was the original UI-only scope. The site now runs on **Next.js 16 + Supabase** (menu, reservations, accounts, admin dashboard). It started as a Lovable project, but Lovable cannot run Next.js, so it is no longer edited there.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Requires Node.js 20.9 or newer and npm.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+git clone https://github.com/Dielltarkau/aurea-lounge-ui.git
+cd aurea-lounge-ui
+npm ci
+cp .env.example .env.local   # then fill in the Supabase values
+npm run dev                  # http://localhost:3000
 ```
+
+Other scripts: `npm run build`, `npm start`, `npm test`, `npm run lint`.
+
+## Deploy on Vercel
+
+1. In Vercel, **Add New → Project** and import `Dielltarkau/aurea-lounge-ui`. Framework, build command and output are detected automatically (Next.js, `npm run build`) — leave them as they are.
+2. Under **Environment Variables**, add for Production and Preview (values from Supabase → Project Settings → API, see `.env.example`):
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - optional `NEXT_PUBLIC_SITE_URL` (defaults to `https://aurealounge.de`)
+
+   The build stops with a clear error if either Supabase variable is missing.
+3. Deploy.
+4. In Supabase → **Authentication → URL Configuration**, set **Site URL** to the live address and add these **Redirect URLs**, so sign-up confirmation emails lead back to the site:
+   - `https://<your-domain>/auth/callback`
+   - `https://*-<your-vercel-team>.vercel.app/auth/callback` (preview deployments, optional)
