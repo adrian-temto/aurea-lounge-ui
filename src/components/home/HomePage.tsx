@@ -905,7 +905,7 @@ export function FloatingReserve() {
     <ReserveLink
       aria-hidden={!shown}
       tabIndex={shown ? undefined : -1}
-      className={`press fixed bottom-5 left-5 z-40 flex items-center gap-3 border border-gold/40 bg-espresso px-5 py-3.5 text-[0.68rem] uppercase tracking-[0.25em] text-cream shadow-2xl transition-[opacity,transform,background-color,color] duration-500 ease-aurea hover:bg-gold hover:text-espresso md:bottom-8 md:left-8 ${
+      className={`press fixed bottom-5 right-5 z-40 flex items-center gap-3 border border-gold/40 bg-espresso px-5 py-3.5 text-[0.68rem] uppercase tracking-[0.25em] text-cream shadow-2xl transition-[opacity,transform,background-color,color] duration-500 ease-aurea hover:bg-gold hover:text-espresso md:bottom-8 md:right-8${
         shown ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
       }`}
     >
