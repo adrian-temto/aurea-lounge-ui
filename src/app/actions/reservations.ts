@@ -5,7 +5,8 @@ import { z } from "zod";
 
 import { DEFAULT_LOCALE, SITE_URL, isLocale, localizePath, type Locale } from "@/i18n/config";
 import { getDictionary, type Dictionary } from "@/i18n/dictionaries";
-import { replyToAddress, sendEmail, staffInboxes } from "@/lib/email/send";
+import { replyToAddress, sendEmail } from "@/lib/email/send";
+import { teamInboxes } from "@/lib/email/team-inboxes";
 import {
   guestPendingEmail,
   marketingConfirmEmail,
@@ -80,7 +81,7 @@ export async function createReservation(
     return { ok: false, message: t.errors.failed(CONTACT.phone) };
   }
 
-  // The guest hears that the request is pending, the team that one is waiting. Sent after the
+  // The guest hears that the request is pending, every admin that one is waiting. Sent after the
   // response, so a slow or failing mail service never delays or breaks the booking itself.
   const booking: Booking = {
     name: rest.name,
@@ -93,7 +94,7 @@ export async function createReservation(
     locale,
   };
   after(async () => {
-    const team = staffInboxes();
+    const team = await teamInboxes();
     const results = await Promise.all([
       sendEmail({ ...guestPendingEmail({ ...booking, email: rest.email }), replyTo: replyToAddress() }),
       team.length ? sendEmail(staffNewReservationEmail(booking, team)) : null,

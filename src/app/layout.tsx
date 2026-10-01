@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import Script from "next/script";
 
 import { LOCALE_SWITCH_KEY, SITE_URL } from "@/i18n/config";
 import { getLocale } from "@/i18n/server";
@@ -40,18 +41,23 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   // Set by proxy.ts: "en" under /en, otherwise German.
   const locale = await getLocale();
   return (
-    <html lang={locale} className={`${cormorant.variable} ${manrope.variable}`} suppressHydrationWarning>
-      <head>
+    <html
+      lang={locale}
+      className={`${cormorant.variable} ${manrope.variable}`}
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>
+        <Providers locale={locale}>{children}</Providers>
         {/* Arriving from a language switch: stay hidden until the scroll position is restored,
-            then useLocaleArrival fades the page in. CSS un-hides it after 1.5s regardless. */}
-        <script
+            then useLocaleArrival fades the page in. CSS un-hides it after 1.5s regardless.
+            next/script puts it in the initial HTML; React never renders a <script> itself. */}
+        <Script
+          id="locale-arrival"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `try{if(sessionStorage.getItem(${JSON.stringify(LOCALE_SWITCH_KEY)})&&!matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("locale-arriving")}catch(e){}`,
           }}
         />
-      </head>
-      <body suppressHydrationWarning>
-        <Providers locale={locale}>{children}</Providers>
       </body>
     </html>
   );

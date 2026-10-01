@@ -251,7 +251,7 @@ function RespondForm({
             </Button>
             <Button type="submit" disabled={pending}>
               {pending && <Loader2 className="animate-spin" aria-hidden />}
-              {pending ? "Sendet…" : notify ? "Speichern & senden" : "Antwort speichern"}
+              <span>{pending ? "Sendet…" : notify ? "Speichern & senden" : "Antwort speichern"}</span>
             </Button>
           </DialogFooter>
         </form>

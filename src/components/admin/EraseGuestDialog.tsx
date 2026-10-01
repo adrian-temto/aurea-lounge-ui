@@ -127,7 +127,7 @@ function EraseForm({
         </Button>
         <Button type="submit" variant="destructive" disabled={pending}>
           {pending && <Loader2 className="animate-spin" aria-hidden />}
-          Endgültig löschen
+          <span>Endgültig löschen</span>
         </Button>
       </DialogFooter>
     </form>

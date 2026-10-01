@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { MUST_CHANGE_PASSWORD } from "@/lib/team";
 import type { Permission, Profile, Role } from "@/lib/types";
 
 export type Session = {
@@ -9,6 +10,10 @@ export type Session = {
   profile: Profile | null;
   roles: Role[];
   permissions: Permission[];
+  /** The one super admin: decides who else has access. */
+  isOwner: boolean;
+  /** Signed in with the temporary password from the welcome email; must choose their own first. */
+  mustChangePassword: boolean;
 };
 
 /** The signed-in team member (verified JWT claims), their profile and what they may do. */
@@ -16,7 +21,16 @@ export async function getSession(): Promise<Session> {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   const claims = data?.claims;
-  if (!claims) return { supabase, user: null, profile: null, roles: [], permissions: [] };
+  if (!claims)
+    return {
+      supabase,
+      user: null,
+      profile: null,
+      roles: [],
+      permissions: [],
+      isOwner: false,
+      mustChangePassword: false,
+    };
 
   // Roles live in user_roles, which the API lets users read but never write.
   const [profile, roles, permissions] = await Promise.all([
@@ -30,12 +44,16 @@ export async function getSession(): Promise<Session> {
   ]);
 
   const email = typeof claims["email"] === "string" ? claims["email"] : "";
+  const meta = claims["user_metadata"] as Record<string, unknown> | undefined;
+  const userRoles = ((roles.data ?? []) as { role: Role }[]).map((r) => r.role);
   return {
     supabase,
     user: { id: claims.sub, email },
     profile: profile.data,
-    roles: ((roles.data ?? []) as { role: Role }[]).map((r) => r.role),
+    roles: userRoles,
     permissions: (permissions.data ?? []) as Permission[],
+    isOwner: userRoles.includes("owner"),
+    mustChangePassword: meta?.[MUST_CHANGE_PASSWORD] === true,
   };
 }
 
@@ -49,12 +67,21 @@ export function displayName(session: Session) {
 export const canUseDashboard = (session: Session) => session.permissions.length > 0;
 
 /**
- * Any staff permission opens the dashboard; each tab and action checks its own permission.
+ * Any team permission opens the dashboard; each tab and action checks its own permission.
  * There are no guest accounts: a signed-in user without a permission is sent back to the login.
+ * Someone still on their temporary password chooses their own before anything else.
  */
 export async function requireDashboard() {
   const session = await getSession();
   if (!session.user) redirect(`/login?next=${encodeURIComponent("/admin")}`);
   if (!canUseDashboard(session)) redirect("/login?error=forbidden");
+  if (session.mustChangePassword) redirect("/login/passwort");
   return { ...session, user: session.user };
+}
+
+/** Pages only the super admin may open; everyone else lands on the overview. */
+export async function requireOwner() {
+  const session = await requireDashboard();
+  if (!session.isOwner) redirect("/admin");
+  return session;
 }

@@ -44,9 +44,26 @@ export const PRIVACY_PATH = "/datenschutz";
 
 const ConsentContext = createContext<Ctx | null>(null);
 
+/**
+ * Outside the provider (in development this happens for a moment while hot reload swaps modules)
+ * nothing is allowed: no third-party content loads, and the page keeps working instead of crashing.
+ */
+const NO_CONSENT: Ctx = {
+  consent: null,
+  ready: false,
+  dialogOpen: false,
+  allows: () => false,
+  openSettings: () => {},
+  save: () => {},
+};
+
 export function useConsent() {
   const ctx = useContext(ConsentContext);
-  if (!ctx) throw new Error("useConsent must be used inside <ConsentProvider>");
+  if (!ctx) {
+    if (process.env.NODE_ENV !== "production")
+      console.warn("useConsent used outside <ConsentProvider>; treating it as no consent.");
+    return NO_CONSENT;
+  }
   return ctx;
 }
 

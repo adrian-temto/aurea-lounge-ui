@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 
 import AdminShell from "@/components/admin/AdminShell";
 import { displayName, requireDashboard } from "@/lib/auth";
+import { ROLE_LABEL } from "@/lib/team";
 
 export const metadata: Metadata = { title: "Admin — Auréa", robots: { index: false } };
 
@@ -25,8 +26,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     <AdminShell
       name={displayName(session)}
       email={session.user.email}
-      roleLabel={session.roles.includes("admin") ? "Administrator" : "Team"}
+      roleLabel={ROLE_LABEL[session.isOwner ? "owner" : "admin"]}
       permissions={session.permissions}
+      isOwner={session.isOwner}
       newCount={count ?? 0}
       defaultOpen={cookieStore.get("sidebar_state")?.value !== "false"}
     >

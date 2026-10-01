@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import LoginForm from "@/components/admin/LoginForm";
 import { canUseDashboard, getSession } from "@/lib/auth";
 
-/** Team login on the admin host (see lib/admin-host.ts). There is no sign-up: accounts are created by an admin. */
+/** Team login on the admin host (see lib/admin-host.ts). There is no sign-up: the super admin creates admin accounts in the dashboard. */
 export const metadata: Metadata = { title: "Anmelden — Auréa Admin", robots: { index: false } };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
@@ -19,7 +19,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Search
   const session = await getSession();
   if (session.user && canUseDashboard(session)) redirect(next);
 
-  // Signed in without a staff role (e.g. an old guest account): the form signs them out.
+  // Signed in without a team role (e.g. an old guest account): the form signs them out.
   const forbidden = one(sp["error"]) === "forbidden" || !!session.user;
   return <LoginForm next={next} forbidden={forbidden} />;
 }

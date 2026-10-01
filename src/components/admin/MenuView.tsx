@@ -1311,7 +1311,7 @@ function ItemSheet({
               </Button>
               <Button type="submit" disabled={pending} className="h-10">
                 {pending && <Loader2 className="animate-spin" aria-hidden />}
-                {pending ? "Speichert…" : draft.id ? "Änderungen speichern" : "Gericht anlegen"}
+                <span>{pending ? "Speichert…" : draft.id ? "Änderungen speichern" : "Gericht anlegen"}</span>
               </Button>
             </SheetFooter>
           </form>
@@ -1457,7 +1457,7 @@ function CategoryDialog({
               </Button>
               <Button type="submit" disabled={pending || !draft.name.trim()}>
                 {pending && <Loader2 className="animate-spin" aria-hidden />}
-                {draft.id ? "Speichern" : "Anlegen"}
+                <span>{draft.id ? "Speichern" : "Anlegen"}</span>
               </Button>
             </DialogFooter>
           </form>

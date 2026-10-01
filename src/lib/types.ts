@@ -62,7 +62,7 @@ export type Reservation = {
   anonymized_at: string | null;
 };
 
-export type Role = "admin" | "staff";
+export type Role = "owner" | "admin";
 export type Permission = "menu.manage" | "reservations.manage";
 
 export type Profile = { full_name: string | null; created_at: string };

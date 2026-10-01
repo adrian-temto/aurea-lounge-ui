@@ -9,6 +9,7 @@ import {
   ExternalLink,
   LayoutDashboard,
   LogOut,
+  Users,
   UtensilsCrossed,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -53,6 +54,7 @@ type Props = {
   email: string;
   roleLabel: string;
   permissions: Permission[];
+  isOwner: boolean;
   newCount: number;
   defaultOpen: boolean;
 };
@@ -62,6 +64,8 @@ const NAV: {
   label: string;
   Icon: typeof LayoutDashboard;
   permission?: Permission;
+  /** Only the super admin sees it. */
+  ownerOnly?: boolean;
 }[] = [
   { href: "/admin", label: "Übersicht", Icon: LayoutDashboard },
   {
@@ -71,6 +75,7 @@ const NAV: {
     permission: "reservations.manage",
   },
   { href: "/admin/menu", label: "Speisekarte", Icon: UtensilsCrossed, permission: "menu.manage" },
+  { href: "/admin/team", label: "Team", Icon: Users, ownerOnly: true },
 ];
 
 export default function AdminShell({
@@ -79,13 +84,16 @@ export default function AdminShell({
   email,
   roleLabel,
   permissions,
+  isOwner,
   newCount,
   defaultOpen,
 }: Props) {
   const pathname = usePathname();
   const router = useRouter();
   const canReservations = permissions.includes("reservations.manage");
-  const nav = NAV.filter((n) => !n.permission || permissions.includes(n.permission));
+  const nav = NAV.filter(
+    (n) => (!n.permission || permissions.includes(n.permission)) && (!n.ownerOnly || isOwner),
+  );
   const current = nav.find((n) =>
     n.href === "/admin" ? pathname === "/admin" : pathname.startsWith(n.href),
   );

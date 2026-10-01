@@ -252,3 +252,43 @@ export function marketingConfirmEmail(
     text: `${hello}\n\n${c.offers.text}\n\n${c.offers.button}: ${link}\n\n${c.offers.ignore}\n\n${c.signText}`,
   };
 }
+
+/**
+ * To a new admin, when the super admin created their account (or sent the details again): the
+ * temporary password and a sign-in button. Always German, like the dashboard.
+ */
+export function adminWelcomeEmail(
+  a: { name: string; email: string },
+  password: string,
+  link = `${ADMIN_URL}/login`,
+): Email {
+  const hello = a.name.trim() ? `Hallo ${firstName(a.name)},` : "Hallo,";
+  const intro =
+    "für dich wurde ein Zugang zum Team-Bereich der Auréa Lounge angelegt. Damit meldest du dich an:";
+  const note =
+    "Nach der ersten Anmeldung legst du dein eigenes Passwort fest. Dieses Passwort gilt nur bis dahin.";
+  const notYou = "Du hast mit dieser E-Mail nicht gerechnet? Dann melde dich bitte bei uns.";
+  const rows: [string, string][] = [
+    ["E-Mail", a.email],
+    ["Passwort", password],
+  ];
+  return {
+    to: a.email,
+    subject: "Dein Zugang zum Auréa Team-Bereich",
+    html: layout(
+      "de",
+      "Willkommen im Team",
+      `<p style="margin:0 0 12px">${esc(hello)}</p><p style="margin:0">${esc(intro)}</p>
+<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;border-top:1px solid #e6dccb;margin:24px 0">${rows
+        .map(
+          ([k, v]) =>
+            `<tr><td style="padding:12px 0;border-bottom:1px solid #e6dccb;color:#7a6a58;font-size:14px;width:40%">${esc(k)}</td><td style="padding:12px 0;border-bottom:1px solid #e6dccb;font-family:Consolas,Menlo,monospace;font-size:17px;letter-spacing:1px">${esc(v)}</td></tr>`,
+        )
+        .join("")}</table>
+<p style="margin:0 0 24px"><a href="${link}" style="display:inline-block;background:#1c120c;color:#f4efe6;padding:14px 24px;text-decoration:none;font-family:Arial,sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase">Jetzt anmelden</a></p>
+<p style="margin:0 0 12px;font-size:14px;color:#7a6a58">${esc(note)}</p>
+<p style="margin:0;font-size:14px;color:#7a6a58">${esc(notYou)}</p>`,
+    ),
+    text: `${hello}\n\n${intro}\n\n${rows.map(([k, v]) => `${k}: ${v}`).join("\n")}\n\nAnmelden: ${link}\n\n${note}\n\n${notYou}`,
+  };
+}
