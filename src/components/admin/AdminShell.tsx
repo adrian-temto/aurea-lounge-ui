@@ -9,12 +9,12 @@ import {
   ExternalLink,
   LayoutDashboard,
   LogOut,
-  UserRound,
   UtensilsCrossed,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { signOut } from "@/app/actions/auth";
+import { signOut } from "@/app/admin/auth-actions";
+import { SITE_URL } from "@/i18n/config";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -192,7 +192,8 @@ export default function AdminShell({
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild tooltip="Website ansehen" className="h-10">
-                    <a href="/" target="_blank" rel="noopener noreferrer">
+                    {/* The dashboard runs on the admin host; the website is the main domain. */}
+                    <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
                       <ExternalLink aria-hidden />
                       <span>Website ansehen</span>
                     </a>
@@ -231,12 +232,6 @@ export default function AdminShell({
                     <p className="text-sm font-medium">{name}</p>
                     <p className="truncate text-xs text-muted-foreground">{email}</p>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/account">
-                      <UserRound aria-hidden /> Mein Konto
-                    </Link>
-                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <form action={signOut}>
                     <DropdownMenuItem asChild>

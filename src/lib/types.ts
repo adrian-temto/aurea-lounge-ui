@@ -35,8 +35,9 @@ export type ReservationStatus = "new" | "confirmed" | "declined" | "cancelled";
 export type Reservation = {
   id: number;
   name: string;
-  phone: string;
-  /** Null on requests made before guests gave an email address. */
+  /** Null only once the reservation has been anonymised (2 years after its date). */
+  phone: string | null;
+  /** Null on requests made before guests gave an email address, and after anonymisation. */
   email: string | null;
   reservation_date: string;
   reservation_time: string;
@@ -44,15 +45,21 @@ export type Reservation = {
   special_requests: string | null;
   status: ReservationStatus;
   created_at: string;
-  /** Set when the guest was signed in while booking; they can then read the response in /account. */
-  user_id: string | null;
   admin_response: string | null;
   responded_at: string | null;
   responded_by: string | null;
   terms_accepted_at: string | null;
-  /** Opt-ins ticked in the booking form. */
+  /** Opt-ins ticked in the booking form. Offers by email only count once confirmed. */
   marketing_email: boolean;
   marketing_sms: boolean;
+  /** Double opt-in: when the guest confirmed offers by email via the emailed link. */
+  marketing_email_confirmed_at: string | null;
+  /** Language the guest booked in; their emails use it. */
+  locale: "de" | "en";
+  /** When the team's answer was emailed to the guest. */
+  response_emailed_at: string | null;
+  /** Set when the nightly retention job removed the personal data. */
+  anonymized_at: string | null;
 };
 
 export type Role = "admin" | "staff";
@@ -60,5 +67,3 @@ export type Permission = "menu.manage" | "reservations.manage";
 
 export type Profile = { full_name: string | null; created_at: string };
 
-/** Where the header's account link points. `href` is unlocalized; the dashboard is German-only. */
-export type AccountLink = { href: string; kind: "join" | "account" | "dashboard" };

@@ -1,20 +1,30 @@
 /**
- * Business facts the Datenschutzerklärung needs. `null` means the owner hasn't supplied it yet:
- * /datenschutz then shows a highlighted "Fehlt: …" marker in development and leaves the detail
- * out in production. Fill these in rather than editing the page.
+ * Business facts the Impressum and the privacy policy (both languages) need. `null` means the
+ * owner hasn't supplied it yet: the pages then show a highlighted "Fehlt: …" marker in
+ * development and leave the detail out in production. Fill these in rather than editing pages.
  */
 export const LEGAL = {
   businessName: "Auréa Café & Lounge",
   /** Legal owner: the person's full name, or the company name with its legal form (e.g. GmbH). */
   owner: null as string | null,
-  /** Address for privacy requests. */
+  /** For a company: who represents it, e.g. "Geschäftsführer: Max Mustermann". */
+  representative: null as string | null,
+  /** Address for privacy requests and the Impressum. */
   email: null as string | null,
+  /** Commercial register entry if registered, e.g. "Amtsgericht Potsdam, HRB 12345". */
+  register: null as string | null,
+  /** VAT ID (USt-IdNr.) if there is one, e.g. "DE123456789". */
+  vatId: null as string | null,
+  /** Person responsible for the content (§ 18 Abs. 2 MStV), with address if it differs. */
+  contentResponsible: null as string | null,
   /** Company that hosts the website, with its address. */
   hosting: null as string | null,
   /** How long the host keeps access logs (IP address etc.). */
   hostingLogRetention: null as string | null,
   /** Where the Supabase project stores data, e.g. "Frankfurt (EU)". */
   supabaseRegion: "Frankfurt am Main, Deutschland (AWS eu-central-1)" as string | null,
+  supabaseRegionEn: "Frankfurt am Main, Germany (AWS eu-central-1)",
   /** Date of the current version. */
-  updated: "September 2026",
+  updated: "Oktober 2026",
+  updatedEn: "October 2026",
 };

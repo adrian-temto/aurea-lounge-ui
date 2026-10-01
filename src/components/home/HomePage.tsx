@@ -6,11 +6,11 @@ import Link from "next/link";
 import { createReservation } from "@/app/actions/reservations";
 import { CookieSettingsButton } from "@/components/consent/CookieSettingsButton";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { GoogleMap } from "@/components/site/GoogleMap";
 import { useI18n } from "@/i18n/client";
 import { useCarryOver, useRestoreScroll } from "@/i18n/switch";
 import { CONTACT, MAX_ONLINE_GUESTS, TIME_SLOTS } from "@/lib/reservation";
 import type { Localized, PublicCategory, PublicItem } from "@/lib/menu";
-import type { AccountLink } from "@/lib/types";
 import {
   GroupHint,
   ReservationConsents,
@@ -20,8 +20,9 @@ import {
   useSavedContact,
 } from "./ReservationModal";
 import { EuDateInput } from "./EuDateInput";
-import hero from "@/assets/hero.jpg";
+import hero from "@/assets/hero-aurea.webp";
 import {
+  atmosphere as atmos,
   avocadoToast,
   burrata,
   cheesecake,
@@ -30,10 +31,9 @@ import {
   OPENING_PHOTOS,
   owner,
   porridge,
+  staff as story,
   tagliatelle,
 } from "@/lib/photos";
-import story from "@/assets/story.jpg";
-import atmos from "@/assets/atmos.jpg";
 
 export function useReveal() {
   useEffect(() => {
@@ -70,25 +70,15 @@ function Text({ value }: { value: Localized }) {
   return value.lang === locale ? <>{value.text}</> : <span lang={value.lang}>{value.text}</span>;
 }
 
-function useAccountLink(account: AccountLink) {
-  const { t, href } = useI18n();
-  // The dashboard is German-only, so it keeps its plain URL.
-  return {
-    href: account.kind === "dashboard" ? account.href : href(account.href),
-    label: t.nav.account[account.kind],
-  };
-}
-
 /** Hash links point into the home page; on other pages they go back to it first. */
 function useLinkTo(onHome: boolean) {
   const { href } = useI18n();
   return (h: string) => (h.startsWith("#") ? (onHome ? h : `${href("/")}${h}`) : href(h));
 }
 
-export function Header({ account, onHome = true }: { account: AccountLink; onHome?: boolean }) {
+export function Header({ onHome = true }: { onHome?: boolean }) {
   const { t } = useI18n();
   const to = useLinkTo(onHome);
-  const accountLink = useAccountLink(account);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   // Slides away while reading downwards and returns on the first scroll up.
@@ -161,9 +151,6 @@ export function Header({ account, onHome = true }: { account: AccountLink; onHom
           </nav>
           <div className="hidden items-center gap-6 lg:flex xl:gap-8">
             <LanguageSwitcher className="text-[0.72rem]" />
-            <Link href={accountLink.href} className="link-line whitespace-nowrap text-[0.72rem] uppercase tracking-[0.18em] xl:tracking-[0.22em]">
-              {accountLink.label}
-            </Link>
             <ReserveLink
               className={`press whitespace-nowrap border px-4 py-3 text-[0.7rem] uppercase tracking-[0.2em] xl:px-6 xl:tracking-[0.25em] ${
                 scrolled ? "border-foreground hover:bg-foreground hover:text-background" : "border-cream/60 hover:bg-cream hover:text-espresso"
@@ -218,9 +205,6 @@ export function Header({ account, onHome = true }: { account: AccountLink; onHom
           <ReserveLink returnFocus={menuButton} onClick={() => setOpen(false)} className="press block bg-foreground py-4 text-center text-xs uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground">
             {t.nav.reserve}
           </ReserveLink>
-          <Link href={accountLink.href} onClick={() => setOpen(false)} className="mt-3 block border border-foreground py-4 text-center text-xs uppercase tracking-[0.25em]">
-            {accountLink.label}
-          </Link>
           <p className="mt-6 text-sm text-muted-foreground">{t.nav.address}</p>
         </div>
       </div>
@@ -278,12 +262,26 @@ function Hero() {
   // The buttons follow once the last word of the description has nearly settled.
   const buttonsAt = HERO_TEXT_START + (t.hero.text.split(" ").length - 1) * HERO_WORD_STEP + 550;
   return (
-    <section id="top" className="relative h-[100svh] min-h-[640px] overflow-hidden bg-espresso text-cream">
-      <img src={hero.src} alt={t.hero.imageAlt} width={1920} height={1088} fetchPriority="high" className="hero-settle absolute inset-0 h-full w-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-t from-espresso/85 via-espresso/30 to-espresso/20" />
-      <div className="relative mx-auto flex h-full max-w-[1440px] flex-col justify-end px-6 pb-16 md:px-12 md:pb-24">
-        <p className="hero-rise eyebrow mb-8 text-gold" style={rise(80)}>{t.hero.eyebrow}</p>
-        <h1 className="max-w-4xl font-serif text-[3.2rem] font-light leading-[0.98] md:text-[6.5rem]">
+    // The photo is 800 px wide, so it is framed rather than stretched across the screen: above
+    // the text on phones and tablets, the right half from lg up. It starts below the header, so
+    // neither the header nor the headline ever sits on top of it.
+    <section id="top" className="relative flex min-h-[100svh] flex-col overflow-hidden bg-espresso text-cream lg:grid lg:h-[100svh] lg:min-h-[640px] lg:grid-cols-2">
+      <div className="px-6 pt-24 md:px-12 md:pt-28 lg:order-2 lg:h-full lg:pb-12 lg:pl-0">
+        <div className="relative h-[36svh] min-h-[240px] overflow-hidden md:h-[50svh] lg:h-full">
+          <img
+            src={hero.src}
+            alt={t.hero.imageAlt}
+            width={hero.width}
+            height={hero.height}
+            fetchPriority="high"
+            className="hero-settle absolute inset-0 h-full w-full object-cover object-[85%_30%]"
+          />
+          <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/30 md:inset-4" />
+        </div>
+      </div>
+      <div className="relative flex flex-1 flex-col justify-end px-6 pb-[max(3.5rem,env(safe-area-inset-bottom))] pt-8 md:px-12 md:pb-16 lg:order-1 lg:pb-12 lg:pl-[max(3rem,calc((100vw-1440px)/2+3rem))]">
+        <p className="hero-rise eyebrow mb-6 text-gold md:mb-8" style={rise(80)}>{t.hero.eyebrow}</p>
+        <h1 className="max-w-4xl font-serif text-[2.9rem] font-light leading-[0.98] sm:text-[3.4rem] md:text-[5.5rem] lg:text-[4.6rem] xl:text-[5.6rem]">
           <span className="block">
             <SplitText text={t.hero.title} start={250} />
           </span>
@@ -291,8 +289,8 @@ function Hero() {
             <SplitText text={t.hero.titleEm} start={250 + Array.from(t.hero.title.replace(/ /g, "")).length * 38 + 120} />
           </em>
         </h1>
-        <div className="mt-10 grid gap-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
-          <p className="max-w-md text-[0.95rem] leading-relaxed text-cream/80">
+        <div className="mt-8 grid gap-8 md:mt-10 md:gap-10">
+          <p className="max-w-md text-base leading-relaxed text-cream/80">
             <WordReveal text={t.hero.text} start={HERO_TEXT_START} step={HERO_WORD_STEP} />
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -307,7 +305,7 @@ function Hero() {
           </div>
         </div>
       </div>
-      <div className="hero-cue pointer-events-none absolute bottom-0 right-6 hidden h-24 w-px overflow-hidden bg-cream/15 md:right-12 md:block" aria-hidden>
+      <div className="hero-cue pointer-events-none absolute bottom-0 right-6 hidden h-24 w-px overflow-hidden bg-cream/15 md:right-12 md:block lg:hidden" aria-hidden>
         <span className="hero-cue-dot block h-8 w-px bg-gold" />
       </div>
     </section>
@@ -367,7 +365,8 @@ function Chapters() {
                     <div className="story-curtain absolute inset-0 bg-background" aria-hidden />
                     <span className="story-fade absolute left-5 top-5 font-serif text-lg italic text-cream">{pic.n}</span>
                   </div>
-                  <div className="mt-7 flex items-baseline justify-between border-b border-border pb-4">
+                  {/* Wraps on narrow tablet columns, where the time would otherwise stick out of the page. */}
+                  <div className="mt-7 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 border-b border-border pb-4">
                     <h3 className="font-serif text-4xl font-light md:text-5xl">
                       <Words text={c.title} />
                     </h3>
@@ -424,7 +423,7 @@ function Story() {
         <div className="px-6 pt-24 md:px-16 md:py-36">
           <div className="reveal story-media relative aspect-[4/5] w-full overflow-hidden md:mx-auto md:max-w-[560px]">
             <div className="story-parallax absolute inset-x-0 -inset-y-[8%]">
-              <img src={story.src} alt={t.story.imageAlt} loading="lazy" width={1024} height={1280} className="story-zoom h-full w-full object-cover" />
+              <img src={story.src} alt={t.story.imageAlt} loading="lazy" width={story.width} height={story.height} className="story-zoom h-full w-full object-cover" />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-espresso/60 via-transparent to-transparent" aria-hidden />
             <div className="story-curtain absolute inset-0 bg-espresso" aria-hidden />
@@ -588,7 +587,8 @@ function DishGrid({ items, animate = false }: { items: PublicItem[]; animate?: b
 const GALLERY = [
   { src: cheesecake, cls: "md:col-span-4 aspect-square" },
   { src: porridge, cls: "md:col-span-3 md:mt-24 aspect-[4/5]" },
-  { src: burrata, cls: "col-span-2 md:col-span-5 aspect-[4/5] md:-mt-32" },
+  // No negative margins: a tile pulled up over the big photo overlapped it (and its hover zoom).
+  { src: burrata, cls: "col-span-2 md:col-span-5 aspect-[4/5]" },
 ];
 
 function Atmosphere() {
@@ -629,16 +629,18 @@ function Atmosphere() {
             </em>
           </h2>
         </Reveal>
-        <div ref={ref} className="reveal atmos-media relative h-[60vh] overflow-hidden md:h-[80vh]">
+        {/* The photo spans the full content width; its parallax overscan stays small so the 1534 px source holds up. */}
+        <div ref={ref} className="reveal atmos-media relative aspect-[3/2] overflow-hidden md:aspect-[16/9]">
           {/* The clip lives on this inner layer: the observed .reveal box itself is never clipped away. */}
           <div className="atmos-clip absolute inset-0 overflow-hidden">
-            <img src={atmos.src} alt={t.atmosphere.alts[0]} loading="lazy" width={1920} height={1088} ref={img} className="absolute inset-x-0 -top-[10%] h-[120%] w-full object-cover will-change-transform" />
+            <img src={atmos.src} alt={t.atmosphere.alts[0]} loading="lazy" width={atmos.width} height={atmos.height} ref={img} className="absolute inset-x-0 -top-[5%] h-[110%] w-full object-cover will-change-transform" />
             <span aria-hidden className="atmos-frame pointer-events-none absolute inset-4 border border-cream/40 md:inset-8" />
           </div>
         </div>
         <div className="mt-6 grid grid-cols-2 gap-4 md:mt-8 md:grid-cols-12 md:gap-8">
           {GALLERY.map((im, i) => (
-            <Reveal key={i} delay={i * 120} className={`group overflow-hidden ${im.cls}`}>
+            // isolate + overflow-hidden keep the hover zoom inside the tile's own box.
+            <Reveal key={i} delay={i * 120} className={`group relative isolate overflow-hidden ${im.cls}`}>
               <img src={im.src.src} alt={t.atmosphere.alts[i + 1]} loading="lazy" className="h-full w-full object-cover transition-transform duration-[1200ms] ease-aurea group-hover:scale-[1.04]" />
             </Reveal>
           ))}
@@ -651,7 +653,7 @@ function Atmosphere() {
 /** Opening hours, address and map. Lives on its own page (/anfahrt), whose title band replaces the heading. */
 export function Visit({ standalone = false }: { standalone?: boolean }) {
   const { t } = useI18n();
-  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${CONTACT.street}, ${CONTACT.city}`)}`;
+  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(CONTACT.mapsQuery)}`;
   return (
     <section id="visit" className={`mx-auto max-w-[1440px] px-6 md:px-12 ${standalone ? "pb-28 pt-16 md:pb-44 md:pt-20" : "py-28 md:py-44"}`}>
       <div className="grid gap-16 md:grid-cols-12">
@@ -692,30 +694,19 @@ export function Visit({ standalone = false }: { standalone?: boolean }) {
           </div>
         </Reveal>
         <Reveal className="md:col-span-7" delay={150}>
-          <div className="map-card relative aspect-[4/5] overflow-hidden bg-card md:aspect-auto md:h-full md:min-h-[560px]">
-            <svg className="absolute inset-0 h-full w-full text-foreground/15" preserveAspectRatio="none" viewBox="0 0 400 500" fill="none" stroke="currentColor">
-              <path pathLength={1} style={step(0)} className="map-path text-cream" d="M-10 120 C 120 140, 200 60, 420 110" strokeWidth="6" stroke="currentColor" />
-              <path pathLength={1} style={step(0)} className="map-path" d="M-10 120 C 120 140, 200 60, 420 110" strokeWidth="0.6" />
-              <path pathLength={1} style={step(1)} className="map-path text-background" d="M150 -10 C 170 150, 230 300, 210 520" strokeWidth="10" stroke="currentColor" />
-              <path pathLength={1} style={step(1)} className="map-path" d="M150 -10 C 170 150, 230 300, 210 520" strokeWidth="0.6" />
-              <path pathLength={1} style={step(2)} className="map-path" d="M-10 360 L 420 300" strokeWidth="0.5" />
-              <path pathLength={1} style={step(3)} className="map-path" d="M300 -10 L 330 520" strokeWidth="0.5" />
-              <path pathLength={1} style={step(3)} className="map-path" d="M60 -10 L 20 520" strokeWidth="0.4" />
-              <path pathLength={1} style={step(4)} className="map-path" d="M-10 440 C 100 420, 300 470, 420 430" strokeWidth="0.4" />
-              <rect x="240" y="150" width="70" height="60" className="text-olive/20" fill="currentColor" stroke="none" />
-            </svg>
-            <div className="map-pin absolute left-[52%] top-[44%] -translate-x-1/2 -translate-y-full text-center">
-              <span className="mb-2 block font-serif text-lg italic">Auréa</span>
-              <span className="relative mx-auto block h-3 w-3">
-                <span aria-hidden className="map-ping absolute inset-0 rotate-45 bg-gold" />
-                <span className="relative block h-3 w-3 rotate-45 bg-gold ring-8 ring-gold/20" />
-              </span>
-            </div>
-            <p className="eyebrow absolute left-6 top-6 text-muted-foreground">Beelitz · 52.23° N</p>
-            <a href={directions} target="_blank" rel="noopener noreferrer" className="press absolute bottom-6 right-6 bg-foreground px-7 py-4 text-[0.7rem] uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground">
-              {t.visit.directions}
-            </a>
+          {/* The real map (Google Maps, after consent). The button sits below it, not on it,
+              so Google's controls and attribution stay visible. */}
+          <div className="map-card relative aspect-[4/5] overflow-hidden border border-border bg-card sm:aspect-[4/3] md:aspect-auto md:h-[calc(100%-4.5rem)] md:min-h-[480px]">
+            <GoogleMap />
           </div>
+          <a
+            href={directions}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="press mt-4 flex min-h-11 w-full items-center justify-center bg-foreground px-7 py-4 text-[0.7rem] uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground sm:ml-auto sm:w-fit"
+          >
+            {t.visit.directions}
+          </a>
         </Reveal>
       </div>
     </section>
@@ -843,7 +834,7 @@ function Reservation() {
 }
 
 export function Footer({ onHome = true }: { onHome?: boolean }) {
-  const { t } = useI18n();
+  const { t, href } = useI18n();
   const to = useLinkTo(onHome);
   const links: [string, string][] = [
     [t.footer.links.home, "#top"],
@@ -852,7 +843,6 @@ export function Footer({ onHome = true }: { onHome?: boolean }) {
     [t.footer.links.gallery, "/galerie"],
     [t.footer.links.visit, "/anfahrt"],
     [t.footer.links.reserve, "#reserve"],
-    [t.footer.links.join, "/login"],
   ];
   return (
     <footer className="border-t border-cream/10 bg-espresso text-cream/70">
@@ -888,10 +878,11 @@ export function Footer({ onHome = true }: { onHome?: boolean }) {
       <div className="mx-auto flex max-w-[1440px] flex-col justify-between gap-4 border-t border-cream/10 px-6 py-8 text-xs sm:flex-row md:px-12">
         <div className="flex flex-wrap gap-x-6 gap-y-2">
           <p>{t.footer.copyright}</p>
-          {/* The privacy policy exists in German only until a verified translation is ready. */}
-          <Link href="/datenschutz" hrefLang="de" className="link-line hover:text-cream">
+          <Link href={href("/datenschutz")} className="link-line hover:text-cream">
             {t.footer.privacy}
-            {t.footer.germanOnly && ` ${t.footer.germanOnly}`}
+          </Link>
+          <Link href={href("/impressum")} className="link-line hover:text-cream">
+            {t.footer.imprint}
           </Link>
           <CookieSettingsButton className="link-line hover:text-cream focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold" />
         </div>
@@ -1053,13 +1044,13 @@ function Host() {
   );
 }
 
-export default function HomePage({ menu, account }: { menu: PublicCategory[]; account: AccountLink }) {
+export default function HomePage({ menu }: { menu: PublicCategory[] }) {
   useReveal();
   useRestoreScroll();
   return (
     <ReservationModalProvider>
       <main className="bg-background">
-        <Header account={account} />
+        <Header />
         <Hero />
         <Intro />
         <Chapters />

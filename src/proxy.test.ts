@@ -21,12 +21,15 @@ const { proxy } = await import("./proxy");
 
 const request = (
   path: string,
-  init: { cookie?: string; headers?: Record<string, string>; method?: string } = {},
-) =>
-  new NextRequest(new URL(path, "https://aurealounge.de"), {
+  init: { cookie?: string; headers?: Record<string, string>; method?: string; host?: string } = {},
+) => {
+  const host = init.host ?? "aurealounge.de";
+  return new NextRequest(new URL(path, `https://${host}`), {
     method: init.method ?? "GET",
-    headers: { ...(init.cookie ? { cookie: init.cookie } : {}), ...init.headers },
+    headers: { host, ...(init.cookie ? { cookie: init.cookie } : {}), ...init.headers },
   });
+};
+const admin = (path: string) => request(path, { host: "admin.aurealounge.de" });
 
 /** What the page will read from headers() after the proxy ran. */
 const localeSeen = (res: Response) => res.headers.get(`x-middleware-request-${LOCALE_HEADER}`);
@@ -46,17 +49,21 @@ beforeEach(() => {
 describe("paths", () => {
   it("adds and removes the /en prefix, keeping query and hash", () => {
     expect(localizePath("en", "/")).toBe("/en");
-    expect(localizePath("en", "/login?mode=login")).toBe("/en/login?mode=login");
+    expect(localizePath("en", "/karte?tab=1")).toBe("/en/karte?tab=1");
     expect(localizePath("en", "/#reserve")).toBe("/en#reserve");
-    expect(localizePath("de", "/login")).toBe("/login");
+    expect(localizePath("de", "/karte")).toBe("/karte");
     expect(splitLocale("/en")).toEqual({ locale: "en", path: "/" });
-    expect(splitLocale("/en/account")).toEqual({ locale: "en", path: "/account" });
+    expect(splitLocale("/en/karte")).toEqual({ locale: "en", path: "/karte" });
     expect(splitLocale("/english-menu")).toEqual({ locale: "de", path: "/english-menu" });
   });
 
   it("knows which pages exist in English", () => {
-    expect(["/", "/login", "/account"].every(isLocalizedRoute)).toBe(true);
-    expect(["/datenschutz", "/admin", "/admin/menu"].some(isLocalizedRoute)).toBe(false);
+    expect(
+      ["/", "/karte", "/anfahrt", "/datenschutz", "/impressum", "/angebote/bestaetigen"].every(
+        isLocalizedRoute,
+      ),
+    ).toBe(true);
+    expect(["/admin", "/login", "/account"].some(isLocalizedRoute)).toBe(false);
   });
 });
 
@@ -80,8 +87,8 @@ describe("proxy", () => {
   });
 
   it("brings back English for visitors who chose it", async () => {
-    const res = await proxy(request("/login?mode=login", { cookie: `${LOCALE_COOKIE}=en` }));
-    expect(redirectedTo(res)).toBe("/en/login?mode=login");
+    const res = await proxy(request("/karte?tab=1", { cookie: `${LOCALE_COOKIE}=en` }));
+    expect(redirectedTo(res)).toBe("/en/karte?tab=1");
   });
 
   it("keeps German for visitors who chose German, or chose nothing", async () => {
@@ -94,29 +101,56 @@ describe("proxy", () => {
     expect(redirectedTo(res)).toBeNull();
   });
 
+  it("serves the legal pages in English too", async () => {
+    for (const path of ["/datenschutz", "/impressum"]) {
+      const res = await proxy(request(`/en${path}`));
+      expect(redirectedTo(res)).toBeNull();
+      expect(rewrittenTo(res)).toBe(path);
+      expect(localeSeen(res)).toBe("en");
+    }
+  });
+
   it("sends English links to German-only pages to the German page", async () => {
-    expect(redirectedTo(await proxy(request("/en/datenschutz")))).toBe("/datenschutz");
-    expect(redirectedTo(await proxy(request("/en/admin/menu")))).toBe("/admin/menu");
+    expect(redirectedTo(await proxy(request("/en/unbekannt")))).toBe("/unbekannt");
   });
 
-  it("does not bounce English visitors off German-only pages", async () => {
-    const res = await proxy(request("/datenschutz", { cookie: `${LOCALE_COOKIE}=en` }));
-    expect(redirectedTo(res)).toBeNull();
+  it("hides the team area on the public site", async () => {
+    for (const path of ["/admin", "/admin/menu", "/login", "/en/login", "/en/admin"]) {
+      const res = await proxy(request(path));
+      expect(redirectedTo(res)).toBeNull();
+      expect(rewrittenTo(res)).toBe("/__not-found");
+    }
+  });
+});
+
+describe("proxy on the admin host", () => {
+  it("opens the dashboard from the bare host", async () => {
+    expect(redirectedTo(await proxy(admin("/")))).toBe("/admin");
   });
 
-  it("asks signed-out visitors to log in, in their language", async () => {
-    expect(redirectedTo(await proxy(request("/en/account")))).toBe(
-      `/en/login?mode=login&next=${encodeURIComponent("/en/account")}`,
+  it("serves only the dashboard and its login", async () => {
+    expect(redirectedTo(await proxy(admin("/karte")))).toBe("/admin");
+    expect(redirectedTo(await proxy(admin("/en")))).toBe("/admin");
+  });
+
+  it("asks signed-out visitors to log in", async () => {
+    expect(redirectedTo(await proxy(admin("/admin/menu")))).toBe(
+      `/login?next=${encodeURIComponent("/admin/menu")}`,
     );
-    expect(redirectedTo(await proxy(request("/account")))).toBe(
-      `/login?mode=login&next=${encodeURIComponent("/account")}`,
-    );
+    const login = await proxy(admin("/login"));
+    expect(redirectedTo(login)).toBeNull();
+    expect(localeSeen(login)).toBe("de");
   });
 
-  it("lets signed-in guests through to the English account page", async () => {
+  it("lets signed-in team members through", async () => {
     signedIn = true;
-    const res = await proxy(request("/en/account"));
-    expect(rewrittenTo(res)).toBe("/account");
-    expect(localeSeen(res)).toBe("en");
+    const res = await proxy(admin("/admin"));
+    expect(redirectedTo(res)).toBeNull();
+    expect(rewrittenTo(res)).toBeNull();
+  });
+
+  it("recognises admin.localhost for development", async () => {
+    const res = await proxy(request("/", { host: "admin.localhost:3000" }));
+    expect(redirectedTo(res)).toBe("/admin");
   });
 });

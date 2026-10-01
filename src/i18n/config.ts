@@ -1,5 +1,5 @@
 /**
- * Languages of the public site. German lives at the root (/, /login, /account), English under
+ * Languages of the public site. German lives at the root (/, /karte, …), English under
  * /en. proxy.ts maps /en/... onto the same routes and tells them the language through
  * LOCALE_HEADER, so pages and components never parse the URL themselves.
  */
@@ -14,22 +14,31 @@ export const LOCALE_HEADER = "x-aurea-locale";
 /** sessionStorage key that carries selections across a language switch (see switch.ts). */
 export const LOCALE_SWITCH_KEY = "aurea_locale_switch";
 
-/** Routes that exist in both languages. Everything else (admin, legal pages) is German only. */
-export const LOCALIZED_ROUTES = ["/", "/karte", "/ueber-uns", "/galerie", "/anfahrt", "/login", "/account"] as const;
+/** Routes that exist in both languages. The admin host is German only. */
+export const LOCALIZED_ROUTES = [
+  "/",
+  "/karte",
+  "/ueber-uns",
+  "/galerie",
+  "/anfahrt",
+  "/datenschutz",
+  "/impressum",
+  "/angebote",
+] as const;
 
 export const isLocale = (v: unknown): v is Locale => LOCALES.includes(v as Locale);
 
 export const isLocalizedRoute = (path: string) =>
   LOCALIZED_ROUTES.some((r) => path === r || (r !== "/" && path.startsWith(`${r}/`)));
 
-/** "/login" → "/en/login" for English; unchanged for German. Keeps ?query and #hash. */
+/** "/karte" → "/en/karte" for English; unchanged for German. Keeps ?query and #hash. */
 export function localizePath(locale: Locale, path: string) {
   if (locale === DEFAULT_LOCALE) return path;
   const [, pathname = "/", rest = ""] = /^([^?#]*)(.*)$/.exec(path) ?? [];
   return `/${locale}${pathname === "/" ? "" : pathname}${rest}`;
 }
 
-/** Splits "/en/login" into { locale: "en", path: "/login" }; unprefixed paths are German. */
+/** Splits "/en/karte" into { locale: "en", path: "/karte" }; unprefixed paths are German. */
 export function splitLocale(pathname: string): { locale: Locale; path: string } {
   const m = /^\/(en)(\/.*)?$/.exec(pathname);
   if (m) return { locale: "en", path: m[2] || "/" };

@@ -9,10 +9,12 @@ const en: Dictionary = {
     homeOgTitle: "Auréa — Breakfast, Café & Lounge",
     homeOgDescription:
       "Where morning light meets candlelight. Breakfast, coffee and candlelit evenings in Beelitz.",
-    joinTitle: "Account — Auréa",
-    joinDescription: "Join Auréa — create an account or sign in.",
-    accountTitle: "My account — Auréa",
     notFoundTitle: "Page not found — Auréa",
+    privacyTitle: "Privacy policy — Auréa",
+    privacyDescription:
+      "Which personal data the Auréa website processes, why, for how long, and what your rights are.",
+    imprintTitle: "Legal notice — Auréa",
+    offersTitle: "Confirm offers — Auréa",
   },
 
   language: {
@@ -34,12 +36,11 @@ const en: Dictionary = {
     openMenu: "Open menu",
     closeMenu: "Close menu",
     reserve: "Reserve a table",
-    account: { join: "Login", account: "My account", dashboard: "Dashboard" },
     address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
   },
 
   hero: {
-    imageAlt: "Auréa café in the morning light with brass details and candles",
+    imageAlt: "The Auréa lounge: the glowing Auréa sign above velvet armchairs and golden table lamps",
     eyebrow: "Breakfast · Café · Lounge",
     title: "A golden hour,",
     titleEm: "from dawn to late.",
@@ -77,7 +78,7 @@ const en: Dictionary = {
   ],
 
   story: {
-    imageAlt: "Brass counter with freshly baked sourdough bread",
+    imageAlt: "The Auréa Lounge team behind the counter, with Burim Abdija in the middle",
     eyebrow: "Our story",
     title: "Rooted in warmth,",
     titleEm: "gilded with care.",
@@ -118,7 +119,7 @@ const en: Dictionary = {
     title: "Slow mornings.",
     titleEm: "Golden evenings.",
     alts: [
-      "Candlelit table at golden hour",
+      "The golden Auréa Lounge lettering at dusk, with white and gold balloons below",
       "Strawberry pistachio cheesecake",
       "Beelitz strawberry porridge",
       "Burrata & fig salad",
@@ -230,6 +231,12 @@ const en: Dictionary = {
     country: "Germany",
     phone: "Phone",
     directions: "Get directions →",
+    map: {
+      title: "Auréa on Google Maps",
+      consent:
+        "The map is loaded from Google, which receives data such as your IP address.",
+      load: "Load map",
+    },
   },
 
   reservation: {
@@ -243,9 +250,8 @@ const en: Dictionary = {
     email: "Email",
     emailPlaceholder: "name@example.com",
     remember: "Save my details for my next reservations.",
-    terms: "I accept the terms and conditions.",
-    required: "required",
-    marketingEmail: "Send me offers and news by email.",
+    marketingEmail:
+      "Send me offers and news by email (only after I confirm via a link I receive by email).",
     marketingSms: "Send me offers and news by SMS.",
     date: "Date",
     time: "Time",
@@ -266,7 +272,7 @@ const en: Dictionary = {
     groupHint: (max: number) => `More than ${max} guests? Give us a call:`,
     privacy:
       "We use your details to handle your reservation and to contact you about it by phone, SMS, WhatsApp or email. We only send offers and news if you tick that above. If you're signed in, the request also appears in your account. More in our",
-    privacyLink: "privacy policy (German)",
+    privacyLink: "privacy policy",
     newTab: "(opens in a new tab)",
     modalTitle: "Reserve",
     modalTitleEm: "a table",
@@ -284,7 +290,6 @@ const en: Dictionary = {
       name: "Please enter your name.",
       phone: "Please enter a phone number.",
       email: "Please enter a valid email address.",
-      terms: "Please accept the terms and conditions.",
       date: "Please choose a date.",
       time: "Please choose a time.",
       tooMany: (max: number, phone: string) =>
@@ -293,7 +298,7 @@ const en: Dictionary = {
       past: "That date is in the past.",
       failed: (phone: string) => `Something went wrong. Please call us: ${phone}`,
     },
-    success: "Thank you — we'll be in touch shortly.",
+    success: "Thank you! We've emailed you a copy of your request and will be in touch shortly.",
   },
 
   footer: {
@@ -305,14 +310,13 @@ const en: Dictionary = {
       gallery: "Gallery",
       visit: "Visit",
       reserve: "Reservations",
-      join: "Login",
     },
     contact: "Contact",
     hours: "Opening hours",
     hoursLines: ["Mon–Sun 08–20"],
     copyright: "© 2026 Auréa Café & Lounge. All rights reserved.",
     privacy: "Privacy policy",
-    germanOnly: "(German)",
+    imprint: "Legal notice",
     cookieSettings: "Cookie settings",
   },
 
@@ -334,7 +338,7 @@ const en: Dictionary = {
       necessary: {
         title: "Essential",
         description:
-          "Keep the website, table reservations and sign-in working. These are always active.",
+          "Keep the website and table reservations working. These are always active.",
       },
       analytics: {
         title: "Statistics",
@@ -354,68 +358,27 @@ const en: Dictionary = {
       `This content is loaded from ${provider}. It appears once you allow “${category}” in the cookie settings.`,
   },
 
-  auth: {
-    eyebrow: "Account",
-    imageAlt: "Candlelight and cocktails in the Auréa lounge",
-    imageTitle: "Come for breakfast.",
-    imageTitleEm: "Return for the evening.",
-    homeAria: "Back to the home page",
-    signupTitle: "Become part",
-    signupTitleEm: "of Auréa",
-    loginTitle: "Welcome",
-    loginTitleEm: "back",
-    tabs: { signup: "Sign up", login: "Sign in" },
-    name: "Name",
-    namePlaceholder: "First and last name",
-    email: "Email",
-    emailPlaceholder: "you@example.com",
-    password: "Password",
-    passwordPlaceholder: "At least 8 characters",
-    submitSignup: "Create account",
-    submitLogin: "Sign in",
-    wait: "One moment…",
-    checkInboxEyebrow: "Almost there",
-    checkInboxTitle: "Check your inbox",
-    checkInboxText: (email: string) =>
-      [`We've sent a confirmation email to `, email, `. Click the link in it to activate your account.`],
-    toLogin: "Go to sign in",
-    haveAccount: "Already have an account?",
-    noAccount: "No account yet?",
-    notices: {
-      confirmed: "Email confirmed — please sign in now.",
-      "link-invalid": "The confirmation link is invalid or has expired.",
-    },
-    errors: {
-      invalid_credentials: "Wrong email or password.",
-      email_not_confirmed: "Please confirm your email address first.",
-      user_already_exists: "There is already an account for this email. Please sign in.",
-      weak_password: "That password is too weak — use at least 8 characters.",
-      over_email_send_rate_limit: "Too many emails in a short time. Please try again later.",
-      unknown: "Something went wrong. Please try again.",
-    },
+  legal: {
+    backToSite: "Back to website",
+    homeAria: "Auréa — home",
+    updated: "Last updated",
   },
 
-  account: {
-    signOut: "Sign out",
-    forbidden: "Your account doesn't have access to the dashboard.",
-    eyebrow: "My account",
-    welcome: "Welcome,",
-    name: "Name",
-    email: "Email",
-    memberSince: "Member since",
-    role: "Role",
-    roles: { admin: "Administrator", staff: "Team", guest: "Guest" },
-    reserve: "Reserve a table",
-    dashboard: "Dashboard",
-    reservations: "My reservations",
-    none: "No reservations yet. Reservations you request while signed in appear here — together with our reply.",
-    status: {
-      new: "Requested",
-      confirmed: "Confirmed",
-      declined: "Declined",
-      cancelled: "Cancelled",
-    },
-    message: "Message from Auréa",
+  offers: {
+    eyebrow: "Offers by email",
+    title: "Please",
+    titleEm: "confirm",
+    text: "When you booked, you ticked that you would like to receive offers and news from Auréa by email. Please confirm here – only then will we write to you.",
+    withdraw:
+      "You can withdraw your consent at any time, e.g. with a short reply to any of our emails or by phone.",
+    button: "Yes, send me offers by email",
+    sending: "One moment…",
+    doneTitle: "Thank you, all set",
+    doneText: "Your email address is confirmed. From now on you will receive our offers and news.",
+    invalidTitle: "This link no longer works",
+    invalidText:
+      "It has already been used or is older than 30 days. If you would like offers, simply tick the box again next time you book.",
+    home: "Back to the homepage",
   },
 
   notFound: {

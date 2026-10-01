@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { AboutPage } from "@/components/site/SubPages";
 import { languageAlternates } from "@/i18n/config";
 import { getI18n } from "@/i18n/server";
-import { accountLink, getSession } from "@/lib/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale, t } = await getI18n();
@@ -14,7 +13,6 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function Page() {
-  const session = await getSession();
-  return <AboutPage account={accountLink(session)} />;
+export default function Page() {
+  return <AboutPage />;
 }

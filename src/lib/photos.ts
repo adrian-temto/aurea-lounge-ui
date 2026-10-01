@@ -21,6 +21,8 @@ import canapes from "@/assets/events/bar-canape-display-lilies.jpg";
 import prosecco from "@/assets/events/bar-prosecco-bucket.jpg";
 import barista from "@/assets/events/bar-barista-at-counter.jpg";
 import owner from "@/assets/team/burim-abdija.jpg";
+import staff from "@/assets/team/aurea-staff.jpg";
+import atmosphere from "@/assets/events/facade-sign-balloons.jpg";
 
 export {
   avocadoToast,
@@ -46,6 +48,8 @@ export {
   prosecco,
   barista,
   owner,
+  staff,
+  atmosphere,
 };
 
 /** Photos used elsewhere on the home page (day chapters, atmosphere), in gallery order. */

@@ -14,7 +14,7 @@ export type Consent = Choices & { version: number; decidedAt: string };
 
 export const CONSENT_COOKIE = "aurea_consent";
 /** Bump when the list of optional services changes, so visitors are asked again. */
-export const CONSENT_VERSION = 1;
+export const CONSENT_VERSION = 2;
 /** Ask again after 12 months. */
 export const CONSENT_MAX_AGE = 60 * 60 * 24 * 365;
 

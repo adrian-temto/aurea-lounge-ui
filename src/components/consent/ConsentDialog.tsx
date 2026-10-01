@@ -37,7 +37,7 @@ export function ConsentDialog({
   onRejectOptional,
   onSave,
 }: Props) {
-  const { locale, t } = useI18n();
+  const { locale, t, href } = useI18n();
   const info = t.consent.categoryInfo;
   const names = (c: keyof typeof SERVICES) =>
     SERVICES[c].map((s) => (locale === "de" ? s.name : s.nameEn));
@@ -84,10 +84,8 @@ export function ConsentDialog({
           </h2>
           <p id="consent-desc" className="mt-2 text-[0.8rem] leading-normal text-muted-foreground">
             {t.consent.text}{" "}
-            {/* German-only until a verified translation exists. */}
             <Link
-              href="/datenschutz"
-              hrefLang="de"
+              href={href("/datenschutz")}
               className={`underline underline-offset-4 hover:text-foreground ${focusRing}`}
             >
               {t.consent.learnMore}

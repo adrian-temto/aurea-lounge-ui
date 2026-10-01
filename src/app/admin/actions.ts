@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getSession } from "@/lib/auth";
+import { replyToAddress, sendEmail } from "@/lib/email/send";
+import { guestResponseEmail } from "@/lib/email/templates";
 import { ALLERGEN_KEYS, IMAGE_PATH, MENU_BUCKET } from "@/lib/menu";
 import type { Permission, Reservation, ReservationStatus } from "@/lib/types";
 
@@ -313,17 +315,27 @@ const responseSchema = z.object({
     .trim()
     .min(1, "Bitte schreibe eine Nachricht.")
     .max(2000, "Die Nachricht ist zu lang."),
+  notify: z.boolean(),
 });
 
+/** How the guest heard about the answer: emailed, not wanted, or failed (with the reason). */
+export type Delivery = { emailed: true } | { emailed: false; reason: string };
+
+/**
+ * Saves the team's answer and, when `notify` is set, emails it to the guest in the language
+ * they booked in. The answer is saved even if the email fails; the result says so.
+ */
 export async function respondToReservation(
   id: number,
   status: ReservationStatus,
   message: string,
-): Promise<Result & { reservation?: Reservation }> {
+  notify = true,
+): Promise<Result & { reservation?: Reservation; delivery?: Delivery }> {
   const auth = await authorize("reservations.manage");
   if (!auth) return FORBIDDEN;
-  const parsed = responseSchema.safeParse({ status, message });
+  const parsed = responseSchema.safeParse({ status, message, notify });
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Ungültige Eingabe." };
+  if (!idSchema.safeParse(id).success) return { error: "Ungültige Reservierung." };
 
   const { data, error } = await auth.supabase
     .from("reservations")
@@ -337,8 +349,89 @@ export async function respondToReservation(
     .select()
     .single();
   if (error) return { error: error.message };
+  let reservation = data as Reservation;
 
-  revalidatePath("/admin");
-  revalidatePath("/account");
-  return { reservation: data as Reservation };
+  let delivery: Delivery = { emailed: false, reason: "Der E-Mail-Versand war abgewählt." };
+  if (parsed.data.notify) {
+    if (!reservation.email) {
+      delivery = { emailed: false, reason: "Für diese Reservierung ist keine E-Mail-Adresse hinterlegt." };
+    } else {
+      const sent = await sendEmail({
+        ...guestResponseEmail(
+          {
+            name: reservation.name,
+            phone: reservation.phone,
+            email: reservation.email,
+            date: reservation.reservation_date,
+            time: reservation.reservation_time.slice(0, 5),
+            guests: reservation.guests,
+            notes: reservation.special_requests,
+            locale: reservation.locale === "en" ? "en" : "de",
+          },
+          parsed.data.status,
+          parsed.data.message,
+        ),
+        replyTo: replyToAddress(),
+      });
+      if (sent.ok) {
+        delivery = { emailed: true };
+        const { data: marked } = await auth.supabase
+          .from("reservations")
+          .update({ response_emailed_at: new Date().toISOString() })
+          .eq("id", id)
+          .select()
+          .single();
+        if (marked) reservation = marked as Reservation;
+      } else {
+        console.error("response email failed:", sent.error);
+        delivery = { emailed: false, reason: sent.error };
+      }
+    }
+  }
+
+  revalidatePath("/admin", "layout");
+  return { reservation, delivery };
+}
+
+/* ---------------- Guest data (reservations.manage) ---------------- */
+
+/** Deletes one reservation for good. */
+export async function deleteReservation(id: number): Promise<Result> {
+  const auth = await authorize("reservations.manage");
+  if (!auth) return FORBIDDEN;
+  if (!idSchema.safeParse(id).success) return { error: "Ungültige Reservierung." };
+  const { error } = await auth.supabase.from("reservations").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/admin", "layout");
+  return {};
+}
+
+const eraseSchema = z
+  .object({
+    email: z.string().trim().toLowerCase().max(254),
+    phone: z.string().trim().max(30),
+  })
+  .refine((v) => v.email.includes("@") || v.phone.replace(/\D/g, "").length >= 5, {
+    message: "Bitte gib eine E-Mail-Adresse oder Telefonnummer an.",
+  });
+
+/**
+ * Right to erasure (Art. 17 DSGVO): deletes every reservation with this email address or phone
+ * number, in any spelling of the number (+49 …, 0049 …, 0 …). Returns how many were deleted.
+ */
+export async function eraseGuestData(
+  email: string,
+  phone: string,
+): Promise<Result & { deleted?: number }> {
+  const auth = await authorize("reservations.manage");
+  if (!auth) return FORBIDDEN;
+  const parsed = eraseSchema.safeParse({ email, phone });
+  if (!parsed.success) return { error: firstIssue(parsed.error) };
+  const { data, error } = await auth.supabase.rpc("erase_guest_data", {
+    p_email: parsed.data.email,
+    p_phone: parsed.data.phone,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/admin", "layout");
+  return { deleted: Number(data) || 0 };
 }

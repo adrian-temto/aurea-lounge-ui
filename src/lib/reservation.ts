@@ -18,6 +18,8 @@ export const CONTACT = {
   phoneHref: "tel:+4933204634887",
   street: "Berlinerstr 196",
   city: "14547 Beelitz",
+  /** What Google Maps searches for (embed and directions). */
+  mapsQuery: "Berliner Str. 196, 14547 Beelitz",
 };
 
 /** Today in the café's time zone as YYYY-MM-DD, so the date picker agrees with the server. */

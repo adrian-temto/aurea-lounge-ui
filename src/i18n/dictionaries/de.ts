@@ -10,10 +10,12 @@ const de = {
     homeOgTitle: "Auréa — Frühstück, Café & Lounge",
     homeOgDescription:
       "Wo Morgenlicht auf Kerzenschein trifft. Frühstück, Kaffee und Abende bei Kerzenschein in Beelitz.",
-    joinTitle: "Konto — Auréa",
-    joinDescription: "Werde Teil von Auréa — erstelle ein Konto oder melde dich an.",
-    accountTitle: "Mein Konto — Auréa",
     notFoundTitle: "Seite nicht gefunden — Auréa",
+    privacyTitle: "Datenschutzerklärung — Auréa",
+    privacyDescription:
+      "Welche personenbezogenen Daten die Website von Auréa verarbeitet, wofür, wie lange und welche Rechte du hast.",
+    imprintTitle: "Impressum — Auréa",
+    offersTitle: "Angebote bestätigen — Auréa",
   },
 
   language: {
@@ -35,12 +37,11 @@ const de = {
     openMenu: "Menü öffnen",
     closeMenu: "Menü schließen",
     reserve: "Tisch reservieren",
-    account: { join: "Login", account: "Mein Konto", dashboard: "Dashboard" },
     address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
   },
 
   hero: {
-    imageAlt: "Auréa Café im Morgenlicht mit Messingdetails und Kerzen",
+    imageAlt: "Die Auréa Lounge: das leuchtende Auréa-Logo über Samtsesseln und goldenen Tischleuchten",
     eyebrow: "Breakfast · Café · Lounge",
     title: "Eine goldene Stunde,",
     titleEm: "von früh bis spät.",
@@ -78,7 +79,7 @@ const de = {
   ],
 
   story: {
-    imageAlt: "Messingtresen mit frisch gebackenem Sauerteigbrot",
+    imageAlt: "Das Team der Auréa Lounge hinter der Theke, mit Burim Abdija in der Mitte",
     eyebrow: "Unsere Story",
     title: "Wärme verwurzelt,",
     titleEm: "mit Sorgfalt vergoldet.",
@@ -120,7 +121,7 @@ const de = {
     title: "Langsame Morgen.",
     titleEm: "Goldene Abende.",
     alts: [
-      "Kerzenbeleuchteter Tisch zur goldenen Stunde",
+      "Goldener Schriftzug der Auréa Lounge am Abend, darunter weiße und goldene Luftballons",
       "Erdbeer-Pistazien-Cheesecake",
       "Beelitzer Erdbeer-Porridge",
       "Burrata-Feigen-Salat",
@@ -231,7 +232,13 @@ const de = {
     address: "Adresse",
     country: "Deutschland",
     phone: "Telefon",
-    directions: "Anfahrt →",
+    directions: "Route planen →",
+    map: {
+      title: "Auréa auf Google Maps",
+      consent:
+        "Die Karte wird von Google geladen. Dabei werden Daten wie deine IP-Adresse an Google übertragen.",
+      load: "Karte laden",
+    },
   },
 
   reservation: {
@@ -245,9 +252,8 @@ const de = {
     email: "E-Mail",
     emailPlaceholder: "name@beispiel.de",
     remember: "Speichern Sie die Informationen für meine nächsten Reservierungen.",
-    terms: "Ich akzeptiere die Allgemeinen Geschäftsbedingungen.",
-    required: "Pflichtfeld",
-    marketingEmail: "Senden Sie mir Angebote und Neuigkeiten per E-Mail.",
+    marketingEmail:
+      "Senden Sie mir Angebote und Neuigkeiten per E-Mail (erst nach Bestätigung über einen Link, den ich per E-Mail erhalte).",
     marketingSms: "Senden Sie mir Angebote und Neuigkeiten per SMS",
     date: "Datum",
     time: "Uhrzeit",
@@ -289,7 +295,6 @@ const de = {
       name: "Bitte gib deinen Namen an.",
       phone: "Bitte gib eine Telefonnummer an.",
       email: "Bitte gib eine gültige E-Mail-Adresse an.",
-      terms: "Bitte akzeptiere die Allgemeinen Geschäftsbedingungen.",
       date: "Bitte wähle ein Datum.",
       time: "Bitte wähle eine Uhrzeit.",
       tooMany: (max: number, phone: string) =>
@@ -298,7 +303,7 @@ const de = {
       past: "Das Datum liegt in der Vergangenheit.",
       failed: (phone: string) => `Etwas ist schiefgelaufen. Bitte ruf uns an: ${phone}`,
     },
-    success: "Danke — wir melden uns in Kürze.",
+    success: "Danke! Wir haben dir eine Bestätigung deiner Anfrage per E-Mail geschickt und melden uns in Kürze.",
   },
 
   footer: {
@@ -310,15 +315,13 @@ const de = {
       gallery: "Galerie",
       visit: "Anfahrt",
       reserve: "Reservierung",
-      join: "Login",
     },
     contact: "Kontakt",
     hours: "Öffnungszeiten",
     hoursLines: ["Mo–So 08–20"],
     copyright: "© 2026 Auréa Café & Lounge. Alle Rechte vorbehalten.",
     privacy: "Datenschutz",
-    /** Shown after legal links whose page exists only in German. Empty in German. */
-    germanOnly: "",
+    imprint: "Impressum",
     cookieSettings: "Cookie-Einstellungen",
   },
 
@@ -340,7 +343,7 @@ const de = {
       necessary: {
         title: "Notwendig",
         description:
-          "Damit die Website, die Tischreservierung und die Anmeldung funktionieren. Diese Technologien sind immer aktiv.",
+          "Damit die Website und die Tischreservierung funktionieren. Diese Technologien sind immer aktiv.",
       },
       analytics: {
         title: "Statistik",
@@ -362,68 +365,27 @@ const de = {
       `Dieser Inhalt wird von ${provider} geladen. Er erscheint, sobald du „${category}“ in den Cookie-Einstellungen erlaubst.`,
   },
 
-  auth: {
-    eyebrow: "Konto",
-    imageAlt: "Kerzenlicht und Cocktails in der Auréa Lounge",
-    imageTitle: "Zum Frühstück kommen.",
-    imageTitleEm: "Am Abend wiederkommen.",
-    homeAria: "Zurück zur Startseite",
-    signupTitle: "Werde Teil",
-    signupTitleEm: "von Auréa",
-    loginTitle: "Willkommen",
-    loginTitleEm: "zurück",
-    tabs: { signup: "Registrieren", login: "Anmelden" },
-    name: "Name",
-    namePlaceholder: "Vor- und Nachname",
-    email: "E-Mail",
-    emailPlaceholder: "du@beispiel.de",
-    password: "Passwort",
-    passwordPlaceholder: "Mindestens 8 Zeichen",
-    submitSignup: "Konto erstellen",
-    submitLogin: "Anmelden",
-    wait: "Einen Moment…",
-    checkInboxEyebrow: "Fast geschafft",
-    checkInboxTitle: "Prüfe dein Postfach",
-    checkInboxText: (email: string): [string, string, string] =>
-      [`Wir haben eine Bestätigungs-E-Mail an `, email, ` geschickt. Klicke auf den Link darin, um dein Konto zu aktivieren.`],
-    toLogin: "Zur Anmeldung",
-    haveAccount: "Schon ein Konto?",
-    noAccount: "Noch kein Konto?",
-    notices: {
-      confirmed: "E-Mail bestätigt — bitte melde dich jetzt an.",
-      "link-invalid": "Der Bestätigungslink ist ungültig oder abgelaufen.",
-    } as Record<string, string>,
-    errors: {
-      invalid_credentials: "E-Mail oder Passwort ist falsch.",
-      email_not_confirmed: "Bitte bestätige zuerst deine E-Mail-Adresse.",
-      user_already_exists: "Für diese E-Mail gibt es bereits ein Konto. Bitte melde dich an.",
-      weak_password: "Das Passwort ist zu schwach — mindestens 8 Zeichen.",
-      over_email_send_rate_limit: "Zu viele E-Mails in kurzer Zeit. Bitte versuche es später erneut.",
-      unknown: "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-    } as Record<string, string>,
+  legal: {
+    backToSite: "Zur Website",
+    homeAria: "Auréa — Startseite",
+    updated: "Stand",
   },
 
-  account: {
-    signOut: "Abmelden",
-    forbidden: "Dein Konto hat keinen Zugang zum Dashboard.",
-    eyebrow: "Mein Konto",
-    welcome: "Willkommen,",
-    name: "Name",
-    email: "E-Mail",
-    memberSince: "Mitglied seit",
-    role: "Rolle",
-    roles: { admin: "Administrator", staff: "Team", guest: "Gast" },
-    reserve: "Tisch reservieren",
-    dashboard: "Dashboard",
-    reservations: "Meine Reservierungen",
-    none: "Noch keine Reservierungen. Reservierungen, die du angemeldet anfragst, erscheinen hier — zusammen mit unserer Antwort.",
-    status: {
-      new: "Angefragt",
-      confirmed: "Bestätigt",
-      declined: "Abgelehnt",
-      cancelled: "Storniert",
-    },
-    message: "Nachricht von Auréa",
+  offers: {
+    eyebrow: "Angebote per E-Mail",
+    title: "Bitte",
+    titleEm: "bestätigen",
+    text: "Du hast bei deiner Reservierung angekreuzt, dass du Angebote und Neuigkeiten von Auréa per E-Mail erhalten möchtest. Bestätige das hier – erst dann schreiben wir dir.",
+    withdraw:
+      "Du kannst die Einwilligung jederzeit widerrufen, z. B. mit einer kurzen Antwort auf eine unserer E-Mails oder telefonisch.",
+    button: "Ja, Angebote per E-Mail erhalten",
+    sending: "Einen Moment…",
+    doneTitle: "Danke, das hat geklappt",
+    doneText: "Deine E-Mail-Adresse ist bestätigt. Ab jetzt erhältst du unsere Angebote und Neuigkeiten.",
+    invalidTitle: "Dieser Link funktioniert nicht mehr",
+    invalidText:
+      "Er wurde schon benutzt oder ist älter als 30 Tage. Möchtest du Angebote erhalten, kreuze es bei deiner nächsten Reservierung einfach wieder an.",
+    home: "Zur Startseite",
   },
 
   notFound: {

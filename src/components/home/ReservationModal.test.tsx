@@ -108,7 +108,7 @@ describe("reservation buttons", () => {
     );
   });
 
-  it("ends with the consents, only the terms required, and a privacy notice", async () => {
+  it("ends with optional consents, nothing required, and a privacy notice", async () => {
     render(<Page />);
     await userEvent.click(screen.getByRole("link", { name: "Tisch reservieren" }));
     fireEvent.change(screen.getByLabelText("Datum"), { target: { value: "02.05.2099" } });
@@ -119,12 +119,13 @@ describe("reservation buttons", () => {
     expect(link).toHaveAttribute("href", "/datenschutz");
     expect(link).toHaveAttribute("target", "_blank");
     const boxes = within(form).getAllByRole("checkbox");
-    expect(boxes).toHaveLength(3);
-    // Nothing is pre-ticked; only the terms block sending.
+    expect(boxes).toHaveLength(2);
+    // Nothing is pre-ticked and nothing is required: there are no terms to accept.
     expect(boxes.every((b) => !(b as HTMLInputElement).checked)).toBe(true);
-    expect(boxes.filter((b) => (b as HTMLInputElement).required)).toEqual([
-      within(form).getByRole("checkbox", { name: /Allgemeinen Geschäftsbedingungen/ }),
-    ]);
+    expect(boxes.some((b) => (b as HTMLInputElement).required)).toBe(false);
+    expect(within(form).queryByText(/Geschäftsbedingungen/)).toBeNull();
+    // The offers box says it only counts after confirming by email (double opt-in).
+    expect(within(form).getByRole("checkbox", { name: /Angebote.*Bestätigung/ })).toBeInTheDocument();
     expect(within(form).getByLabelText("E-Mail")).toBeRequired();
   });
 
@@ -142,9 +143,6 @@ describe("reservation buttons", () => {
     await userEvent.type(screen.getByLabelText("Name"), "Mila Hoxha");
     await userEvent.type(screen.getByLabelText("Telefon"), "+49 170 1234567");
     await userEvent.type(screen.getByLabelText("E-Mail"), "mila@example.com");
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: /Allgemeinen Geschäftsbedingungen/ }),
-    );
     await userEvent.click(screen.getByRole("button", { name: "Anfrage senden" }));
 
     expect(await screen.findByText("Danke — wir melden uns in Kürze.")).toBeInTheDocument();
@@ -159,7 +157,6 @@ describe("reservation buttons", () => {
       name: "Mila Hoxha",
       phone: "+49 170 1234567",
       email: "mila@example.com",
-      terms: "on",
     });
     expect(localStorage.getItem(SAVED_CONTACT_KEY)).toBeNull();
   });
@@ -174,9 +171,6 @@ describe("reservation buttons", () => {
     await userEvent.type(screen.getByLabelText("Telefon"), "+49 170 1234567");
     await userEvent.type(screen.getByLabelText("E-Mail"), "mila@example.com");
     await userEvent.click(screen.getByRole("checkbox", { name: /nächsten Reservierungen/ }));
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: /Allgemeinen Geschäftsbedingungen/ }),
-    );
     await userEvent.click(screen.getByRole("button", { name: "Anfrage senden" }));
     await screen.findByText("Danke — wir melden uns in Kürze.");
 
@@ -210,9 +204,6 @@ describe("reservation buttons", () => {
     await userEvent.type(screen.getByLabelText("Name"), "Mila");
     await userEvent.type(screen.getByLabelText("Telefon"), "12345");
     await userEvent.type(screen.getByLabelText("E-Mail"), "mila@example.com");
-    await userEvent.click(
-      screen.getByRole("checkbox", { name: /Allgemeinen Geschäftsbedingungen/ }),
-    );
     await userEvent.click(screen.getByRole("button", { name: "Anfrage senden" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -254,14 +245,14 @@ describe("in English", () => {
     // The selections carry over to the second step unchanged.
     expect(screen.getByText("3 guests")).toBeInTheDocument();
     expect(screen.getByText("12:00")).toBeInTheDocument();
-    const privacy = screen.getByRole("link", { name: /^privacy policy \(German\)/ });
-    expect(privacy).toHaveAttribute("href", "/datenschutz");
-    expect(privacy).toHaveAttribute("hreflang", "de");
+    // The privacy policy exists in English too, so English visitors get it.
+    const privacy = screen.getByRole("link", { name: /^privacy policy/ });
+    expect(privacy).toHaveAttribute("href", "/en/datenschutz");
+    expect(privacy).not.toHaveAttribute("hreflang");
 
     await userEvent.type(screen.getByLabelText("Name"), "Mila Hoxha");
     await userEvent.type(screen.getByLabelText("Phone"), "+49 170 1234567");
     await userEvent.type(screen.getByLabelText("Email"), "mila@example.com");
-    await userEvent.click(screen.getByRole("checkbox", { name: /terms and conditions/ }));
     await userEvent.click(screen.getByRole("button", { name: "Send request" }));
 
     expect(await screen.findByText("Thank you — we'll be in touch shortly.")).toBeInTheDocument();

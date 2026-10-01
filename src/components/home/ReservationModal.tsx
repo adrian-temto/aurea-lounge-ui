@@ -436,8 +436,8 @@ function ContactStep({
 }
 
 /**
- * The booking form's checkboxes. Only the terms are required; "remember" stays on this device
- * (see useSavedContact) and the two opt-ins are stored with the request.
+ * The booking form's optional checkboxes. "remember" stays on this device (see useSavedContact);
+ * the offers opt-in is stored with the request and only counts once confirmed by email.
  */
 export function ReservationConsents({
   className = "",
@@ -449,7 +449,6 @@ export function ReservationConsents({
   const { t } = useI18n();
   const boxes = [
     { name: "remember", label: t.reservation.remember },
-    { name: "terms", label: t.reservation.terms, required: true },
     { name: "marketing_email", label: t.reservation.marketingEmail },
   ];
   return (
@@ -459,25 +458,14 @@ export function ReservationConsents({
           key={b.name}
           className={`flex cursor-pointer items-start gap-3 text-sm leading-snug ${dark ? "text-cream/80" : "text-foreground"}`}
         >
-          <input type="checkbox" name={b.name} required={b.required} className="peer sr-only" />
+          <input type="checkbox" name={b.name} className="peer sr-only" />
           <span
             aria-hidden
             className={`mt-px grid size-[1.125rem] shrink-0 place-items-center border transition-colors duration-200 peer-checked:border-gold peer-checked:bg-gold peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-gold [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100 ${dark ? "border-cream/40 text-espresso" : "border-foreground/30 text-espresso"}`}
           >
             <Check className="size-3.5" strokeWidth={2.5} />
           </span>
-          <span>
-            {b.label}
-            {b.required && (
-              <>
-                {" "}
-                <span className="text-gold" aria-hidden>
-                  *
-                </span>
-                <span className="sr-only">({t.reservation.required})</span>
-              </>
-            )}
-          </span>
+          <span>{b.label}</span>
         </label>
       ))}
     </div>
@@ -492,16 +480,15 @@ export function ReservationPrivacyNote({
   className?: string;
   dark?: boolean;
 }) {
-  const { t } = useI18n();
+  const { t, href } = useI18n();
   return (
     <p
       className={`text-xs leading-relaxed ${dark ? "text-cream/60" : "text-muted-foreground"} ${className}`}
     >
       {t.reservation.privacy}{" "}
-      {/* A new tab, so reading it doesn't throw away what was typed. German-only for now. */}
+      {/* A new tab, so reading it doesn't throw away what was typed. */}
       <a
-        href={PRIVACY_PATH}
-        hrefLang="de"
+        href={href(PRIVACY_PATH)}
         target="_blank"
         rel="noopener"
         className={`underline underline-offset-4 ${dark ? "text-cream hover:text-gold" : "text-foreground hover:text-gold"} ${focusRing}`}

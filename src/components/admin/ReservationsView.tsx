@@ -5,21 +5,34 @@ import { useRouter } from "next/navigation";
 import {
   CalendarX2,
   Check,
+  MailCheck,
   MessageSquareReply,
   MoreHorizontal,
   Phone,
   Search,
-  UserRound,
+  ShieldX,
+  Trash2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { setReservationStatus } from "@/app/admin/actions";
+import { deleteReservation, setReservationStatus } from "@/app/admin/actions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -37,6 +50,7 @@ import {
   todayISO,
   type Filter,
 } from "./format";
+import { EraseGuestDialog, type EraseTarget } from "./EraseGuestDialog";
 import { PageHeader } from "./PageHeader";
 import { RespondDialog } from "./RespondDialog";
 import { StatusBadge } from "./StatusBadge";
@@ -73,6 +87,8 @@ export default function ReservationsView({ reservations, initialFilter, openId }
   const [responding, setResponding] = useState<Reservation | null>(
     () => reservations.find((r) => r.id === openId) ?? null,
   );
+  const [erasing, setErasing] = useState<EraseTarget | null>(null);
+  const [deleting, setDeleting] = useState<Reservation | null>(null);
   const [, startTransition] = useTransition();
   // Status changes show instantly; the server refresh (or the realtime event) confirms them.
   const [list, setOptimistic] = useOptimistic(
@@ -101,7 +117,7 @@ export default function ReservationsView({ reservations, initialFilter, openId }
             !q ||
             r.name.toLowerCase().includes(q) ||
             !!r.email?.includes(q) ||
-            r.phone.replace(/\s/g, "").includes(q.replace(/\s/g, "")),
+            !!r.phone?.replace(/\s/g, "").includes(q.replace(/\s/g, "")),
         )
         .sort(byDateTime),
     [list, filter, today, q],
@@ -128,6 +144,22 @@ export default function ReservationsView({ reservations, initialFilter, openId }
     });
   }
 
+  function remove(r: Reservation) {
+    startTransition(async () => {
+      const res = await deleteReservation(r.id);
+      if (res.error) toast.error(res.error);
+      else toast.success("Reservierung gelöscht", { description: r.name });
+      router.refresh();
+    });
+  }
+
+  const actions = {
+    onRespond: setResponding,
+    onStatus: changeStatus,
+    onDelete: setDeleting,
+    onErase: (r: Reservation) => setErasing({ email: r.email ?? "", phone: r.phone ?? "", name: r.name }),
+  };
+
   const openCount = list.filter((r) => r.status === "new").length;
 
   return (
@@ -138,6 +170,11 @@ export default function ReservationsView({ reservations, initialFilter, openId }
           openCount === 0
             ? "Alle Anfragen sind beantwortet."
             : `${openCount} ${openCount === 1 ? "Anfrage wartet" : "Anfragen warten"} auf eine Antwort.`
+        }
+        actions={
+          <Button variant="outline" className="h-9" onClick={() => setErasing({ email: "", phone: "" })}>
+            <ShieldX aria-hidden /> Datenlöschung
+          </Button>
         }
       />
 
@@ -285,11 +322,7 @@ export default function ReservationsView({ reservations, initialFilter, openId }
                             {timeAgo(r.created_at)}
                           </td>
                           <td className="px-4 py-3">
-                            <RowActions
-                              r={r}
-                              onRespond={() => setResponding(r)}
-                              onStatus={changeStatus}
-                            />
+                            <RowActions r={r} {...actions} />
                           </td>
                         </tr>
                       ))}
@@ -318,11 +351,7 @@ export default function ReservationsView({ reservations, initialFilter, openId }
                         <GuestCell r={r} />
                       </div>
                       <div className="mt-4 border-t border-border pt-3">
-                        <RowActions
-                          r={r}
-                          onRespond={() => setResponding(r)}
-                          onStatus={changeStatus}
-                        />
+                        <RowActions r={r} {...actions} />
                       </div>
                     </li>
                   ))}
@@ -338,6 +367,32 @@ export default function ReservationsView({ reservations, initialFilter, openId }
         onOpenChange={(open) => !open && setResponding(null)}
         onSaved={() => router.refresh()}
       />
+      <EraseGuestDialog
+        target={erasing}
+        onOpenChange={(open) => !open && setErasing(null)}
+        onErased={() => router.refresh()}
+      />
+      <AlertDialog open={deleting !== null} onOpenChange={(open) => !open && setDeleting(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reservierung löschen?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleting &&
+                `${deleting.name}, ${relativeDay(deleting.reservation_date, today)} um ${time(deleting)} Uhr. `}
+              Die Reservierung wird endgültig gelöscht. Der Gast wird nicht benachrichtigt.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => deleting && remove(deleting)}
+            >
+              Löschen
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -347,21 +402,20 @@ function GuestCell({ r }: { r: Reservation }) {
     <div className="min-w-0">
       <p className="flex flex-wrap items-center gap-2 font-medium">
         {r.name}
-        {r.user_id && (
-          <span
-            className="inline-flex items-center gap-1 rounded bg-muted px-1.5 py-0.5 text-[0.7rem] font-normal text-muted-foreground"
-            title="Der Gast sieht Antworten in seinem Konto"
-          >
-            <UserRound className="size-3" aria-hidden /> Konto
+        {r.locale === "en" && (
+          <span className="rounded bg-muted px-1.5 py-0.5 text-[0.7rem] font-normal text-muted-foreground" title="Hat auf Englisch gebucht; E-Mails gehen auf Englisch raus">
+            EN
           </span>
         )}
       </p>
-      <a
-        href={`tel:${r.phone}`}
-        className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
-      >
-        {r.phone}
-      </a>
+      {r.phone && (
+        <a
+          href={`tel:${r.phone}`}
+          className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+        >
+          {r.phone}
+        </a>
+      )}
       {r.email && (
         <a
           href={`mailto:${r.email}`}
@@ -370,10 +424,11 @@ function GuestCell({ r }: { r: Reservation }) {
           {r.email}
         </a>
       )}
-      {(r.marketing_email || r.marketing_sms) && (
+      {r.marketing_email && (
         <p className="mt-1 text-xs text-muted-foreground">
-          Werbung erlaubt:{" "}
-          {[r.marketing_email && "E-Mail", r.marketing_sms && "SMS"].filter(Boolean).join(", ")}
+          {r.marketing_email_confirmed_at
+            ? "Angebote per E-Mail: bestätigt"
+            : "Angebote per E-Mail: angefragt, noch nicht bestätigt (nicht anschreiben)"}
         </p>
       )}
       {r.special_requests && (
@@ -386,6 +441,11 @@ function GuestCell({ r }: { r: Reservation }) {
           Antwort: {r.admin_response}
         </p>
       )}
+      {r.response_emailed_at && (
+        <p className="mt-1 inline-flex items-center gap-1 text-xs text-olive" title={new Date(r.response_emailed_at).toLocaleString("de-DE")}>
+          <MailCheck className="size-3.5" aria-hidden /> Antwort per E-Mail gesendet
+        </p>
+      )}
     </div>
   );
 }
@@ -394,24 +454,24 @@ function RowActions({
   r,
   onRespond,
   onStatus,
+  onDelete,
+  onErase,
 }: {
   r: Reservation;
-  onRespond: () => void;
+  onRespond: (r: Reservation) => void;
   onStatus: (r: Reservation, s: ReservationStatus, success: string) => void;
+  onDelete: (r: Reservation) => void;
+  onErase: (r: Reservation) => void;
 }) {
   return (
     <div className="flex items-center justify-end gap-1.5">
       {r.status === "new" && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => onStatus(r, "confirmed", "Reservierung bestätigt")}
-          className="h-9"
-        >
+        // Opens the answer with the confirmation text ready, so the guest gets it by email.
+        <Button size="sm" variant="outline" onClick={() => onRespond(r)} className="h-9">
           <Check aria-hidden /> Bestätigen
         </Button>
       )}
-      <Button size="sm" onClick={onRespond} className="h-9">
+      <Button size="sm" onClick={() => onRespond(r)} className="h-9">
         <MessageSquareReply aria-hidden />
         {r.admin_response ? "Antwort ändern" : "Antworten"}
       </Button>
@@ -426,13 +486,20 @@ function RowActions({
             <MoreHorizontal aria-hidden />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem asChild>
-            <a href={`tel:${r.phone}`}>
-              <Phone aria-hidden /> Anrufen
-            </a>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="end" className="w-64">
+          {r.phone && (
+            <>
+              <DropdownMenuItem asChild>
+                <a href={`tel:${r.phone}`}>
+                  <Phone aria-hidden /> Anrufen
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+            Nur Status ändern (ohne E-Mail)
+          </DropdownMenuLabel>
           {r.status !== "confirmed" && (
             <DropdownMenuItem onSelect={() => onStatus(r, "confirmed", "Reservierung bestätigt")}>
               <Check aria-hidden /> Als bestätigt markieren
@@ -451,6 +518,13 @@ function RowActions({
               <X aria-hidden /> Stornieren
             </DropdownMenuItem>
           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={() => onDelete(r)} className="text-destructive focus:text-destructive">
+            <Trash2 aria-hidden /> Reservierung löschen
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => onErase(r)} className="text-destructive focus:text-destructive">
+            <ShieldX aria-hidden /> Alle Daten des Gastes löschen
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

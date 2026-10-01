@@ -19,19 +19,17 @@ import {
   facade,
   owner,
   prosecco,
+  staff,
 } from "@/lib/photos";
-import type { AccountLink } from "@/lib/types";
 
 /** Frame shared by the pages besides the landing page: header, a dark title band, footer. */
 function SubPage({
-  account,
   eyebrow,
   title,
   titleEm,
   text,
   children,
 }: {
-  account: AccountLink;
   eyebrow: string;
   title: string;
   titleEm: string;
@@ -43,7 +41,7 @@ function SubPage({
   return (
     <ReservationModalProvider>
       <main className="bg-background">
-        <Header account={account} onHome={false} />
+        <Header onHome={false} />
         {/* Dark band, so the transparent header (cream text) stays readable before scrolling. */}
         <section className="bg-espresso pb-20 pt-40 text-cream md:pb-28 md:pt-52">
           <div className="mx-auto max-w-[1440px] px-6 md:px-12">
@@ -70,11 +68,11 @@ const arrowLink =
 
 /* ---------------- /karte ---------------- */
 
-export function MenuPage({ menu, account }: { menu: PublicCategory[]; account: AccountLink }) {
+export function MenuPage({ menu }: { menu: PublicCategory[] }) {
   const { t } = useI18n();
   const p = t.pages.menu;
   return (
-    <SubPage account={account} eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm} text={p.text}>
+    <SubPage eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm} text={p.text}>
       <Menu menu={menu} standalone />
     </SubPage>
   );
@@ -82,10 +80,10 @@ export function MenuPage({ menu, account }: { menu: PublicCategory[]; account: A
 
 /* ---------------- /anfahrt ---------------- */
 
-export function VisitPage({ account }: { account: AccountLink }) {
+export function VisitPage() {
   const { t } = useI18n();
   return (
-    <SubPage account={account} eyebrow={t.visit.eyebrow} title={t.visit.title} titleEm={t.visit.titleEm}>
+    <SubPage eyebrow={t.visit.eyebrow} title={t.visit.title} titleEm={t.visit.titleEm}>
       <Visit standalone />
     </SubPage>
   );
@@ -93,16 +91,29 @@ export function VisitPage({ account }: { account: AccountLink }) {
 
 /* ---------------- /ueber-uns ---------------- */
 
-export function AboutPage({ account }: { account: AccountLink }) {
+export function AboutPage() {
   const { t, href } = useI18n();
   const p = t.pages.about;
   const opening = [facade, crowd, prosecco];
   return (
-    <SubPage account={account} eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm}>
-      <section className="mx-auto max-w-[1100px] px-6 py-24 md:px-12 md:py-36">
-        <Reveal className="grid gap-8 md:grid-cols-12">
-          <p className="eyebrow text-gold md:col-span-4">{t.story.eyebrow}</p>
-          <div className="space-y-6 md:col-span-8">
+    <SubPage eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm}>
+      <section className="mx-auto grid max-w-[1100px] items-center gap-10 px-6 py-24 md:grid-cols-12 md:gap-16 md:px-12 md:py-36">
+        <Reveal className="md:col-span-5">
+          <div className="relative mx-auto max-w-[320px] md:max-w-none">
+            <img
+              src={staff.src}
+              alt={t.story.imageAlt}
+              loading="lazy"
+              width={staff.width}
+              height={staff.height}
+              className="aspect-[4/5] w-full object-cover object-[center_55%]"
+            />
+            <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/50" />
+          </div>
+        </Reveal>
+        <Reveal className="md:col-span-7" delay={150}>
+          <p className="eyebrow text-gold">{t.story.eyebrow}</p>
+          <div className="mt-6 space-y-6">
             <p className="font-serif text-2xl font-light leading-snug md:text-3xl">{t.story.p1}</p>
             <p className="leading-relaxed text-muted-foreground">{t.story.p2}</p>
           </div>
@@ -201,7 +212,7 @@ export function AboutPage({ account }: { account: AccountLink }) {
 type Photo = { img: StaticImageData; alt: string; group: "food" | "opening" };
 type Filter = "all" | "food" | "opening";
 
-export function GalleryPage({ account }: { account: AccountLink }) {
+export function GalleryPage() {
   const { t } = useI18n();
   const p = t.pages.gallery;
   const [filter, setFilter] = useState<Filter>("all");
@@ -238,7 +249,7 @@ export function GalleryPage({ account }: { account: AccountLink }) {
   }, [current, shown.length]);
 
   return (
-    <SubPage account={account} eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm} text={p.text}>
+    <SubPage eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm} text={p.text}>
       <section className="mx-auto max-w-[1440px] px-6 py-20 md:px-12 md:py-28">
         <div role="group" aria-label={p.filterLabel} className="flex flex-wrap gap-x-8 gap-y-3 border-b border-border">
           {(["all", "food", "opening"] as const).map((f) => (

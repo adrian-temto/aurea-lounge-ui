@@ -25,6 +25,7 @@ import {
   type Consent,
 } from "@/lib/consent";
 
+import { splitLocale } from "@/i18n/config";
 import { ConsentDialog, type View } from "./ConsentDialog";
 
 type Ctx = {
@@ -54,7 +55,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [view, setView] = useState<View | null>(null);
   // The privacy page explains the choices, so the first-visit modal must not cover it.
-  const onPrivacyPage = usePathname() === PRIVACY_PATH;
+  const onPrivacyPage = splitLocale(usePathname()).path === PRIVACY_PATH;
   const shownView = onPrivacyPage && !consent && view === "summary" ? null : view;
 
   // The cookie is only readable in the browser; first visits get the modal.

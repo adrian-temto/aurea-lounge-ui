@@ -706,7 +706,7 @@ html.locale-arrived body {
   transform: scaleX(1);
 }
 
-/* ---- Visit: hours and contact step in, the map draws itself, the pin drops ---- */
+/* ---- Visit: hours and contact step in, the map card is uncovered ---- */
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
   .reveal .visit-in {
     opacity: 0;
@@ -719,15 +719,6 @@ html.locale-arrived body {
     opacity: 1;
     transform: none;
   }
-  /* pathLength="1" on each path, so one dash length works for every line. */
-  .reveal .map-path {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    transition: stroke-dashoffset 1600ms var(--ease-aurea) calc(300ms + var(--i, 0) * 180ms);
-  }
-  .reveal.in .map-path {
-    stroke-dashoffset: 0;
-  }
   /* The map card is uncovered from the left as it arrives. */
   .reveal .map-card {
     clip-path: inset(0 100% 0 0);
@@ -735,31 +726,6 @@ html.locale-arrived body {
   }
   .reveal.in .map-card {
     clip-path: inset(0);
-  }
-  .reveal .map-pin {
-    opacity: 0;
-    transform: translate3d(0, -28px, 0);
-    transition:
-      opacity 400ms var(--ease-aurea) 1300ms,
-      transform 700ms cubic-bezier(0.34, 1.56, 0.64, 1) 1300ms;
-  }
-  .reveal.in .map-pin {
-    opacity: 1;
-    transform: none;
-  }
-  /* A soft ring keeps pulsing under the pin, so the place stays alive. */
-  .reveal.in .map-ping {
-    animation: aurea-ping 2.4s var(--ease-aurea) 2s infinite;
-  }
-}
-@keyframes aurea-ping {
-  from {
-    opacity: 0.5;
-    transform: scale(1);
-  }
-  to {
-    opacity: 0;
-    transform: scale(4.5);
   }
 }
 

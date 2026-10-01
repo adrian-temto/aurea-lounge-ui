@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Permission } from "@/lib/types";
 
-/* A tiny in-memory stand-in for the Supabase query builder: enough filters for the menu actions. */
+/* A tiny in-memory stand-in for the Supabase query builder: enough for the menu and reservation actions. */
 type Row = Record<string, unknown>;
 type Write = { table: string; op: "insert" | "update" | "delete"; payload?: Row; where: Row };
 
@@ -33,6 +33,15 @@ function fakeSupabase(tables: Record<string, Row[]>) {
       not: () => b,
       order: () => b,
       limit: () => b,
+      // update(…).select().single(): applies the update in memory and returns the row.
+      single: () => {
+        const rows = (tables[table] ?? []).filter((r) => preds.every((p) => p(r)));
+        if (op === "update" && payload) {
+          writes.push({ table, op, where, payload });
+          rows.forEach((r) => Object.assign(r, payload));
+        }
+        return Promise.resolve({ data: rows[0] ?? null, error: rows[0] ? null : { message: "not found" } });
+      },
       maybeSingle: () => {
         const r = result();
         return Promise.resolve({ ...r, data: Array.isArray(r.data) ? (r.data[0] ?? null) : null });
@@ -43,13 +52,16 @@ function fakeSupabase(tables: Record<string, Row[]>) {
     return b;
   });
   const remove = vi.fn(async () => ({ error: null }));
-  return { client: { from, storage: { from: () => ({ remove }) } }, from, writes, remove };
+  const rpc = vi.fn(async () => ({ data: 2, error: null }));
+  return { client: { from, rpc, storage: { from: () => ({ remove }) } }, from, rpc, writes, remove };
 }
 
 let db: ReturnType<typeof fakeSupabase>;
 let permissions: Permission[] = [];
 
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+const sendEmail = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/email/send", () => ({ sendEmail, replyToAddress: () => "team@aurealounge.de" }));
 vi.mock("@/lib/auth", () => ({
   getSession: async () => ({
     user: permissions.length ? { id: "u1", email: "a@b.de" } : null,
@@ -59,6 +71,20 @@ vi.mock("@/lib/auth", () => ({
 }));
 
 const actions = await import("./actions");
+
+const reservation = {
+  name: "Mia Weber",
+  phone: "+49 170 1234567",
+  email: "mia@example.com",
+  reservation_date: "2026-10-10",
+  reservation_time: "19:00:00",
+  guests: 2,
+  special_requests: null,
+  status: "new",
+  locale: "de",
+  admin_response: null,
+  response_emailed_at: null,
+};
 
 const validItem = {
   category_id: 1,
@@ -88,7 +114,13 @@ beforeEach(() => {
       { id: 11, category_id: 1, image_path: "items/11111111-1111-4111-8111-111111111111.jpg" },
       { id: 12, category_id: 3, image_path: null },
     ],
+    reservations: [
+      { ...reservation, id: 20 },
+      { ...reservation, id: 21, email: null },
+      { ...reservation, id: 22, locale: "en", name: "Jane Doe", email: "jane@example.com" },
+    ],
   });
+  sendEmail.mockReset().mockResolvedValue({ ok: true, id: "email-1" });
 });
 
 describe("authorization", () => {
@@ -215,5 +247,78 @@ describe("categories", () => {
     expect(await actions.deleteCategory(1)).toEqual({});
     expect(db.writes).toEqual([{ table: "menu_categories", op: "delete", where: { id: 1 } }]);
     expect(db.remove).toHaveBeenCalledWith(["items/11111111-1111-4111-8111-111111111111.jpg"]);
+  });
+});
+
+describe("reservation answers", () => {
+  beforeEach(() => {
+    permissions = ["reservations.manage"];
+  });
+
+  it("saves the answer and emails it to the guest", async () => {
+    const res = await actions.respondToReservation(20, "confirmed", "Hallo Mia, bis bald!");
+    expect(res.delivery).toEqual({ emailed: true });
+    expect(sendEmail).toHaveBeenCalledTimes(1);
+    const email = sendEmail.mock.calls[0]![0];
+    expect(email.to).toBe("mia@example.com");
+    expect(email.subject).toBe("Deine Reservierung bei Auréa ist bestätigt");
+    expect(email.text).toContain("Hallo Mia, bis bald!");
+    expect(email.replyTo).toBe("team@aurealounge.de");
+    expect(res.reservation?.status).toBe("confirmed");
+    expect(res.reservation?.response_emailed_at).toBeTruthy();
+  });
+
+  it("writes to guests who booked in English in English", async () => {
+    await actions.respondToReservation(22, "declined", "Sorry, we are full.");
+    expect(sendEmail.mock.calls[0]![0].subject).toBe("About your reservation request at Auréa");
+  });
+
+  it("only saves when the team unticks the email", async () => {
+    const res = await actions.respondToReservation(20, "confirmed", "Bis bald!", false);
+    expect(sendEmail).not.toHaveBeenCalled();
+    expect(res.delivery?.emailed).toBe(false);
+    expect(res.reservation?.response_emailed_at).toBeNull();
+  });
+
+  it("keeps the answer when there is no address or the email fails", async () => {
+    const noAddress = await actions.respondToReservation(21, "confirmed", "Bis bald!");
+    expect(noAddress.delivery).toEqual({ emailed: false, reason: expect.stringMatching(/keine E-Mail-Adresse/) });
+
+    sendEmail.mockResolvedValue({ ok: false, error: "Resend antwortete mit 500." });
+    const failed = await actions.respondToReservation(20, "confirmed", "Bis bald!");
+    expect(failed.error).toBeUndefined();
+    expect(failed.delivery).toEqual({ emailed: false, reason: "Resend antwortete mit 500." });
+    expect(failed.reservation?.admin_response).toBe("Bis bald!");
+  });
+
+  it("refuses staff without reservations.manage", async () => {
+    permissions = ["menu.manage"];
+    expect((await actions.respondToReservation(20, "confirmed", "Hi")).error).toMatch(/Berechtigung/);
+    expect((await actions.eraseGuestData("mia@example.com", "")).error).toMatch(/Berechtigung/);
+    expect((await actions.deleteReservation(20)).error).toMatch(/Berechtigung/);
+    expect(sendEmail).not.toHaveBeenCalled();
+    expect(db.from).not.toHaveBeenCalled();
+    expect(db.rpc).not.toHaveBeenCalled();
+  });
+});
+
+describe("guest data erasure", () => {
+  beforeEach(() => {
+    permissions = ["reservations.manage"];
+  });
+
+  it("erases by email or phone and reports how many reservations went", async () => {
+    expect(await actions.eraseGuestData("  Mia@Example.com ", "")).toEqual({ deleted: 2 });
+    expect(db.rpc).toHaveBeenCalledWith("erase_guest_data", { p_email: "mia@example.com", p_phone: "" });
+  });
+
+  it("needs an email address or a phone number", async () => {
+    expect((await actions.eraseGuestData("", "12")).error).toMatch(/E-Mail-Adresse oder Telefonnummer/);
+    expect(db.rpc).not.toHaveBeenCalled();
+  });
+
+  it("deletes a single reservation", async () => {
+    expect(await actions.deleteReservation(20)).toEqual({});
+    expect(db.writes).toEqual([{ table: "reservations", op: "delete", where: { id: 20 } }]);
   });
 });

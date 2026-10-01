@@ -9,16 +9,21 @@ import {
   localizePath,
   splitLocale,
 } from "@/i18n/config";
-
-const PROTECTED = ["/admin", "/account"];
-/** Paths that read the Supabase session here (refresh + route protection). */
-const NEEDS_SESSION = ["/admin", "/account", "/login"];
+import { ADMIN_PATHS, isAdminHost } from "@/lib/admin-host";
 
 const startsWithAny = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || path.startsWith(`${p}/`));
 
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
+
+  // The team area has its own host (admin.…); the public site doesn't know it exists.
+  if (isAdminHost(request.headers.get("host"))) return adminProxy(request);
+  if (startsWithAny(splitLocale(pathname).path, ADMIN_PATHS)) {
+    // A path no route matches, so Next renders app/not-found.tsx with status 404.
+    return NextResponse.rewrite(new URL("/__not-found", request.url));
+  }
+
   const { locale, path } = splitLocale(pathname);
 
   // English exists for the public pages only; /en/datenschutz, /en/admin … use the German page.
@@ -45,9 +50,22 @@ export async function proxy(request: NextRequest) {
     url.pathname = path;
     return NextResponse.rewrite(url, { request: { headers } });
   };
-  let response = respond();
+  return respond();
+}
 
-  if (!startsWithAny(path, NEEDS_SESSION)) return response;
+/** admin.…: only the dashboard and its login, in German, with the Supabase session refreshed. */
+async function adminProxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  if (!startsWithAny(pathname, ADMIN_PATHS)) {
+    return NextResponse.redirect(new URL("/admin", request.url));
+  }
+
+  const respond = () => {
+    const headers = new Headers(request.headers);
+    headers.set(LOCALE_HEADER, DEFAULT_LOCALE);
+    return NextResponse.next({ request: { headers } });
+  };
+  let response = respond();
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -71,10 +89,10 @@ export async function proxy(request: NextRequest) {
   // Refreshes the session cookie when it is close to expiring.
   const { data } = await supabase.auth.getClaims();
 
-  if (!data?.claims && startsWithAny(path, PROTECTED)) {
+  if (!data?.claims && startsWithAny(pathname, ["/admin"])) {
     const url = request.nextUrl.clone();
-    url.pathname = localizePath(locale, "/login");
-    url.search = `?mode=login&next=${encodeURIComponent(pathname)}`;
+    url.pathname = "/login";
+    url.search = `?next=${encodeURIComponent(pathname)}`;
     return NextResponse.redirect(url);
   }
 
@@ -82,6 +100,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Everything except Next internals, the auth callback and files with an extension.
-  matcher: ["/((?!_next/|auth/callback|.*\\.[a-z0-9]+$).*)"],
+  // Everything except Next internals and files with an extension.
+  matcher: ["/((?!_next/|.*\\.[a-z0-9]+$).*)"],
 };

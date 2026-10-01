@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import type { AccountLink, Permission, Profile, Role } from "@/lib/types";
+import type { Permission, Profile, Role } from "@/lib/types";
 
 export type Session = {
   supabase: Awaited<ReturnType<typeof createClient>>;
@@ -11,7 +11,7 @@ export type Session = {
   permissions: Permission[];
 };
 
-/** The signed-in user (verified JWT claims), their profile and what they may do. */
+/** The signed-in team member (verified JWT claims), their profile and what they may do. */
 export async function getSession(): Promise<Session> {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
@@ -48,21 +48,13 @@ export function displayName(session: Session) {
 
 export const canUseDashboard = (session: Session) => session.permissions.length > 0;
 
-export async function requireUser(next = "/account") {
-  const session = await getSession();
-  if (!session.user) redirect(`/login?mode=login&next=${encodeURIComponent(next)}`);
-  return { ...session, user: session.user };
-}
-
-/** Any staff permission opens the dashboard; each tab and action checks its own permission. */
+/**
+ * Any staff permission opens the dashboard; each tab and action checks its own permission.
+ * There are no guest accounts: a signed-in user without a permission is sent back to the login.
+ */
 export async function requireDashboard() {
-  const session = await requireUser("/admin");
-  if (!canUseDashboard(session)) redirect("/account?error=forbidden");
-  return session;
-}
-
-export function accountLink(session: Session): AccountLink {
-  if (!session.user) return { href: "/login", kind: "join" };
-  if (canUseDashboard(session)) return { href: "/admin", kind: "dashboard" };
-  return { href: "/account", kind: "account" };
+  const session = await getSession();
+  if (!session.user) redirect(`/login?next=${encodeURIComponent("/admin")}`);
+  if (!canUseDashboard(session)) redirect("/login?error=forbidden");
+  return { ...session, user: session.user };
 }
