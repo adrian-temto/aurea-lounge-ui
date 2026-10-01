@@ -15,7 +15,7 @@ export const LOCALE_HEADER = "x-aurea-locale";
 export const LOCALE_SWITCH_KEY = "aurea_locale_switch";
 
 /** Routes that exist in both languages. Everything else (admin, legal pages) is German only. */
-export const LOCALIZED_ROUTES = ["/", "/login", "/account"] as const;
+export const LOCALIZED_ROUTES = ["/", "/karte", "/ueber-uns", "/galerie", "/anfahrt", "/login", "/account"] as const;
 
 export const isLocale = (v: unknown): v is Locale => LOCALES.includes(v as Locale);
 

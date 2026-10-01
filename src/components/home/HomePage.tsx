@@ -21,15 +21,21 @@ import {
 } from "./ReservationModal";
 import { EuDateInput } from "./EuDateInput";
 import hero from "@/assets/hero.jpg";
-import breakfast from "@/assets/breakfast.jpg";
-import cafe from "@/assets/cafe.jpg";
-import lounge from "@/assets/lounge.jpg";
+import {
+  avocadoToast,
+  burrata,
+  cheesecake,
+  ciabatta,
+  KITCHEN_PHOTOS,
+  OPENING_PHOTOS,
+  owner,
+  porridge,
+  tagliatelle,
+} from "@/lib/photos";
 import story from "@/assets/story.jpg";
 import atmos from "@/assets/atmos.jpg";
-import pastry from "@/assets/pastry.jpg";
-import cocktail from "@/assets/cocktail.jpg";
 
-function useReveal() {
+export function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
     const io = new IntersectionObserver(
@@ -50,7 +56,7 @@ function useReveal() {
   }, []);
 }
 
-function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
+export function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   return (
     <div className={`reveal ${className}`} style={{ transitionDelay: `${delay}ms` }}>
       {children}
@@ -73,8 +79,15 @@ function useAccountLink(account: AccountLink) {
   };
 }
 
-function Header({ account }: { account: AccountLink }) {
+/** Hash links point into the home page; on other pages they go back to it first. */
+function useLinkTo(onHome: boolean) {
+  const { href } = useI18n();
+  return (h: string) => (h.startsWith("#") ? (onHome ? h : `${href("/")}${h}`) : href(h));
+}
+
+export function Header({ account, onHome = true }: { account: AccountLink; onHome?: boolean }) {
   const { t } = useI18n();
+  const to = useLinkTo(onHome);
   const accountLink = useAccountLink(account);
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -90,10 +103,17 @@ function Header({ account }: { account: AccountLink }) {
       const y = window.scrollY;
       setScrolled(y > 60);
       const dy = y - lastY.current;
-      if (openRef.current || y < 240) setHidden(false);
-      else if (dy > 8) setHidden(true);
-      else if (dy < -8) setHidden(false);
-      if (Math.abs(dy) > 8) lastY.current = y;
+      // lastY only moves when the bar changes state, so slow scrolling still adds up to a decision.
+      if (openRef.current || y < 80) {
+        setHidden(false);
+        lastY.current = y;
+      } else if (dy > 6) {
+        setHidden(true);
+        lastY.current = y;
+      } else if (dy < -4) {
+        setHidden(false);
+        lastY.current = y;
+      }
     };
     f();
     window.addEventListener("scroll", f, { passive: true });
@@ -122,7 +142,7 @@ function Header({ account }: { account: AccountLink }) {
       >
         <span aria-hidden className="nav-progress absolute inset-x-0 bottom-0 h-px origin-left bg-gold" />
         <div className="mx-auto flex max-w-[1440px] items-center justify-between px-6 md:px-12">
-          <a href="#top" aria-label={t.nav.home} className="block shrink-0">
+          <a href={to("#top")} aria-label={t.nav.home} className="block shrink-0">
             {/* The logo's tagline is dark brown, so swap to the cream variant over the dark hero. */}
             <img
               src={solid ? "/logo.svg" : "/logo-light.svg"}
@@ -134,7 +154,7 @@ function Header({ account }: { account: AccountLink }) {
           </a>
           <nav className="hidden items-center gap-6 lg:flex xl:gap-9">
             {t.nav.items.map(([l, h], i) => (
-              <a key={l} href={h} style={step(i)} className="nav-in link-line whitespace-nowrap text-[0.72rem] uppercase tracking-[0.18em] xl:tracking-[0.22em]">
+              <a key={l} href={to(h)} style={step(i)} className="nav-in link-line whitespace-nowrap text-[0.72rem] uppercase tracking-[0.18em] xl:tracking-[0.22em]">
                 {l}
               </a>
             ))}
@@ -176,7 +196,7 @@ function Header({ account }: { account: AccountLink }) {
           {t.nav.items.map(([l, h], i) => (
             <a
               key={l}
-              href={h}
+              href={to(h)}
               onClick={() => setOpen(false)}
               className={`group/link flex w-fit items-baseline gap-4 font-serif text-5xl font-light transition-[opacity,transform,color,filter] ease-aurea hover:text-gold focus-visible:text-gold focus-visible:outline-none ${
                 open ? "translate-y-0 opacity-100 blur-0 duration-700" : "translate-y-6 opacity-0 blur-md duration-150"
@@ -323,9 +343,9 @@ function Intro() {
 }
 
 const CHAPTER_IMAGES = [
-  { n: "I", img: breakfast },
-  { n: "II", img: cafe },
-  { n: "III", img: lounge },
+  { n: "I", img: avocadoToast },
+  { n: "II", img: ciabatta },
+  { n: "III", img: tagliatelle },
 ];
 
 function Chapters() {
@@ -440,8 +460,8 @@ function Story() {
   );
 }
 
-function Menu({ menu }: { menu: PublicCategory[] }) {
-  const { t } = useI18n();
+export function Menu({ menu, standalone = false }: { menu: PublicCategory[]; standalone?: boolean }) {
+  const { t, href } = useI18n();
   const [catId, setCatId] = useState(menu[0]?.id ?? 0);
   // The open tab survives a language switch.
   useCarryOver(
@@ -455,7 +475,8 @@ function Menu({ menu }: { menu: PublicCategory[] }) {
   // Only animate dishes after a visitor changes the tab, not on first load.
   const [changed, setChanged] = useState(false);
   return (
-    <section id="menu" className="mx-auto max-w-[1440px] px-6 py-28 md:px-12 md:py-44">
+    <section id="menu" className={`mx-auto max-w-[1440px] px-6 md:px-12 ${standalone ? "pb-28 pt-16 md:pb-44 md:pt-20" : "py-28 md:py-44"}`}>
+      {!standalone && (
       <Reveal className="grid gap-8 md:grid-cols-12 md:items-end">
         <div className="md:col-span-7">
           <p className="eyebrow text-muted-foreground">{t.menu.eyebrow}</p>
@@ -464,7 +485,8 @@ function Menu({ menu }: { menu: PublicCategory[] }) {
           </h2>
         </div>
       </Reveal>
-      <Reveal className="no-scrollbar -mx-6 mt-16 flex gap-8 overflow-x-auto border-b border-border px-6 md:mx-0 md:px-0" delay={200}>
+      )}
+      <Reveal className={`no-scrollbar -mx-6 flex gap-8 overflow-x-auto border-b border-border px-6 md:mx-0 md:px-0 ${standalone ? "" : "mt-16"}`} delay={200}>
         {menu.map((c, i) => (
           <button
             key={c.id}
@@ -504,12 +526,14 @@ function Menu({ menu }: { menu: PublicCategory[] }) {
         ))}
       </div>
       </Reveal>
+      {!standalone && (
       <div className="mt-16 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-        <a href="#menu" className="group inline-flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.25em]">
+        <a href={href("/karte")} className="group inline-flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.25em]">
           <span className="link-line">{t.menu.fullMenu}</span>
           <span className="h-px w-10 origin-left bg-gold transition-transform duration-500 ease-aurea group-hover:scale-x-150 group-focus-visible:scale-x-150" />
         </a>
       </div>
+      )}
     </section>
   );
 }
@@ -562,9 +586,9 @@ function DishGrid({ items, animate = false }: { items: PublicItem[]; animate?: b
 }
 
 const GALLERY = [
-  { src: pastry, cls: "md:col-span-4 aspect-square" },
-  { src: cafe, cls: "md:col-span-3 md:mt-24 aspect-[4/5]" },
-  { src: cocktail, cls: "col-span-2 md:col-span-5 aspect-[4/5] md:-mt-32" },
+  { src: cheesecake, cls: "md:col-span-4 aspect-square" },
+  { src: porridge, cls: "md:col-span-3 md:mt-24 aspect-[4/5]" },
+  { src: burrata, cls: "col-span-2 md:col-span-5 aspect-[4/5] md:-mt-32" },
 ];
 
 function Atmosphere() {
@@ -624,12 +648,16 @@ function Atmosphere() {
   );
 }
 
-function Visit() {
+/** Opening hours, address and map. Lives on its own page (/anfahrt), whose title band replaces the heading. */
+export function Visit({ standalone = false }: { standalone?: boolean }) {
   const { t } = useI18n();
+  const directions = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${CONTACT.street}, ${CONTACT.city}`)}`;
   return (
-    <section id="visit" className="mx-auto max-w-[1440px] px-6 py-28 md:px-12 md:py-44">
+    <section id="visit" className={`mx-auto max-w-[1440px] px-6 md:px-12 ${standalone ? "pb-28 pt-16 md:pb-44 md:pt-20" : "py-28 md:py-44"}`}>
       <div className="grid gap-16 md:grid-cols-12">
         <Reveal className="md:col-span-5">
+          {!standalone && (
+            <>
           <p className="eyebrow text-muted-foreground">{t.visit.eyebrow}</p>
           <h2 className="mt-6 font-serif text-5xl font-light leading-[1.02] md:text-7xl">
             <SplitText text={t.visit.title} start={150} step={36} letterClass="reveal-letter" />
@@ -638,7 +666,9 @@ function Visit() {
               <SplitText text={t.visit.titleEm} start={150 + t.visit.title.length * 36 + 100} step={36} letterClass="reveal-letter" />
             </em>
           </h2>
-          <dl className="mt-14 divide-y divide-border border-y border-border">
+            </>
+          )}
+          <dl className={`divide-y divide-border border-y border-border ${standalone ? "" : "mt-14"}`}>
             {t.visit.hours.map(([d, time], i) => (
               <div key={d} className="visit-in flex justify-between py-5 text-sm" style={step(i)}>
                 <dt className="text-muted-foreground">{d}</dt>
@@ -682,7 +712,7 @@ function Visit() {
               </span>
             </div>
             <p className="eyebrow absolute left-6 top-6 text-muted-foreground">Beelitz · 52.23° N</p>
-            <a href="#visit" className="press absolute bottom-6 right-6 bg-foreground px-7 py-4 text-[0.7rem] uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground">
+            <a href={directions} target="_blank" rel="noopener noreferrer" className="press absolute bottom-6 right-6 bg-foreground px-7 py-4 text-[0.7rem] uppercase tracking-[0.25em] text-background hover:bg-gold hover:text-foreground">
               {t.visit.directions}
             </a>
           </div>
@@ -812,15 +842,17 @@ function Reservation() {
   );
 }
 
-function Footer() {
-  const { t, href } = useI18n();
+export function Footer({ onHome = true }: { onHome?: boolean }) {
+  const { t } = useI18n();
+  const to = useLinkTo(onHome);
   const links: [string, string][] = [
     [t.footer.links.home, "#top"],
-    [t.footer.links.menu, "#menu"],
-    [t.footer.links.story, "#story"],
-    [t.footer.links.visit, "#visit"],
+    [t.footer.links.menu, "/karte"],
+    [t.footer.links.about, "/ueber-uns"],
+    [t.footer.links.gallery, "/galerie"],
+    [t.footer.links.visit, "/anfahrt"],
     [t.footer.links.reserve, "#reserve"],
-    [t.footer.links.join, href("/login")],
+    [t.footer.links.join, "/login"],
   ];
   return (
     <footer className="border-t border-cream/10 bg-espresso text-cream/70">
@@ -834,7 +866,7 @@ function Footer() {
             h === "#reserve" ? (
               <ReserveLink key={l} className="link-line w-fit hover:text-cream">{l}</ReserveLink>
             ) : (
-              <a key={l} href={h} className="link-line w-fit hover:text-cream">{l}</a>
+              <a key={l} href={to(h)} className="link-line w-fit hover:text-cream">{l}</a>
             ),
           )}
         </nav>
@@ -874,7 +906,7 @@ function Footer() {
 }
 
 /** Bottom-left shortcut to the reservation dialog; appears as soon as the page is scrolled. */
-function FloatingReserve() {
+export function FloatingReserve() {
   const { t } = useI18n();
   const [shown, setShown] = useState(false);
 
@@ -899,6 +931,128 @@ function FloatingReserve() {
   );
 }
 
+const KITCHEN = KITCHEN_PHOTOS.map((img, i) => ({
+  img,
+  span: ["md:col-span-3", "md:col-span-3", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-2", "md:col-span-3", "md:col-span-3"][i]!,
+}));
+
+/** The remaining kitchen photos, as a plain grid under the menu. */
+function Kitchen() {
+  const { t } = useI18n();
+  return (
+    <section id="kitchen" className="bg-muted/50 py-28 md:py-40">
+      <div className="mx-auto max-w-[1440px] px-6 md:px-12">
+        <Reveal className="grid gap-8 md:grid-cols-12 md:items-end">
+          <div className="md:col-span-7">
+            <p className="eyebrow text-muted-foreground">{t.kitchen.eyebrow}</p>
+            <h2 className="mt-4 font-serif text-6xl font-light leading-none md:text-8xl">
+              {t.kitchen.title} <em className="text-gold">{t.kitchen.titleEm}</em>
+            </h2>
+          </div>
+          <p className="max-w-md text-muted-foreground md:col-span-5">{t.kitchen.text}</p>
+        </Reveal>
+        <ul className="mt-16 grid grid-cols-2 gap-4 md:grid-cols-6 md:gap-6">
+          {KITCHEN.map((d, i) => (
+            <li key={i} className={`group ${d.span}`}>
+              <Reveal delay={(i % 3) * 100}>
+                <div className="overflow-hidden bg-muted">
+                  <img
+                    src={d.img.src}
+                    alt={t.kitchen.dishes[i]}
+                    loading="lazy"
+                    width={1197}
+                    height={799}
+                    className="aspect-[3/2] w-full object-cover transition-transform duration-[1200ms] ease-aurea group-hover:scale-[1.04]"
+                  />
+                </div>
+                <p className="mt-3 font-serif text-lg font-light italic leading-snug md:text-xl">
+                  {t.kitchen.dishes[i]}
+                </p>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+const OPENING = OPENING_PHOTOS;
+
+/** Photos from the opening evening. They are only 640 px wide, so they stay small on screen. */
+function Opening() {
+  const { t } = useI18n();
+  return (
+    <section id="opening" className="py-28 md:py-40">
+      <div className="mx-auto max-w-[1100px] px-6 md:px-12">
+        <Reveal className="text-center">
+          <p className="eyebrow text-muted-foreground">{t.opening.eyebrow}</p>
+          <h2 className="mt-4 font-serif text-6xl font-light leading-none md:text-8xl">
+            {t.opening.title}
+            <br />
+            <em className="text-gold">{t.opening.titleEm}</em>
+          </h2>
+          <p className="mx-auto mt-8 max-w-xl text-muted-foreground">{t.opening.text}</p>
+        </Reveal>
+        <ul className="mt-16 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
+          {OPENING.map((img, i) => (
+            <li key={i} className="group">
+              <Reveal delay={(i % 3) * 100}>
+                <div className="overflow-hidden bg-muted">
+                  <img
+                    src={img.src}
+                    alt={t.opening.alts[i]}
+                    loading="lazy"
+                    width={640}
+                    height={428}
+                    className="aspect-[3/2] w-full object-cover transition-transform duration-[1200ms] ease-aurea group-hover:scale-[1.04]"
+                  />
+                </div>
+              </Reveal>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+/** Short introduction of the owner; the full story is on /ueber-uns. */
+function Host() {
+  const { t, href } = useI18n();
+  const p = t.pages;
+  return (
+    <section id="host" className="py-24 md:py-36">
+      <div className="mx-auto grid max-w-[1100px] items-center gap-10 px-6 md:grid-cols-12 md:gap-16 md:px-12">
+        <Reveal className="md:col-span-4">
+          <div className="relative mx-auto max-w-[280px] md:max-w-none">
+            <img
+              src={owner.src}
+              alt={p.about.hostAlt}
+              loading="lazy"
+              width={owner.width}
+              height={owner.height}
+              className="aspect-[4/5] w-full object-cover"
+            />
+            <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/50" />
+          </div>
+        </Reveal>
+        <Reveal className="md:col-span-8" delay={150}>
+          <p className="eyebrow text-gold">{p.host.eyebrow}</p>
+          <h2 className="mt-4 font-serif text-5xl font-light leading-none md:text-7xl">{p.about.hostName}</h2>
+          <p className="eyebrow mt-4 text-muted-foreground">{p.about.hostRole}</p>
+          <div className="my-8 h-px w-16 bg-gold" aria-hidden />
+          <p className="max-w-xl leading-relaxed text-muted-foreground">{p.about.hostText}</p>
+          <Link href={href("/ueber-uns")} className="group mt-10 inline-flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.25em]">
+            <span className="link-line">{p.host.cta}</span>
+            <span className="h-px w-10 origin-left bg-gold transition-transform duration-500 ease-aurea group-hover:scale-x-150" />
+          </Link>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 export default function HomePage({ menu, account }: { menu: PublicCategory[]; account: AccountLink }) {
   useReveal();
   useRestoreScroll();
@@ -912,8 +1066,10 @@ export default function HomePage({ menu, account }: { menu: PublicCategory[]; ac
         <Reservation />
         <Story />
         <Menu menu={menu} />
+        <Kitchen />
         <Atmosphere />
-        <Visit />
+        <Opening />
+        <Host />
         <Footer />
         <FloatingReserve />
       </main>

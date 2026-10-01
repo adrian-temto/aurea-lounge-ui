@@ -25,12 +25,10 @@ const de = {
   nav: {
     items: [
       ["Start", "#top"],
-      ["Frühstück", "#tag"],
-      ["Café", "#tag"],
-      ["Lounge", "#tag"],
-      ["Karte", "#menu"],
-      ["Unsere Story", "#story"],
-      ["Anfahrt", "#visit"],
+      ["Karte", "/karte"],
+      ["Über uns", "/ueber-uns"],
+      ["Galerie", "/galerie"],
+      ["Anfahrt", "/anfahrt"],
     ] as [string, string][],
     home: "Auréa — Startseite",
     logoAlt: "Auréa — Breakfast · Café · Lounge",
@@ -62,20 +60,20 @@ const de = {
     {
       time: "Ab 08:00",
       title: "Frühstück",
-      alt: "Frühstückstisch mit Eggs Benedict und Sauerteigbrot",
-      copy: "Sauerteigbrot, weiche Eier, Steinobstmarmelade und mehr — für einen guten Start in den Tag.",
+      alt: "Bagel mit Ei, Avocado und Rucola",
+      copy: "Avocado Benedict, Egg & Avocado Croissant, Porridge und Joghurt-Bowls — dazu ein Frühstücksbuffet bis 12 Uhr.",
     },
     {
       time: "Ab 11:00",
-      title: "Café",
-      alt: "Flat White und Croissant auf Marmortisch",
-      copy: "Specialty Coffee, frisches Gebäck und eine volle Mittagskarte für den langen Nachmittag.",
+      title: "Mittagstisch",
+      alt: "Ciabatta Mozzarella",
+      copy: "Ciabatta, Bagels, Bowls, Salate und Pinsa — dazu illy-Kaffee, Cold Brew und Matcha.",
     },
     {
       time: "Ab 18:00",
-      title: "Lounge",
-      alt: "Kerzenlicht, Cocktail und Plattenspieler am Abend",
-      copy: "Kerzenschein, kleine Gerichte, klassische Cocktails und Vinyl, das leise spielt.",
+      title: "Abendkarte",
+      alt: "Trüffel-Burrata-Pasta",
+      copy: "Flammkuchen, Pasta und die Saisonkarte — dazu alkoholfreier Spritz, Prosecco 0,0 % und Sanbittèr.",
     },
   ],
 
@@ -123,10 +121,104 @@ const de = {
     titleEm: "Goldene Abende.",
     alts: [
       "Kerzenbeleuchteter Tisch zur goldenen Stunde",
-      "Pistazien-Porridge und Croissant",
-      "Kaffee und Croissant",
-      "Cocktail bei Kerzenlicht",
+      "Erdbeer-Pistazien-Cheesecake",
+      "Beelitzer Erdbeer-Porridge",
+      "Burrata-Feigen-Salat",
     ],
+  },
+
+  kitchen: {
+    eyebrow: "Aus unserer Küche",
+    title: "Frisch auf den",
+    titleEm: "Teller.",
+    text: "Von der Pinsa bis zur Green Power Bowl — ein kleiner Einblick in das, was bei uns täglich aus der Küche kommt.",
+    dishes: [
+      "Caesar Salad",
+      "Chicken-Avocado-Bagel",
+      "Avocado Benedict",
+      "Mini Pancakes",
+      "Vegetarischer Flammkuchen",
+      "Pinsa",
+      "Penne Zucchini, Gorgonzola & Walnüsse",
+      "Spargel & Lachs",
+      "Ciabatta",
+      "Green Power Bowl",
+    ],
+  },
+
+  opening: {
+    eyebrow: "Die Eröffnung",
+    title: "Der Abend, an dem",
+    titleEm: "alles begann.",
+    text: "Freunde, Nachbarn und die ersten Gäste — mit Prosecco, Häppchen und viel guter Laune haben wir die Türen der Auréa Lounge geöffnet.",
+    alts: [
+      "Goldener Auréa-Lounge-Schriftzug über dem Eingang, davor Luftballons",
+      "Gäste vor dem Eingang der Auréa Lounge",
+      "Kreidetafel zur Eröffnung der Auréa Lounge",
+      "Häppchen und Lilien auf dem Tresen",
+      "Prosecco im Kühler und Gläser",
+      "Barista am Tresen der Auréa Lounge",
+    ],
+  },
+
+  pages: {
+    menu: {
+      metaTitle: "Speisekarte — Auréa Café & Lounge",
+      metaDescription:
+        "Die ganze Karte der Auréa Lounge in Beelitz: Frühstück, Café und Lounge — mit Preisen und Allergenhinweisen.",
+      eyebrow: "Speisekarte",
+      title: "Unsere",
+      titleEm: "Karte.",
+      text: "Frühstück, Café und Lounge — alles, was aus unserer Küche und von unserer Bar kommt.",
+    },
+    about: {
+      metaTitle: "Über uns — Auréa Café & Lounge",
+      metaDescription:
+        "Die Geschichte der Auréa Lounge in Beelitz und ihr Gastgeber Burim Abdija: Frühstück, Café und Lounge unter einem Dach.",
+      eyebrow: "Über uns",
+      title: "Ein Ort für",
+      titleEm: "jeden Moment.",
+      hostEyebrow: "Der Gastgeber",
+      hostName: "Burim Abdija",
+      hostRole: "Inhaber der Auréa Lounge",
+      hostAlt: "Burim Abdija, Inhaber der Auréa Lounge",
+      hostText:
+        "Burim Abdija ist der Inhaber der Auréa Lounge in Beelitz. Sein Anspruch: ein Ort, an dem man sich von früh bis spät willkommen fühlt — beim ersten Kaffee, beim Mittagstisch und beim Abendglas.",
+      valuesTitle: "Woran wir uns halten",
+      values: [
+        { title: "Frisch zubereitet", text: "Von der Pinsa bis zur Green Power Bowl: Was auf den Teller kommt, entsteht bei uns in der Küche." },
+        { title: "Vom Morgen bis zum Abend", text: "Frühstück, Café und Lounge unter einem Dach — für jeden Moment des Tages." },
+        { title: "Herzlich willkommen", text: "Freunde, Nachbarn, Familien: Bei uns ist jeder Gast willkommen." },
+      ],
+      openingTitle: "Von Anfang an gut besucht",
+      openingText: "Bei der Eröffnung haben Freunde, Nachbarn und die ersten Gäste mit uns angestoßen.",
+      toGallery: "Zur Galerie",
+      toMenu: "Zur Karte",
+    },
+    gallery: {
+      metaTitle: "Galerie — Auréa Café & Lounge",
+      metaDescription: "Bilder aus der Küche und von der Eröffnung der Auréa Lounge in Beelitz.",
+      eyebrow: "Galerie",
+      title: "Einblicke in",
+      titleEm: "Auréa.",
+      text: "Gerichte aus unserer Küche und Momente von der Eröffnung.",
+      filterLabel: "Bilder filtern",
+      filters: { all: "Alle", food: "Aus der Küche", opening: "Eröffnung" },
+      open: "Foto vergrößern:",
+      close: "Schließen",
+      prev: "Vorheriges Foto",
+      next: "Nächstes Foto",
+      dialog: "Fotoansicht",
+    },
+    visit: {
+      metaTitle: "Anfahrt & Öffnungszeiten — Auréa Café & Lounge",
+      metaDescription:
+        "So findest du die Auréa Lounge in Beelitz: Adresse, Telefon und Öffnungszeiten von Montag bis Sonntag.",
+    },
+    host: {
+      eyebrow: "Ihr Gastgeber",
+      cta: "Mehr über uns",
+    },
   },
 
   visit: {
@@ -211,7 +303,15 @@ const de = {
 
   footer: {
     tagline: "A golden retreat from dawn to late.",
-    links: { home: "Start", menu: "Karte", story: "Story", visit: "Anfahrt", reserve: "Reservierung", join: "Login" },
+    links: {
+      home: "Start",
+      menu: "Karte",
+      about: "Über uns",
+      gallery: "Galerie",
+      visit: "Anfahrt",
+      reserve: "Reservierung",
+      join: "Login",
+    },
     contact: "Kontakt",
     hours: "Öffnungszeiten",
     hoursLines: ["Mo–So 08–20"],

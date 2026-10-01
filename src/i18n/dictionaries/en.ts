@@ -24,12 +24,10 @@ const en: Dictionary = {
   nav: {
     items: [
       ["Home", "#top"],
-      ["Breakfast", "#tag"],
-      ["Café", "#tag"],
-      ["Lounge", "#tag"],
-      ["Menu", "#menu"],
-      ["Our Story", "#story"],
-      ["Visit", "#visit"],
+      ["Menu", "/karte"],
+      ["About us", "/ueber-uns"],
+      ["Gallery", "/galerie"],
+      ["Visit", "/anfahrt"],
     ],
     home: "Auréa — home",
     logoAlt: "Auréa — Breakfast · Café · Lounge",
@@ -61,20 +59,20 @@ const en: Dictionary = {
     {
       time: "From 08:00",
       title: "Breakfast",
-      alt: "Breakfast table with eggs Benedict and sourdough bread",
-      copy: "Sourdough, soft eggs, stone-fruit jam and more — a good start to the day.",
+      alt: "Bagel with egg, avocado and rocket",
+      copy: "Avocado Benedict, egg & avocado croissant, porridge and yoghurt bowls — plus a breakfast buffet until noon.",
     },
     {
       time: "From 11:00",
-      title: "Café",
-      alt: "Flat white and croissant on a marble table",
-      copy: "Specialty coffee, fresh pastries and a full lunch menu for long afternoons.",
+      title: "Lunch",
+      alt: "Ciabatta with mozzarella",
+      copy: "Ciabatta, bagels, bowls, salads and pinsa — with illy coffee, cold brew and matcha.",
     },
     {
       time: "From 18:00",
-      title: "Lounge",
-      alt: "Candlelight, a cocktail and a record player in the evening",
-      copy: "Candlelight, small plates, classic cocktails and vinyl playing softly.",
+      title: "Evening menu",
+      alt: "Truffle burrata pasta",
+      copy: "Flammkuchen, pasta and the seasonal menu — with alcohol-free spritz, 0.0 % prosecco and Sanbittèr.",
     },
   ],
 
@@ -121,10 +119,104 @@ const en: Dictionary = {
     titleEm: "Golden evenings.",
     alts: [
       "Candlelit table at golden hour",
-      "Pistachio porridge and croissant",
-      "Coffee and croissant",
-      "Cocktail by candlelight",
+      "Strawberry pistachio cheesecake",
+      "Beelitz strawberry porridge",
+      "Burrata & fig salad",
     ],
+  },
+
+  kitchen: {
+    eyebrow: "From our kitchen",
+    title: "Fresh onto the",
+    titleEm: "plate.",
+    text: "From pinsa to the green power bowl — a small look at what leaves our kitchen every day.",
+    dishes: [
+      "Caesar salad",
+      "Chicken & avocado bagel",
+      "Avocado Benedict",
+      "Mini pancakes",
+      "Vegetarian flammkuchen",
+      "Pinsa",
+      "Penne with courgette, gorgonzola & walnuts",
+      "Asparagus & salmon",
+      "Ciabatta",
+      "Green power bowl",
+    ],
+  },
+
+  opening: {
+    eyebrow: "The opening",
+    title: "The evening",
+    titleEm: "it all began.",
+    text: "Friends, neighbours and our first guests — with prosecco, small bites and plenty of good cheer, we opened the doors of Auréa Lounge.",
+    alts: [
+      "Golden Auréa Lounge lettering above the entrance, with balloons below",
+      "Guests outside the entrance of Auréa Lounge",
+      "Chalkboard announcing the opening of Auréa Lounge",
+      "Small bites and lilies on the counter",
+      "Prosecco in a cooler and glasses",
+      "Barista behind the counter at Auréa Lounge",
+    ],
+  },
+
+  pages: {
+    menu: {
+      metaTitle: "Menu — Auréa Café & Lounge",
+      metaDescription:
+        "The full menu of Auréa Lounge in Beelitz: breakfast, café and lounge — with prices and allergen information.",
+      eyebrow: "Menu",
+      title: "Our",
+      titleEm: "menu.",
+      text: "Breakfast, café and lounge — everything that comes from our kitchen and our bar.",
+    },
+    about: {
+      metaTitle: "About us — Auréa Café & Lounge",
+      metaDescription:
+        "The story of Auréa Lounge in Beelitz and its host Burim Abdija: breakfast, café and lounge under one roof.",
+      eyebrow: "About us",
+      title: "A place for",
+      titleEm: "every moment.",
+      hostEyebrow: "Your host",
+      hostName: "Burim Abdija",
+      hostRole: "Owner of Auréa Lounge",
+      hostAlt: "Burim Abdija, owner of Auréa Lounge",
+      hostText:
+        "Burim Abdija is the owner of Auréa Lounge in Beelitz. His aim: a place where you feel welcome from early morning to late evening — over the first coffee, at lunch and with an evening glass.",
+      valuesTitle: "What we stand for",
+      values: [
+        { title: "Freshly prepared", text: "From pinsa to the green power bowl: what lands on your plate is made in our kitchen." },
+        { title: "Morning to evening", text: "Breakfast, café and lounge under one roof — for every moment of the day." },
+        { title: "Warm welcome", text: "Friends, neighbours, families: every guest is welcome here." },
+      ],
+      openingTitle: "Well visited from the start",
+      openingText: "At the opening, friends, neighbours and our first guests raised a glass with us.",
+      toGallery: "To the gallery",
+      toMenu: "To the menu",
+    },
+    gallery: {
+      metaTitle: "Gallery — Auréa Café & Lounge",
+      metaDescription: "Pictures from our kitchen and from the opening of Auréa Lounge in Beelitz.",
+      eyebrow: "Gallery",
+      title: "A look inside",
+      titleEm: "Auréa.",
+      text: "Dishes from our kitchen and moments from the opening.",
+      filterLabel: "Filter photos",
+      filters: { all: "All", food: "From the kitchen", opening: "Opening" },
+      open: "Enlarge photo:",
+      close: "Close",
+      prev: "Previous photo",
+      next: "Next photo",
+      dialog: "Photo viewer",
+    },
+    visit: {
+      metaTitle: "Directions & opening hours — Auréa Café & Lounge",
+      metaDescription:
+        "How to find Auréa Lounge in Beelitz: address, phone and opening hours from Monday to Sunday.",
+    },
+    host: {
+      eyebrow: "Your host",
+      cta: "More about us",
+    },
   },
 
   visit: {
@@ -206,7 +298,15 @@ const en: Dictionary = {
 
   footer: {
     tagline: "A golden retreat from dawn to late.",
-    links: { home: "Home", menu: "Menu", story: "Story", visit: "Visit", reserve: "Reservations", join: "Login" },
+    links: {
+      home: "Home",
+      menu: "Menu",
+      about: "About us",
+      gallery: "Gallery",
+      visit: "Visit",
+      reserve: "Reservations",
+      join: "Login",
+    },
     contact: "Contact",
     hours: "Opening hours",
     hoursLines: ["Mon–Sun 08–20"],
