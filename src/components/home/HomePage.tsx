@@ -20,7 +20,7 @@ import {
   useSavedContact,
 } from "./ReservationModal";
 import { EuDateInput } from "./EuDateInput";
-import hero from "@/assets/hero-aurea.webp";
+import hero from "@/assets/hero-bar-lilies.jpg";
 import {
   atmosphere as atmos,
   avocadoToast,
@@ -29,9 +29,8 @@ import {
   ciabatta,
   KITCHEN_PHOTOS,
   OPENING_PHOTOS,
-  owner,
   porridge,
-  staff as story,
+  loungePortrait as story,
   tagliatelle,
 } from "@/lib/photos";
 
@@ -262,26 +261,20 @@ function Hero() {
   // The buttons follow once the last word of the description has nearly settled.
   const buttonsAt = HERO_TEXT_START + (t.hero.text.split(" ").length - 1) * HERO_WORD_STEP + 550;
   return (
-    // The photo is 800 px wide, so it is framed rather than stretched across the screen: above
-    // the text on phones and tablets, the right half from lg up. It starts below the header, so
-    // neither the header nor the headline ever sits on top of it.
-    <section id="top" className="relative flex min-h-[100svh] flex-col overflow-hidden bg-espresso text-cream lg:grid lg:h-[100svh] lg:min-h-[640px] lg:grid-cols-2">
-      <div className="px-6 pt-24 md:px-12 md:pt-28 lg:order-2 lg:h-full lg:pb-12 lg:pl-0">
-        <div className="relative h-[36svh] min-h-[240px] overflow-hidden md:h-[50svh] lg:h-full">
-          <img
-            src={hero.src}
-            alt={t.hero.imageAlt}
-            width={hero.width}
-            height={hero.height}
-            fetchPriority="high"
-            className="hero-settle absolute inset-0 h-full w-full object-cover object-[85%_30%]"
-          />
-          <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/30 md:inset-4" />
-        </div>
-      </div>
-      <div className="relative flex flex-1 flex-col justify-end px-6 pb-[max(3.5rem,env(safe-area-inset-bottom))] pt-8 md:px-12 md:pb-16 lg:order-1 lg:pb-12 lg:pl-[max(3rem,calc((100vw-1440px)/2+3rem))]">
+    // Full-bleed photo with the text over it; the gradient keeps the text readable on the bright bar.
+    <section id="top" className="relative h-[100svh] min-h-[640px] overflow-hidden bg-espresso text-cream">
+      <img
+        src={hero.src}
+        alt={t.hero.imageAlt}
+        width={hero.width}
+        height={hero.height}
+        fetchPriority="high"
+        className="hero-settle absolute inset-0 h-full w-full object-cover object-[40%_center]"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/45 to-espresso/30" aria-hidden />
+      <div className="relative mx-auto flex h-full max-w-[1440px] flex-col justify-end px-6 pb-[max(3.5rem,env(safe-area-inset-bottom))] md:px-12 md:pb-24">
         <p className="hero-rise eyebrow mb-6 text-gold md:mb-8" style={rise(80)}>{t.hero.eyebrow}</p>
-        <h1 className="max-w-4xl font-serif text-[2.9rem] font-light leading-[0.98] sm:text-[3.4rem] md:text-[5.5rem] lg:text-[4.6rem] xl:text-[5.6rem]">
+        <h1 className="max-w-4xl font-serif text-[2.9rem] font-light leading-[0.98] sm:text-[3.4rem] md:text-[6.5rem]">
           <span className="block">
             <SplitText text={t.hero.title} start={250} />
           </span>
@@ -289,7 +282,7 @@ function Hero() {
             <SplitText text={t.hero.titleEm} start={250 + Array.from(t.hero.title.replace(/ /g, "")).length * 38 + 120} />
           </em>
         </h1>
-        <div className="mt-8 grid gap-8 md:mt-10 md:gap-10">
+        <div className="mt-8 grid gap-8 md:mt-10 md:grid-cols-[minmax(0,1fr)_auto] md:items-end md:gap-10">
           <p className="max-w-md text-base leading-relaxed text-cream/80">
             <WordReveal text={t.hero.text} start={HERO_TEXT_START} step={HERO_WORD_STEP} />
           </p>
@@ -305,7 +298,7 @@ function Hero() {
           </div>
         </div>
       </div>
-      <div className="hero-cue pointer-events-none absolute bottom-0 right-6 hidden h-24 w-px overflow-hidden bg-cream/15 md:right-12 md:block lg:hidden" aria-hidden>
+      <div className="hero-cue pointer-events-none absolute bottom-0 right-6 hidden h-24 w-px overflow-hidden bg-cream/15 md:right-12 md:block" aria-hidden>
         <span className="hero-cue-dot block h-8 w-px bg-gold" />
       </div>
     </section>
@@ -630,7 +623,7 @@ function Atmosphere() {
           </h2>
         </Reveal>
         {/* The photo spans the full content width; its parallax overscan stays small so the 1534 px source holds up. */}
-        <div ref={ref} className="reveal atmos-media relative aspect-[3/2] overflow-hidden md:aspect-[16/9]">
+        <div ref={ref} className="reveal atmos-media relative aspect-[16/10] overflow-hidden md:aspect-[2/1]">
           {/* The clip lives on this inner layer: the observed .reveal box itself is never clipped away. */}
           <div className="atmos-clip absolute inset-0 overflow-hidden">
             <img src={atmos.src} alt={t.atmosphere.alts[0]} loading="lazy" width={atmos.width} height={atmos.height} ref={img} className="absolute inset-x-0 -top-[5%] h-[110%] w-full object-cover will-change-transform" />
@@ -987,7 +980,7 @@ function Opening() {
         </Reveal>
         <ul className="mt-16 grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-5">
           {OPENING.map((img, i) => (
-            <li key={i} className="group">
+            <li key={i} className={`group ${i === 0 ? "col-span-2 md:col-span-1" : ""}`}>
               <Reveal delay={(i % 3) * 100}>
                 <div className="overflow-hidden bg-muted">
                   <img
@@ -1003,42 +996,6 @@ function Opening() {
             </li>
           ))}
         </ul>
-      </div>
-    </section>
-  );
-}
-
-/** Short introduction of the owner; the full story is on /ueber-uns. */
-function Host() {
-  const { t, href } = useI18n();
-  const p = t.pages;
-  return (
-    <section id="host" className="py-24 md:py-36">
-      <div className="mx-auto grid max-w-[1100px] items-center gap-10 px-6 md:grid-cols-12 md:gap-16 md:px-12">
-        <Reveal className="md:col-span-4">
-          <div className="relative mx-auto max-w-[280px] md:max-w-none">
-            <img
-              src={owner.src}
-              alt={p.about.hostAlt}
-              loading="lazy"
-              width={owner.width}
-              height={owner.height}
-              className="aspect-[4/5] w-full object-cover"
-            />
-            <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/50" />
-          </div>
-        </Reveal>
-        <Reveal className="md:col-span-8" delay={150}>
-          <p className="eyebrow text-gold">{p.host.eyebrow}</p>
-          <h2 className="mt-4 font-serif text-5xl font-light leading-none md:text-7xl">{p.about.hostName}</h2>
-          <p className="eyebrow mt-4 text-muted-foreground">{p.about.hostRole}</p>
-          <div className="my-8 h-px w-16 bg-gold" aria-hidden />
-          <p className="max-w-xl leading-relaxed text-muted-foreground">{p.about.hostText}</p>
-          <Link href={href("/ueber-uns")} className="group mt-10 inline-flex items-center gap-4 text-[0.72rem] uppercase tracking-[0.25em]">
-            <span className="link-line">{p.host.cta}</span>
-            <span className="h-px w-10 origin-left bg-gold transition-transform duration-500 ease-aurea group-hover:scale-x-150" />
-          </Link>
-        </Reveal>
       </div>
     </section>
   );
@@ -1060,7 +1017,6 @@ export default function HomePage({ menu }: { menu: PublicCategory[] }) {
         <Kitchen />
         <Atmosphere />
         <Opening />
-        <Host />
         <Footer />
         <FloatingReserve />
       </main>

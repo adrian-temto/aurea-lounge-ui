@@ -40,7 +40,7 @@ const en: Dictionary = {
   },
 
   hero: {
-    imageAlt: "The Auréa lounge: the glowing Auréa sign above velvet armchairs and golden table lamps",
+    imageAlt: "The bar at Auréa Lounge: white lilies and finger food on the counter, glasses on the shelves behind",
     eyebrow: "Breakfast · Café · Lounge",
     title: "A golden hour,",
     titleEm: "from dawn to late.",
@@ -78,7 +78,7 @@ const en: Dictionary = {
   ],
 
   story: {
-    imageAlt: "The Auréa Lounge team behind the counter, with Burim Abdija in the middle",
+    imageAlt: "The lounge at Auréa: the Auréa screen above velvet and houndstooth armchairs with golden table lamps",
     eyebrow: "Our story",
     title: "Rooted in warmth,",
     titleEm: "gilded with care.",
@@ -119,7 +119,7 @@ const en: Dictionary = {
     title: "Slow mornings.",
     titleEm: "Golden evenings.",
     alts: [
-      "The golden Auréa Lounge lettering at dusk, with white and gold balloons below",
+      "Golden Auréa Lounge lettering on the facade, with white and gold balloons below",
       "Strawberry pistachio cheesecake",
       "Beelitz strawberry porridge",
       "Burrata & fig salad",
@@ -152,11 +152,8 @@ const en: Dictionary = {
     text: "Friends, neighbours and our first guests — with prosecco, small bites and plenty of good cheer, we opened the doors of Auréa Lounge.",
     alts: [
       "Golden Auréa Lounge lettering above the entrance, with balloons below",
-      "Guests outside the entrance of Auréa Lounge",
       "Chalkboard announcing the opening of Auréa Lounge",
       "Small bites and lilies on the counter",
-      "Prosecco in a cooler and glasses",
-      "Barista behind the counter at Auréa Lounge",
     ],
   },
 
@@ -173,16 +170,10 @@ const en: Dictionary = {
     about: {
       metaTitle: "About us — Auréa Café & Lounge",
       metaDescription:
-        "The story of Auréa Lounge in Beelitz and its host Burim Abdija: breakfast, café and lounge under one roof.",
+        "The story of Auréa Lounge in Beelitz: breakfast, café and lounge under one roof.",
       eyebrow: "About us",
       title: "A place for",
       titleEm: "every moment.",
-      hostEyebrow: "Your host",
-      hostName: "Burim Abdija",
-      hostRole: "Owner of Auréa Lounge",
-      hostAlt: "Burim Abdija, owner of Auréa Lounge",
-      hostText:
-        "Burim Abdija is the owner of Auréa Lounge in Beelitz. His aim: a place where you feel welcome from early morning to late evening — over the first coffee, at lunch and with an evening glass.",
       valuesTitle: "What we stand for",
       values: [
         { title: "Freshly prepared", text: "From pinsa to the green power bowl: what lands on your plate is made in our kitchen." },
@@ -196,13 +187,19 @@ const en: Dictionary = {
     },
     gallery: {
       metaTitle: "Gallery — Auréa Café & Lounge",
-      metaDescription: "Pictures from our kitchen and from the opening of Auréa Lounge in Beelitz.",
+      metaDescription: "Pictures from our kitchen, the lounge and the opening of Auréa Lounge in Beelitz.",
       eyebrow: "Gallery",
       title: "A look inside",
       titleEm: "Auréa.",
-      text: "Dishes from our kitchen and moments from the opening.",
+      text: "Dishes from our kitchen, our lounge and moments from the opening.",
       filterLabel: "Filter photos",
-      filters: { all: "All", food: "From the kitchen", opening: "Opening" },
+      filters: { all: "All", food: "From the kitchen", lounge: "Lounge & bar", opening: "Opening" },
+      loungeAlts: [
+        "A glass on ice on the counter, the glowing Auréa sign behind it",
+        "Iced coffee in front of the Auréa screen",
+        "The coffee bar and espresso machine below the menu boards",
+        "The espresso machine and illy coffee grinder at the bar",
+      ],
       open: "Enlarge photo:",
       close: "Close",
       prev: "Previous photo",
@@ -213,10 +210,6 @@ const en: Dictionary = {
       metaTitle: "Directions & opening hours — Auréa Café & Lounge",
       metaDescription:
         "How to find Auréa Lounge in Beelitz: address, phone and opening hours from Monday to Sunday.",
-    },
-    host: {
-      eyebrow: "Your host",
-      cta: "More about us",
     },
   },
 

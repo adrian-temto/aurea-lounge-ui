@@ -14,12 +14,9 @@ import type { PublicCategory } from "@/lib/menu";
 import {
   FEATURED_FOOD,
   KITCHEN_PHOTOS,
+  LOUNGE_PHOTOS,
   OPENING_PHOTOS,
-  crowd,
-  facade,
-  owner,
-  prosecco,
-  staff,
+  loungePortrait,
 } from "@/lib/photos";
 
 /** Frame shared by the pages besides the landing page: header, a dark title band, footer. */
@@ -94,19 +91,18 @@ export function VisitPage() {
 export function AboutPage() {
   const { t, href } = useI18n();
   const p = t.pages.about;
-  const opening = [facade, crowd, prosecco];
   return (
     <SubPage eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm}>
       <section className="mx-auto grid max-w-[1100px] items-center gap-10 px-6 py-24 md:grid-cols-12 md:gap-16 md:px-12 md:py-36">
         <Reveal className="md:col-span-5">
           <div className="relative mx-auto max-w-[320px] md:max-w-none">
             <img
-              src={staff.src}
+              src={loungePortrait.src}
               alt={t.story.imageAlt}
               loading="lazy"
-              width={staff.width}
-              height={staff.height}
-              className="aspect-[4/5] w-full object-cover object-[center_55%]"
+              width={loungePortrait.width}
+              height={loungePortrait.height}
+              className="aspect-[4/5] w-full object-cover"
             />
             <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/50" />
           </div>
@@ -118,33 +114,6 @@ export function AboutPage() {
             <p className="leading-relaxed text-muted-foreground">{t.story.p2}</p>
           </div>
         </Reveal>
-      </section>
-
-      <section className="bg-muted/50 py-24 md:py-36" aria-labelledby="host-name">
-        <div className="mx-auto grid max-w-[1100px] items-center gap-10 px-6 md:grid-cols-12 md:gap-16 md:px-12">
-          <Reveal className="md:col-span-5">
-            <div className="relative mx-auto max-w-[320px] md:max-w-none">
-              <img
-                src={owner.src}
-                alt={p.hostAlt}
-                loading="lazy"
-                width={owner.width}
-                height={owner.height}
-                className="aspect-[4/5] w-full object-cover"
-              />
-              <span aria-hidden className="pointer-events-none absolute inset-3 border border-gold/50" />
-            </div>
-          </Reveal>
-          <Reveal className="md:col-span-7" delay={150}>
-            <p className="eyebrow text-gold">{p.hostEyebrow}</p>
-            <h2 id="host-name" className="mt-4 font-serif text-5xl font-light leading-none md:text-7xl">
-              {p.hostName}
-            </h2>
-            <p className="eyebrow mt-4 text-muted-foreground">{p.hostRole}</p>
-            <div className="my-8 h-px w-16 bg-gold" aria-hidden />
-            <p className="max-w-xl leading-relaxed text-muted-foreground">{p.hostText}</p>
-          </Reveal>
-        </div>
       </section>
 
       <section className="mx-auto max-w-[1100px] px-6 py-24 md:px-12 md:py-36">
@@ -173,12 +142,12 @@ export function AboutPage() {
             <p className="mx-auto mt-6 max-w-lg text-cream/70">{p.openingText}</p>
           </Reveal>
           <ul className="mt-14 grid grid-cols-3 gap-3 md:gap-5">
-            {opening.map((img, i) => (
+            {OPENING_PHOTOS.map((img, i) => (
               <li key={i}>
                 <Reveal delay={i * 100}>
                   <img
                     src={img.src}
-                    alt={t.opening.alts[OPENING_PHOTOS.indexOf(img)]}
+                    alt={t.opening.alts[i]}
                     loading="lazy"
                     width={640}
                     height={428}
@@ -209,8 +178,8 @@ export function AboutPage() {
 
 /* ---------------- /galerie ---------------- */
 
-type Photo = { img: StaticImageData; alt: string; group: "food" | "opening" };
-type Filter = "all" | "food" | "opening";
+type Photo = { img: StaticImageData; alt: string; group: "food" | "lounge" | "opening" };
+type Filter = "all" | "food" | "lounge" | "opening";
 
 export function GalleryPage() {
   const { t } = useI18n();
@@ -229,6 +198,7 @@ export function GalleryPage() {
       alt: foodAlts[i] ?? "",
       group: "food" as const,
     })),
+    ...LOUNGE_PHOTOS.map((img, i) => ({ img, alt: p.loungeAlts[i] ?? "", group: "lounge" as const })),
     ...OPENING_PHOTOS.map((img, i) => ({ img, alt: t.opening.alts[i] ?? "", group: "opening" as const })),
   ];
   const shown = photos.filter((ph) => filter === "all" || ph.group === filter);
@@ -252,7 +222,7 @@ export function GalleryPage() {
     <SubPage eyebrow={p.eyebrow} title={p.title} titleEm={p.titleEm} text={p.text}>
       <section className="mx-auto max-w-[1440px] px-6 py-20 md:px-12 md:py-28">
         <div role="group" aria-label={p.filterLabel} className="flex flex-wrap gap-x-8 gap-y-3 border-b border-border">
-          {(["all", "food", "opening"] as const).map((f) => (
+          {(["all", "food", "lounge", "opening"] as const).map((f) => (
             <button
               key={f}
               type="button"

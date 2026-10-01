@@ -41,7 +41,7 @@ const de = {
   },
 
   hero: {
-    imageAlt: "Die Auréa Lounge: das leuchtende Auréa-Logo über Samtsesseln und goldenen Tischleuchten",
+    imageAlt: "Die Bar der Auréa Lounge: weiße Lilien und Fingerfood auf der Theke, dahinter Gläser im Regal",
     eyebrow: "Breakfast · Café · Lounge",
     title: "Eine goldene Stunde,",
     titleEm: "von früh bis spät.",
@@ -79,7 +79,7 @@ const de = {
   ],
 
   story: {
-    imageAlt: "Das Team der Auréa Lounge hinter der Theke, mit Burim Abdija in der Mitte",
+    imageAlt: "Die Lounge der Auréa: der Auréa-Bildschirm über Samt- und Hahnentritt-Sesseln mit goldenen Tischleuchten",
     eyebrow: "Unsere Story",
     title: "Wärme verwurzelt,",
     titleEm: "mit Sorgfalt vergoldet.",
@@ -121,7 +121,7 @@ const de = {
     title: "Langsame Morgen.",
     titleEm: "Goldene Abende.",
     alts: [
-      "Goldener Schriftzug der Auréa Lounge am Abend, darunter weiße und goldene Luftballons",
+      "Goldener Auréa-Lounge-Schriftzug an der Fassade, darunter weiße und goldene Luftballons",
       "Erdbeer-Pistazien-Cheesecake",
       "Beelitzer Erdbeer-Porridge",
       "Burrata-Feigen-Salat",
@@ -154,11 +154,8 @@ const de = {
     text: "Freunde, Nachbarn und die ersten Gäste — mit Prosecco, Häppchen und viel guter Laune haben wir die Türen der Auréa Lounge geöffnet.",
     alts: [
       "Goldener Auréa-Lounge-Schriftzug über dem Eingang, davor Luftballons",
-      "Gäste vor dem Eingang der Auréa Lounge",
       "Kreidetafel zur Eröffnung der Auréa Lounge",
       "Häppchen und Lilien auf dem Tresen",
-      "Prosecco im Kühler und Gläser",
-      "Barista am Tresen der Auréa Lounge",
     ],
   },
 
@@ -175,16 +172,10 @@ const de = {
     about: {
       metaTitle: "Über uns — Auréa Café & Lounge",
       metaDescription:
-        "Die Geschichte der Auréa Lounge in Beelitz und ihr Gastgeber Burim Abdija: Frühstück, Café und Lounge unter einem Dach.",
+        "Die Geschichte der Auréa Lounge in Beelitz: Frühstück, Café und Lounge unter einem Dach.",
       eyebrow: "Über uns",
       title: "Ein Ort für",
       titleEm: "jeden Moment.",
-      hostEyebrow: "Der Gastgeber",
-      hostName: "Burim Abdija",
-      hostRole: "Inhaber der Auréa Lounge",
-      hostAlt: "Burim Abdija, Inhaber der Auréa Lounge",
-      hostText:
-        "Burim Abdija ist der Inhaber der Auréa Lounge in Beelitz. Sein Anspruch: ein Ort, an dem man sich von früh bis spät willkommen fühlt — beim ersten Kaffee, beim Mittagstisch und beim Abendglas.",
       valuesTitle: "Woran wir uns halten",
       values: [
         { title: "Frisch zubereitet", text: "Von der Pinsa bis zur Green Power Bowl: Was auf den Teller kommt, entsteht bei uns in der Küche." },
@@ -198,13 +189,19 @@ const de = {
     },
     gallery: {
       metaTitle: "Galerie — Auréa Café & Lounge",
-      metaDescription: "Bilder aus der Küche und von der Eröffnung der Auréa Lounge in Beelitz.",
+      metaDescription: "Bilder aus der Küche, der Lounge und von der Eröffnung der Auréa Lounge in Beelitz.",
       eyebrow: "Galerie",
       title: "Einblicke in",
       titleEm: "Auréa.",
-      text: "Gerichte aus unserer Küche und Momente von der Eröffnung.",
+      text: "Gerichte aus unserer Küche, unsere Lounge und Momente von der Eröffnung.",
       filterLabel: "Bilder filtern",
-      filters: { all: "Alle", food: "Aus der Küche", opening: "Eröffnung" },
+      filters: { all: "Alle", food: "Aus der Küche", lounge: "Lounge & Bar", opening: "Eröffnung" },
+      loungeAlts: [
+        "Ein Glas mit Eis auf dem Tresen, dahinter der leuchtende Auréa-Schriftzug",
+        "Eiskaffee vor dem Auréa-Bildschirm",
+        "Die Kaffeebar mit Siebträgermaschine unter den Menütafeln",
+        "Die Siebträgermaschine und die illy-Kaffeemühle an der Bar",
+      ],
       open: "Foto vergrößern:",
       close: "Schließen",
       prev: "Vorheriges Foto",
@@ -215,10 +212,6 @@ const de = {
       metaTitle: "Anfahrt & Öffnungszeiten — Auréa Café & Lounge",
       metaDescription:
         "So findest du die Auréa Lounge in Beelitz: Adresse, Telefon und Öffnungszeiten von Montag bis Sonntag.",
-    },
-    host: {
-      eyebrow: "Ihr Gastgeber",
-      cta: "Mehr über uns",
     },
   },
 

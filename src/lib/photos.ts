@@ -15,14 +15,14 @@ import salmon from "@/assets/food/salmon-asparagus-hollandaise.jpg";
 import baguette from "@/assets/food/baguette-avocado-chicken.jpg";
 import buddha from "@/assets/food/buddha-bowl-quinoa-broccoli.jpg";
 import facade from "@/assets/events/facade-aurea-lounge-sign.jpg";
-import crowd from "@/assets/events/opening-crowd-entrance.jpg";
 import chalkboard from "@/assets/events/opening-chalkboard-sign.jpg";
 import canapes from "@/assets/events/bar-canape-display-lilies.jpg";
-import prosecco from "@/assets/events/bar-prosecco-bucket.jpg";
-import barista from "@/assets/events/bar-barista-at-counter.jpg";
-import owner from "@/assets/team/burim-abdija.jpg";
-import staff from "@/assets/team/aurea-staff.jpg";
+import loungePortrait from "@/assets/lounge-portrait.jpg";
 import atmosphere from "@/assets/events/facade-sign-balloons.jpg";
+import drinkOnIce from "@/assets/lounge/drink-on-ice-aurea-screen.jpg";
+import icedCoffee from "@/assets/lounge/iced-coffee-aurea-screen.jpg";
+import coffeeBar from "@/assets/lounge/coffee-bar-menu-boards.jpg";
+import espressoMachine from "@/assets/lounge/espresso-machine.jpg";
 
 export {
   avocadoToast,
@@ -42,13 +42,9 @@ export {
   baguette,
   buddha,
   facade,
-  crowd,
   chalkboard,
   canapes,
-  prosecco,
-  barista,
-  owner,
-  staff,
+  loungePortrait,
   atmosphere,
 };
 
@@ -69,5 +65,8 @@ export const KITCHEN_PHOTOS = [
   buddha,
 ];
 
-/** Opening evening, 640 px wide; alt texts are t.opening.alts in the same order. */
-export const OPENING_PHOTOS = [facade, crowd, chalkboard, canapes, prosecco, barista];
+/** Opening evening (no photos of people), 640 px wide; alt texts are t.opening.alts in the same order. */
+export const OPENING_PHOTOS = [facade, chalkboard, canapes];
+
+/** The lounge and bar, for the gallery; alt texts are t.pages.gallery.loungeAlts in the same order. */
+export const LOUNGE_PHOTOS = [drinkOnIce, icedCoffee, coffeeBar, espressoMachine];
