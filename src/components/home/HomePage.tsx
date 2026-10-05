@@ -20,6 +20,7 @@ import {
   useSavedContact,
 } from "./ReservationModal";
 import { EuDateInput } from "./EuDateInput";
+import { TimeSelect } from "./TimeSelect";
 import hero from "@/assets/hero-bar-lilies.jpg";
 import {
   atmosphere as atmos,
@@ -733,6 +734,7 @@ function Reservation() {
   const form = useRef<HTMLFormElement>(null);
   const saveContact = useSavedContact(form);
   const [date, setDate] = useState("");
+  const [time, setTime] = useState("19:00");
   // Date, time and guest count survive a language switch; contact details are not carried over.
   useCarryOver<Selection | null>(
     "reservation",
@@ -747,7 +749,7 @@ function Reservation() {
       if (!f || !s) return;
       const el = f.elements;
       setDate(s.date);
-      if (TIME_SLOTS.includes(s.time)) (el.namedItem("time") as HTMLSelectElement).value = s.time;
+      if (TIME_SLOTS.includes(s.time)) setTime(s.time);
       const guests = el.namedItem("guests") as HTMLSelectElement;
       if (Array.from(guests.options).some((o) => o.value === s.guests)) guests.value = s.guests;
     },
@@ -784,13 +786,15 @@ function Reservation() {
               <EuDateInput name="date" value={date} onChange={setDate} required className={inputCls} />
             </Field>
             <Field label={t.reservation.time} i={4}>
-              <select name="time" className={inputCls} defaultValue="19:00">
-                {TIME_SLOTS.map((time) => (
-                  <option key={time} value={time} className="bg-espresso">
-                    {t.reservation.atTime(time)}
-                  </option>
-                ))}
-              </select>
+              <TimeSelect
+                name="time"
+                slots={TIME_SLOTS}
+                value={time}
+                onChange={setTime}
+                hourClassName={inputCls}
+                minuteClassName={inputCls}
+                optionClassName="bg-espresso"
+              />
             </Field>
             <div className="col-span-2">
               <Field label={t.reservation.guests} i={5}>

@@ -18,6 +18,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useId,
   useRef,
   useState,
   type AnchorHTMLAttributes,
@@ -30,6 +31,7 @@ import { createReservation } from "@/app/actions/reservations";
 import { PRIVACY_PATH } from "@/components/consent/ConsentProvider";
 import { useI18n } from "@/i18n/client";
 import { EuDateInput } from "./EuDateInput";
+import { TimeSelect } from "./TimeSelect";
 import {
   CONTACT,
   MAX_ONLINE_GUESTS,
@@ -188,6 +190,7 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
   const [step, setStep] = useState<"details" | "contact">("details");
   const [cameBack, setCameBack] = useState(false);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const timeLabel = useId();
 
   // Start keyboard and screen reader users at the heading of each step, not inside a field.
   useEffect(() => titleRef.current?.focus(), [step]);
@@ -266,25 +269,27 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
             ))}
           </select>
         </Field>
-        <Field label={t.reservation.time} icon={Clock}>
-          <select
-            value={time}
-            required
-            disabled={!slots.length}
-            onChange={(e) => set({ time: e.target.value })}
-            className={control}
+        {/* A group, not a label: it names two selects, hour and minute. */}
+        <div role="group" aria-labelledby={timeLabel} className="group block min-w-0">
+          <span
+            id={timeLabel}
+            className="eyebrow text-muted-foreground transition-colors duration-200 group-focus-within:text-foreground"
           >
-            {slots.length ? (
-              slots.map((slot) => (
-                <option key={slot} value={slot}>
-                  {t.reservation.atTime(slot)}
-                </option>
-              ))
-            ) : (
-              <option value="">—</option>
-            )}
-          </select>
-        </Field>
+            {t.reservation.time}
+          </span>
+          <span className="relative mt-2 flex items-center">
+            <Clock className="pointer-events-none absolute left-3 z-10 size-4 text-gold" aria-hidden />
+            <TimeSelect
+              slots={slots}
+              value={time}
+              onChange={(time) => set({ time })}
+              required
+              chevrons
+              hourClassName={`${input} pl-10 pr-8`}
+              minuteClassName={`${input} pl-3 pr-8`}
+            />
+          </span>
+        </div>
       </div>
 
       {!slots.length && (

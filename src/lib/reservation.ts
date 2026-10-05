@@ -1,6 +1,18 @@
 /** Booking rules shared by the reservation forms and the server action. */
 
-export const TIME_SLOTS = ["08:00", "10:00", "12:00", "14:00", "17:00", "19:00", "20:30", "22:00"];
+/** Bookable times as HH:MM: every SLOT_MINUTES from opening to the last seating (we close at 20:00). */
+export const FIRST_SLOT = "08:00";
+export const LAST_SLOT = "19:30";
+export const SLOT_MINUTES = 15;
+
+const toMinutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));
+const toHhmm = (m: number) =>
+  `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+
+export const TIME_SLOTS = Array.from(
+  { length: (toMinutes(LAST_SLOT) - toMinutes(FIRST_SLOT)) / SLOT_MINUTES + 1 },
+  (_, i) => toHhmm(toMinutes(FIRST_SLOT) + i * SLOT_MINUTES),
+);
 
 /** Larger groups are arranged by phone. */
 export const MAX_ONLINE_GUESTS = 8;

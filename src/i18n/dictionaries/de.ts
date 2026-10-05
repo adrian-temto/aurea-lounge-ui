@@ -250,6 +250,8 @@ const de = {
     marketingSms: "Senden Sie mir Angebote und Neuigkeiten per SMS",
     date: "Datum",
     time: "Uhrzeit",
+    hour: "Stunde",
+    minute: "Minute",
     guests: "Personen",
     seating: "Bereich",
     requests: "Besondere Wünsche",

@@ -137,7 +137,20 @@ describe("reservation buttons", () => {
     await userEvent.selectOptions(screen.getByLabelText("Personen"), "4");
     fireEvent.change(screen.getByLabelText("Datum"), { target: { value: "02.05.2099" } });
     await userEvent.selectOptions(screen.getByLabelText("Bereich"), "lounge");
-    await userEvent.selectOptions(screen.getByLabelText("Uhrzeit"), "20:30");
+    const time = screen.getByRole("group", { name: "Uhrzeit" });
+    // Hour and minute, every quarter hour from opening to the last seating.
+    const hours = within(time).getByLabelText("Stunde");
+    expect(within(hours).getAllByRole("option")[0]).toHaveValue("08");
+    expect(within(hours).getAllByRole("option").at(-1)).toHaveValue("19");
+    await userEvent.selectOptions(hours, "18");
+    const minutes = within(time).getByLabelText("Minute");
+    expect(within(minutes).getAllByRole("option").map((o) => o.textContent)).toEqual([
+      "00",
+      "15",
+      "30",
+      "45",
+    ]);
+    await userEvent.selectOptions(minutes, "45");
     await userEvent.click(screen.getByRole("button", { name: "Reservieren" }));
 
     await userEvent.type(screen.getByLabelText("Name"), "Mila Hoxha");
@@ -152,7 +165,7 @@ describe("reservation buttons", () => {
       locale: "de",
       guests: "4",
       date: "2099-05-02",
-      time: "20:30",
+      time: "18:45",
       seating: "lounge",
       name: "Mila Hoxha",
       phone: "+49 170 1234567",
@@ -239,7 +252,8 @@ describe("in English", () => {
 
     await userEvent.selectOptions(guests, "3");
     fireEvent.change(screen.getByLabelText("Date"), { target: { value: "02.05.2099" } });
-    await userEvent.selectOptions(screen.getByLabelText("Time"), "12:00");
+    await userEvent.selectOptions(screen.getByLabelText("Hour"), "12");
+    await userEvent.selectOptions(screen.getByLabelText("Minute"), "00");
     await userEvent.click(screen.getByRole("button", { name: "Reserve" }));
 
     // The selections carry over to the second step unchanged.

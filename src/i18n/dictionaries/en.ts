@@ -248,6 +248,8 @@ const en: Dictionary = {
     marketingSms: "Send me offers and news by SMS.",
     date: "Date",
     time: "Time",
+    hour: "Hour",
+    minute: "Minute",
     guests: "Guests",
     seating: "Area",
     requests: "Special requests",
