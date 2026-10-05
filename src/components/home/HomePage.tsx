@@ -683,6 +683,10 @@ export function Visit({ standalone = false }: { standalone?: boolean }) {
             <div className="visit-in" style={step(3)}>
               <p className="eyebrow mb-3 text-gold">{t.visit.phone}</p>
               <a href={CONTACT.phoneHref} className="link-line">{CONTACT.phone}</a>
+              <br />
+              <a href={`mailto:${CONTACT.email}`} className="link-line mt-2 inline-block break-all">
+                {CONTACT.email}
+              </a>
             </div>
           </div>
         </Reveal>
@@ -859,7 +863,9 @@ export function Footer({ onHome = true }: { onHome?: boolean }) {
           <br />
           {CONTACT.city}
           <br />
-          {CONTACT.phone}
+          <a href={CONTACT.phoneHref} className="link-line hover:text-cream">{CONTACT.phone}</a>
+          <br />
+          <a href={`mailto:${CONTACT.email}`} className="link-line hover:text-cream">{CONTACT.email}</a>
         </div>
         <div className="text-sm leading-relaxed md:col-span-3">
           <p className="eyebrow mb-4 text-gold">{t.footer.hours}</p>

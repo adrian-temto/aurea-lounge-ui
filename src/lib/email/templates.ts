@@ -153,7 +153,7 @@ function layout(locale: Locale, title: string, body: string) {
 ${body}
 </td></tr>
 <tr><td style="padding:20px 32px;border-top:1px solid #e6dccb;font-family:Arial,sans-serif;font-size:12px;line-height:1.6;color:#7a6a58">
-Auréa Café &amp; Lounge · ${esc(CONTACT.street)} · ${esc(CONTACT.city)} · ${esc(CONTACT.phone)}<br>
+Auréa Café &amp; Lounge · ${esc(CONTACT.street)} · ${esc(CONTACT.city)} · ${esc(CONTACT.phone)} · <a href="mailto:${CONTACT.email}" style="color:#7a6a58">${CONTACT.email}</a><br>
 ${esc(c.footer)} <a href="${privacy}" style="color:#7a6a58">${esc(c.privacy)}</a> · <a href="${imprint}" style="color:#7a6a58">${esc(c.imprint)}</a>
 </td></tr></table></td></tr></table></body></html>`;
 }

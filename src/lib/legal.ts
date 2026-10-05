@@ -1,3 +1,5 @@
+import { CONTACT } from "./reservation";
+
 /**
  * Business facts the Impressum and the privacy policy (both languages) need. `null` means the
  * owner hasn't supplied it yet: the pages then show a highlighted "Fehlt: …" marker in
@@ -10,7 +12,7 @@ export const LEGAL = {
   /** For a company: who represents it, e.g. "Geschäftsführer: Max Mustermann". */
   representative: null as string | null,
   /** Address for privacy requests and the Impressum. */
-  email: null as string | null,
+  email: CONTACT.email as string | null,
   /** Commercial register entry if registered, e.g. "Amtsgericht Potsdam, HRB 12345". */
   register: null as string | null,
   /** VAT ID (USt-IdNr.) if there is one, e.g. "DE123456789". */

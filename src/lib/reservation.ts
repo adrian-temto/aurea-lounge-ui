@@ -16,6 +16,8 @@ export type Seating = (typeof SEATING)[number]["value"];
 export const CONTACT = {
   phone: "+49 33204 634887",
   phoneHref: "tel:+4933204634887",
+  /** Public contact address, shown on the site and in the legal pages. */
+  email: "info@aurealounge.de",
   street: "Berlinerstr 196",
   city: "14547 Beelitz",
   /** What Google Maps searches for (embed and directions). */
