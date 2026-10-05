@@ -36,6 +36,7 @@ const de = {
     logoAlt: "Auréa — Breakfast · Café · Lounge",
     openMenu: "Menü öffnen",
     closeMenu: "Menü schließen",
+    staffLogin: "Team-Login",
     reserve: "Tisch reservieren",
     address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
   },

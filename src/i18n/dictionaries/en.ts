@@ -35,6 +35,7 @@ const en: Dictionary = {
     logoAlt: "Auréa — Breakfast · Café · Lounge",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    staffLogin: "Staff login",
     reserve: "Reserve a table",
     address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
   },

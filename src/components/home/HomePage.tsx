@@ -7,6 +7,7 @@ import { createReservation } from "@/app/actions/reservations";
 import { CookieSettingsButton } from "@/components/consent/CookieSettingsButton";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { GoogleMap } from "@/components/site/GoogleMap";
+import { StaffIcon } from "@/components/site/StaffIcon";
 import { useI18n } from "@/i18n/client";
 import { useCarryOver, useRestoreScroll } from "@/i18n/switch";
 import { CONTACT, MAX_ONLINE_GUESTS, TIME_SLOTS } from "@/lib/reservation";
@@ -74,6 +75,36 @@ function Text({ value }: { value: Localized }) {
 function useLinkTo(onHome: boolean) {
   const { href } = useI18n();
   return (h: string) => (h.startsWith("#") ? (onHome ? h : `${href("/")}${h}`) : href(h));
+}
+
+/**
+ * The team login lives on the admin host (lib/admin-host.ts). In development that's
+ * admin.localhost on the same port; everywhere else the production dashboard. Not ADMIN_URL:
+ * the browser can't read it, so server and client would render different links.
+ */
+function useAdminLoginUrl() {
+  const [url, setUrl] = useState("https://admin.aurealounge.de/login");
+  useEffect(() => {
+    const { protocol, hostname, port } = window.location;
+    if (hostname === "localhost" || hostname.endsWith(".localhost"))
+      setUrl(`${protocol}//admin.localhost${port ? `:${port}` : ""}/login`);
+  }, []);
+  return url;
+}
+
+function StaffLoginLink({ className = "" }: { className?: string }) {
+  const { t } = useI18n();
+  const href = useAdminLoginUrl();
+  return (
+    <a
+      href={href}
+      aria-label={t.nav.staffLogin}
+      title={t.nav.staffLogin}
+      className={`press flex h-11 w-11 shrink-0 items-center justify-center opacity-70 transition-opacity hover:text-gold hover:opacity-100 focus-visible:opacity-100 ${className}`}
+    >
+      <StaffIcon className="size-6" />
+    </a>
+  );
 }
 
 export function Header({ onHome = true }: { onHome?: boolean }) {
@@ -151,6 +182,7 @@ export function Header({ onHome = true }: { onHome?: boolean }) {
           </nav>
           <div className="hidden items-center gap-6 lg:flex xl:gap-8">
             <LanguageSwitcher className="text-[0.72rem]" />
+            <StaffLoginLink className="-mx-3" />
             <ReserveLink
               className={`press whitespace-nowrap border px-4 py-3 text-[0.7rem] uppercase tracking-[0.2em] xl:px-6 xl:tracking-[0.25em] ${
                 scrolled ? "border-foreground hover:bg-foreground hover:text-background" : "border-cream/60 hover:bg-cream hover:text-espresso"
@@ -171,6 +203,9 @@ export function Header({ onHome = true }: { onHome?: boolean }) {
               <span className={`h-px w-7 bg-current transition-transform duration-300 ease-aurea ${open ? "translate-y-[4px] rotate-45" : ""}`} />
               <span className={`h-px w-7 bg-current transition-transform duration-300 ease-aurea ${open ? "-translate-y-[4px] -rotate-45" : ""}`} />
             </button>
+            {/* Hangs under the menu button so the bar keeps its height and the logo its room.
+                Under the compact bar it would float over the page, so it shows at the top and in the open menu. */}
+            <StaffLoginLink className={`absolute right-0 top-full ${scrolled && !open ? "invisible" : ""}`} />
           </div>
         </div>
       </header>
