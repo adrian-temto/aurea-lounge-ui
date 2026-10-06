@@ -1,6 +1,6 @@
 -- ============ Auréa: the printed menu (pages 01-13) ============
 -- Replaces ALL current categories and dishes (the old test data) with the real menu.
--- Run once in the Supabase SQL Editor (project uvqkwjeupltphvkqvddv). Safe to re-run: it starts
+-- Run once in the Supabase SQL Editor (project pegbvgawqfqvuhlvivze). Safe to re-run: it starts
 -- by clearing the menu again. Dish photos are not part of this file; add them in /admin/menu.
 --
 -- Allergen numbers on the print map to the app's keys: 1 gluten, 2 crustaceans, 3 eggs, 4 fish,

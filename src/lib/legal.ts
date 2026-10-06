@@ -23,9 +23,9 @@ export const LEGAL = {
   hosting: null as string | null,
   /** How long the host keeps access logs (IP address etc.). */
   hostingLogRetention: null as string | null,
-  /** Where the Supabase project stores data, e.g. "Frankfurt (EU)". */
-  supabaseRegion: "Frankfurt am Main, Deutschland (AWS eu-central-1)" as string | null,
-  supabaseRegionEn: "Frankfurt am Main, Germany (AWS eu-central-1)",
+  /** Where the Supabase project stores data (eu-west-1, Ireland). */
+  supabaseRegion: "Irland (AWS eu-west-1)" as string | null,
+  supabaseRegionEn: "Ireland (AWS eu-west-1)",
   /** Date of the current version. */
   updated: "Oktober 2026",
   updatedEn: "October 2026",
