@@ -247,7 +247,7 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
             ))}
           </select>
         </Field>
-        <Field label={t.reservation.date} icon={CalendarDays}>
+        <Field label={t.reservation.date} icon={CalendarDays} chevron={false}>
           <EuDateInput
             required
             min={today}
@@ -280,7 +280,8 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
           <span className="relative mt-2 flex items-center">
             <Clock className="pointer-events-none absolute left-3 z-10 size-4 text-gold" aria-hidden />
             <TimeSelect
-              slots={slots}
+              slots={TIME_SLOTS}
+              available={slots}
               value={time}
               onChange={(time) => set({ time })}
               required
@@ -558,10 +559,13 @@ function Brand() {
 function Field({
   label,
   icon: Icon,
+  chevron = true,
   children,
 }: {
   label: string;
   icon: typeof Users;
+  /** The down arrow of a select; the date field draws its own calendar icon instead. */
+  chevron?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -572,10 +576,12 @@ function Field({
       <span className="relative mt-2 flex items-center">
         <Icon className="pointer-events-none absolute left-3 z-10 size-4 text-gold" aria-hidden />
         {children}
-        <ChevronDown
-          className="pointer-events-none absolute right-3 size-4 text-muted-foreground [input~&]:hidden"
-          aria-hidden
-        />
+        {chevron && (
+          <ChevronDown
+            className="pointer-events-none absolute right-3 size-4 text-muted-foreground [input~&]:hidden"
+            aria-hidden
+          />
+        )}
       </span>
     </label>
   );

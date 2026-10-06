@@ -10,7 +10,7 @@ import { GoogleMap } from "@/components/site/GoogleMap";
 import { StaffIcon } from "@/components/site/StaffIcon";
 import { useI18n } from "@/i18n/client";
 import { useCarryOver, useRestoreScroll } from "@/i18n/switch";
-import { CONTACT, MAX_ONLINE_GUESTS, TIME_SLOTS } from "@/lib/reservation";
+import { CONTACT, MAX_ONLINE_GUESTS, TIME_SLOTS, todayInBerlin } from "@/lib/reservation";
 import type { Localized, PublicCategory, PublicItem } from "@/lib/menu";
 import {
   GroupHint,
@@ -820,7 +820,7 @@ function Reservation() {
               <input name="email" type="email" required maxLength={254} autoComplete="email" className={inputCls} placeholder={t.reservation.emailPlaceholder} />
             </Field>
             <Field label={t.reservation.date} i={3}>
-              <EuDateInput name="date" value={date} onChange={setDate} required className={inputCls} />
+              <EuDateInput name="date" value={date} onChange={setDate} min={todayInBerlin()} required className={inputCls} />
             </Field>
             <Field label={t.reservation.time} i={4}>
               <TimeSelect

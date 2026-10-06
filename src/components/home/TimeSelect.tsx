@@ -5,11 +5,14 @@ import { ChevronDown } from "lucide-react";
 import { useI18n } from "@/i18n/client";
 
 /**
- * Picks one of `slots` (HH:MM) as an hour and a minute. Changing the hour keeps the minute when
- * that hour offers it, otherwise takes its first. With `name`, the time is also sent with the form.
+ * Picks one of `slots` (HH:MM) as an hour and a minute. All slots are always listed; those not in
+ * `available` (for example times that have passed today) are shown greyed out and can't be chosen.
+ * Changing the hour keeps the minute when that hour offers it, otherwise takes its first.
+ * With `name`, the time is also sent with the form.
  */
 export function TimeSelect({
   slots,
+  available = slots,
   value,
   onChange,
   name,
@@ -20,6 +23,8 @@ export function TimeSelect({
   chevrons = false,
 }: {
   slots: string[];
+  /** The slots that can be chosen; defaults to all of them. */
+  available?: string[];
   value: string;
   onChange: (time: string) => void;
   name?: string;
@@ -34,9 +39,10 @@ export function TimeSelect({
   const [hour = "", minute = ""] = value ? value.split(":") : [];
   const hours = [...new Set(slots.map((s) => s.slice(0, 2)))];
   const minutes = slots.filter((s) => s.startsWith(`${hour}:`)).map((s) => s.slice(3));
+  const free = new Set(available);
 
   const pickHour = (h: string) => {
-    const inHour = slots.filter((s) => s.startsWith(`${h}:`));
+    const inHour = slots.filter((s) => s.startsWith(`${h}:`) && free.has(s));
     onChange(inHour.find((s) => s.endsWith(`:${minute}`)) ?? inHour[0] ?? "");
   };
 
@@ -46,7 +52,7 @@ export function TimeSelect({
       aria-hidden
     />
   );
-  const disabled = !slots.length;
+  const disabled = !available.length;
 
   return (
     <span className="flex w-full min-w-0 items-center gap-1.5">
@@ -62,7 +68,12 @@ export function TimeSelect({
         >
           {disabled && <option value="">—</option>}
           {hours.map((h) => (
-            <option key={h} value={h} className={optionClassName}>
+            <option
+              key={h}
+              value={h}
+              disabled={!available.some((s) => s.startsWith(`${h}:`))}
+              className={optionClassName}
+            >
               {h}
             </option>
           ))}
@@ -83,7 +94,12 @@ export function TimeSelect({
         >
           {disabled && <option value="">—</option>}
           {minutes.map((m) => (
-            <option key={m} value={m} className={optionClassName}>
+            <option
+              key={m}
+              value={m}
+              disabled={!free.has(`${hour}:${m}`)}
+              className={optionClassName}
+            >
               {m}
             </option>
           ))}

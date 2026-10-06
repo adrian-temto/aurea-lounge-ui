@@ -1,8 +1,8 @@
 /** Booking rules shared by the reservation forms and the server action. */
 
-/** Bookable times as HH:MM: every SLOT_MINUTES from opening to the last seating (we close at 20:00). */
+/** Bookable times as HH:MM: every SLOT_MINUTES from 08:00 to the last seating, 19:45 (we close at 20:00). */
 export const FIRST_SLOT = "08:00";
-export const LAST_SLOT = "19:30";
+export const LAST_SLOT = "19:45";
 export const SLOT_MINUTES = 15;
 
 const toMinutes = (hhmm: string) => Number(hhmm.slice(0, 2)) * 60 + Number(hhmm.slice(3, 5));

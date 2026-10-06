@@ -84,7 +84,7 @@ export function EuDateInput({
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverAnchor asChild>
-        <div ref={wrapper} className="relative">
+        <div ref={wrapper} className="relative w-full min-w-0">
           <input
             ref={field}
             type="text"
@@ -123,7 +123,8 @@ export function EuDateInput({
         align="start"
         sideOffset={8}
         collisionPadding={12}
-        className="w-auto rounded-2xl border-border/60 p-4 shadow-2xl"
+        // Above the reservation dialog (z-[60]), which this calendar opens from.
+        className="z-[70] w-auto rounded-2xl border-border/60 p-4 shadow-2xl"
         // Clicking the field again must not close and reopen the calendar.
         onInteractOutside={(e) => {
           if (wrapper.current?.contains(e.target as Node)) e.preventDefault();
