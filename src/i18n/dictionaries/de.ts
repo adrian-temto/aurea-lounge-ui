@@ -38,7 +38,7 @@ const de = {
     closeMenu: "Menü schließen",
     staffLogin: "Team-Login",
     reserve: "Tisch reservieren",
-    address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
+    address: "Berliner Straße 196 · Beelitz · +49 33204 634887",
   },
 
   hero: {

@@ -27,8 +27,11 @@ const COPY = {
     contact: "Kontakt",
     phone: "Telefon",
     email: "E-Mail",
-    register: "Registereintrag",
-    vat: "Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG",
+    register: "Handelsregister",
+    court: "Registergericht",
+    registerNumber: "Handelsregisternummer",
+    vat: "Umsatzsteuer-Identifikationsnummer",
+    vatNote: "Umsatzsteuer-Identifikationsnummer gemäß § 27a Umsatzsteuergesetz:",
     responsible: "Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV",
     dispute: "Verbraucherstreitbeilegung",
     disputeText:
@@ -46,7 +49,10 @@ const COPY = {
     phone: "Phone",
     email: "Email",
     register: "Commercial register",
-    vat: "VAT identification number pursuant to Section 27a UStG",
+    court: "Registry court",
+    registerNumber: "Registration number",
+    vat: "VAT identification number",
+    vatNote: "VAT identification number pursuant to Section 27a of the German VAT Act:",
     responsible: "Responsible for content pursuant to Section 18(2) MStV",
     dispute: "Consumer dispute resolution",
     disputeText:
@@ -71,8 +77,6 @@ export default async function ImprintPage() {
           {LEGAL.owner ?? (
             <Missing>Name der Inhaberin / des Inhabers bzw. Firma mit Rechtsform</Missing>
           )}
-          <br />
-          {LEGAL.businessName}
           <br />
           {CONTACT.street}
           <br />
@@ -107,7 +111,11 @@ export default async function ImprintPage() {
 
       {LEGAL.register ? (
         <Block title={c.register}>
-          <p>{LEGAL.register}</p>
+          <p>
+            {c.court}: {LEGAL.register.split(", ")[0]}
+            <br />
+            {c.registerNumber}: {LEGAL.register.split(", ")[1]}
+          </p>
         </Block>
       ) : (
         <p className="mt-8">
@@ -119,7 +127,11 @@ export default async function ImprintPage() {
 
       {LEGAL.vatId ? (
         <Block title={c.vat}>
-          <p>{LEGAL.vatId}</p>
+          <p>
+            {c.vatNote}
+            <br />
+            {LEGAL.vatId}
+          </p>
         </Block>
       ) : (
         <p className="mt-8">

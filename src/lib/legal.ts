@@ -8,17 +8,17 @@ import { CONTACT } from "./reservation";
 export const LEGAL = {
   businessName: "Auréa Café & Lounge",
   /** Legal owner: the person's full name, or the company name with its legal form (e.g. GmbH). */
-  owner: null as string | null,
+  owner: "Aurea GmbH" as string | null,
   /** For a company: who represents it, e.g. "Geschäftsführer: Max Mustermann". */
-  representative: null as string | null,
+  representative: "Geschäftsführer: Abdija Burim" as string | null,
   /** Address for privacy requests and the Impressum. */
   email: CONTACT.email as string | null,
   /** Commercial register entry if registered, e.g. "Amtsgericht Potsdam, HRB 12345". */
-  register: null as string | null,
+  register: "Amtsgericht Potsdam, HRB 42163" as string | null,
   /** VAT ID (USt-IdNr.) if there is one, e.g. "DE123456789". */
-  vatId: null as string | null,
+  vatId: "DE462796535" as string | null,
   /** Person responsible for the content (§ 18 Abs. 2 MStV), with address if it differs. */
-  contentResponsible: null as string | null,
+  contentResponsible: "Abdija Burim" as string | null,
   /** Company that hosts the website, with its address. */
   hosting: null as string | null,
   /** How long the host keeps access logs (IP address etc.). */

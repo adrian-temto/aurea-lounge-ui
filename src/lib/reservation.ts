@@ -30,7 +30,7 @@ export const CONTACT = {
   phoneHref: "tel:+4933204634887",
   /** Public contact address, shown on the site and in the legal pages. */
   email: "info@aurealounge.de",
-  street: "Berlinerstr 196",
+  street: "Berliner Straße 196",
   city: "14547 Beelitz",
   /** What Google Maps searches for (embed and directions). */
   mapsQuery: "Berliner Str. 196, 14547 Beelitz",

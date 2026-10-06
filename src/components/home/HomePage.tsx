@@ -92,6 +92,24 @@ function useAdminLoginUrl() {
   return url;
 }
 
+/** Login as a button under the links of the mobile menu. */
+function MenuLoginButton({ open, delay }: { open: boolean; delay: number }) {
+  const { t } = useI18n();
+  const href = useAdminLoginUrl();
+  return (
+    <a
+      href={href}
+      className={`press mt-4 flex w-fit items-center gap-3 border border-foreground px-6 py-3.5 text-[0.7rem] uppercase tracking-[0.25em] transition-[opacity,transform,background-color,color] ease-aurea hover:bg-foreground hover:text-background focus-visible:bg-foreground focus-visible:text-background ${
+        open ? "translate-y-0 opacity-100 duration-700" : "translate-y-6 opacity-0 duration-150"
+      }`}
+      style={{ transitionDelay: open ? `${delay}ms` : "0ms" }}
+    >
+      <StaffIcon className="size-[18px]" />
+      {t.nav.staffLogin}
+    </a>
+  );
+}
+
 function StaffLoginLink({ className = "" }: { className?: string }) {
   const { t } = useI18n();
   const href = useAdminLoginUrl();
@@ -102,7 +120,7 @@ function StaffLoginLink({ className = "" }: { className?: string }) {
       title={t.nav.staffLogin}
       className={`press flex h-11 w-11 shrink-0 items-center justify-center opacity-70 transition-opacity hover:text-gold hover:opacity-100 focus-visible:opacity-100 ${className}`}
     >
-      <StaffIcon className="size-6" />
+      <StaffIcon className="size-[18px]" />
     </a>
   );
 }
@@ -203,9 +221,6 @@ export function Header({ onHome = true }: { onHome?: boolean }) {
               <span className={`h-px w-7 bg-current transition-transform duration-300 ease-aurea ${open ? "translate-y-[4px] rotate-45" : ""}`} />
               <span className={`h-px w-7 bg-current transition-transform duration-300 ease-aurea ${open ? "-translate-y-[4px] -rotate-45" : ""}`} />
             </button>
-            {/* Hangs under the menu button so the bar keeps its height and the logo its room.
-                Under the compact bar it would float over the page, so it shows at the top and in the open menu. */}
-            <StaffLoginLink className={`absolute right-0 top-full ${scrolled && !open ? "invisible" : ""}`} />
           </div>
         </div>
       </header>
@@ -231,6 +246,7 @@ export function Header({ onHome = true }: { onHome?: boolean }) {
               {l}
             </a>
           ))}
+          <MenuLoginButton open={open} delay={260 + t.nav.items.length * 70} />
         </nav>
         <div
           className={`transition-[opacity,transform] ease-aurea ${open ? "translate-y-0 opacity-100 duration-700" : "translate-y-6 opacity-0 duration-150"}`}

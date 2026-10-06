@@ -37,7 +37,7 @@ const en: Dictionary = {
     closeMenu: "Close menu",
     staffLogin: "Staff login",
     reserve: "Reserve a table",
-    address: "Berlinerstr 196 · Beelitz · +49 33204 634887",
+    address: "Berliner Straße 196 · Beelitz · +49 33204 634887",
   },
 
   hero: {
