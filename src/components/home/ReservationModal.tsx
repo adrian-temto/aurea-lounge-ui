@@ -256,7 +256,7 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
             className={`${input} pl-10`}
           />
         </Field>
-        <Field label={t.reservation.seating} icon={Armchair}>
+        <Field label={t.reservation.seating} icon={Armchair} className="min-[440px]:col-span-2">
           <select
             value={details.seating}
             onChange={(e) => set({ seating: e.target.value as Seating })}
@@ -270,7 +270,12 @@ function QuickReservation({ onDone }: { onDone: () => void }) {
           </select>
         </Field>
         {/* A group, not a label: it names two selects, hour and minute. */}
-        <div role="group" aria-labelledby={timeLabel} className="group block min-w-0">
+        <div
+          role="group"
+          aria-labelledby={timeLabel}
+          // Full width: hour and minute each carry an icon or arrow, so half a column clips "16".
+          className="group block min-w-0 min-[440px]:col-span-2"
+        >
           <span
             id={timeLabel}
             className="eyebrow text-muted-foreground transition-colors duration-200 group-focus-within:text-foreground"
@@ -560,16 +565,18 @@ function Field({
   label,
   icon: Icon,
   chevron = true,
+  className = "",
   children,
 }: {
   label: string;
+  className?: string;
   icon: typeof Users;
   /** The down arrow of a select; the date field draws its own calendar icon instead. */
   chevron?: boolean;
   children: ReactNode;
 }) {
   return (
-    <label className="group block min-w-0">
+    <label className={`group block min-w-0 ${className}`}>
       <span className="eyebrow text-muted-foreground transition-colors duration-200 group-focus-within:text-foreground">
         {label}
       </span>
