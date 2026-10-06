@@ -135,7 +135,7 @@ export default function AdminShell({
   const initials = name.slice(0, 2).toUpperCase();
 
   return (
-    <SidebarProvider defaultOpen={defaultOpen}>
+    <SidebarProvider defaultOpen={defaultOpen} className="admin-ui">
       <a
         href="#admin-main"
         className="sr-only z-50 rounded bg-foreground px-4 py-2 text-background focus:not-sr-only focus:fixed focus:left-4 focus:top-4"
@@ -146,7 +146,7 @@ export default function AdminShell({
         <SidebarHeader className="h-16 justify-center border-b border-sidebar-border px-4 group-data-[collapsible=icon]:px-2">
           <Link href="/admin" className="flex items-center gap-2" aria-label="Auréa Admin">
             <img
-              src="/logo-light.svg"
+              src="/logo.svg"
               alt=""
               width={645}
               height={167}
@@ -164,7 +164,7 @@ export default function AdminShell({
 
         <SidebarContent>
           <SidebarGroup>
-            <SidebarGroupLabel className="text-sidebar-foreground/50">Verwaltung</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-sm text-sidebar-foreground/60">Verwaltung</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {nav.map(({ href, label, Icon }) => {
@@ -175,7 +175,7 @@ export default function AdminShell({
                         asChild
                         isActive={active}
                         tooltip={label}
-                        className="h-10 data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-primary"
+                        className="h-11 text-base data-[active=true]:bg-sidebar-accent data-[active=true]:font-semibold data-[active=true]:text-sidebar-accent-foreground"
                       >
                         <Link href={href} aria-current={active ? "page" : undefined}>
                           <Icon aria-hidden />
@@ -199,9 +199,8 @@ export default function AdminShell({
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild tooltip="Website ansehen" className="h-10">
-                    {/* The dashboard runs on the admin host; the website is the main domain. */}
-                    <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
+                  <SidebarMenuButton asChild tooltip="Website ansehen" className="h-11 text-base">
+                                        <a href={SITE_URL} target="_blank" rel="noopener noreferrer">
                       <ExternalLink aria-hidden />
                       <span>Website ansehen</span>
                     </a>
@@ -260,7 +259,7 @@ export default function AdminShell({
         <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-border bg-background/90 px-4 backdrop-blur md:px-6">
           <SidebarTrigger className="-ml-1 size-9" aria-label="Seitenleiste umschalten" />
           <Separator orientation="vertical" className="h-5" />
-          <p className="truncate text-sm font-medium">{current?.label ?? "Admin"}</p>
+          <p className="truncate text-base font-semibold">{current?.label ?? "Admin"}</p>
           {canReservations && (
             <span
               className="ml-auto inline-flex items-center gap-2 text-xs text-muted-foreground"

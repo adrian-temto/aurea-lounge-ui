@@ -812,3 +812,41 @@ html.locale-arrived body {
     transform: scaleX(1);
   }
 }
+
+/* ============================ Admin area ============================
+ * The dashboard is a tool, not the brand showcase: a classic sans-serif, white surfaces, calm
+ * green for actions. Set on the root while an .admin-ui element is on the page, so dialogs and
+ * menus that Radix renders outside the dashboard markup pick it up too.
+ */
+html:has(.admin-ui) {
+  --font-sans: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --font-serif: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  --radius: 0.5rem;
+  --background: oklch(0.985 0.002 90);
+  --foreground: oklch(0.25 0.005 90);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.25 0.005 90);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.25 0.005 90);
+  --primary: oklch(0.42 0.07 150);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.95 0.004 90);
+  --secondary-foreground: oklch(0.25 0.005 90);
+  --muted: oklch(0.96 0.004 90);
+  --muted-foreground: oklch(0.45 0.005 90);
+  --accent: oklch(0.95 0.012 150);
+  --accent-foreground: oklch(0.25 0.005 90);
+  --border: oklch(0.9 0.004 90);
+  --input: oklch(0.8 0.004 90);
+  --ring: oklch(0.42 0.07 150);
+  --sidebar: oklch(0.97 0.004 90);
+  --sidebar-foreground: oklch(0.3 0.005 90);
+  --sidebar-primary: oklch(0.42 0.07 150);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.92 0.02 150);
+  --sidebar-accent-foreground: oklch(0.25 0.005 90);
+  --sidebar-border: oklch(0.9 0.004 90);
+  --sidebar-ring: oklch(0.42 0.07 150);
+}
+html:has(.admin-ui) body { font-size: 16px; line-height: 1.5; }
+.admin-ui em { font-style: normal; }

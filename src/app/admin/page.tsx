@@ -74,11 +74,7 @@ export default async function AdminOverview() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader
-        title={
-          <>
-            {greeting()}, <em>{displayName(session)}</em>
-          </>
-        }
+        title={`${greeting()}, ${displayName(session)}`}
         description={dateLabel}
         actions={
           <>
@@ -154,7 +150,7 @@ export default async function AdminOverview() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{r.name}</span>
                       {r.special_requests && (
-                        <span className="block truncate text-xs italic text-muted-foreground">
+                        <span className="block truncate text-sm text-muted-foreground">
                           „{r.special_requests}“
                         </span>
                       )}
@@ -183,10 +179,10 @@ export default async function AdminOverview() {
                       href={`/admin/reservations?status=new&open=${r.id}`}
                       className="flex items-center gap-3 px-5 py-3 transition-colors duration-150 hover:bg-muted/50 focus-visible:bg-muted/50 focus-visible:outline-none"
                     >
-                      <span className="size-2 shrink-0 rounded-full bg-gold" aria-hidden />
+                      <span className="size-2.5 shrink-0 rounded-full bg-primary" aria-hidden />
                       <span className="min-w-0 flex-1">
                         <span className="block truncate font-medium">{r.name}</span>
-                        <span className="block text-xs text-muted-foreground">
+                        <span className="block text-sm text-muted-foreground">
                           {relativeDay(r.reservation_date, today)}, {time(r)} · {guests(r.guests)}
                         </span>
                       </span>
@@ -224,17 +220,17 @@ function Stat({
     <Link
       href={href}
       className={`group rounded-lg border p-4 transition-colors duration-200 hover:border-foreground/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:p-5 ${
-        highlight ? "border-gold/60 bg-gold/10" : "border-border bg-card/40"
+        highlight ? "border-primary/40 bg-accent" : "border-border bg-card"
       }`}
     >
-      <span className="flex items-center justify-between text-sm text-muted-foreground">
+      <span className="flex items-center justify-between text-base text-muted-foreground">
         {label}
         <Icon className="size-4" aria-hidden />
       </span>
       <span className="mt-3 block text-3xl font-semibold tabular-nums leading-none tracking-tight md:text-4xl">
         {value}
       </span>
-      <span className="mt-2 block text-xs text-muted-foreground">{hint}</span>
+      <span className="mt-2 block text-sm text-muted-foreground">{hint}</span>
     </Link>
   );
 }
@@ -254,11 +250,11 @@ function Panel({
 }) {
   return (
     <section
-      className={`overflow-hidden rounded-lg border border-border bg-card/40 ${className ?? ""}`}
+      className={`overflow-hidden rounded-lg border border-border bg-card ${className ?? ""}`}
       aria-labelledby={`panel-${href}`}
     >
       <div className="flex items-center justify-between border-b border-border px-5 py-3">
-        <h2 id={`panel-${href}`} className="text-sm font-semibold">
+        <h2 id={`panel-${href}`} className="text-base font-semibold">
           {title}
         </h2>
         <Link
