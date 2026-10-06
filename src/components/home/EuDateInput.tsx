@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CalendarDays } from "lucide-react";
+import { de, enUS } from "date-fns/locale";
+
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverAnchor, PopoverContent } from "@/components/ui/popover";
 import { useI18n } from "@/i18n/client";
 
 /** "2026-03-07" -> "07.03.2026" */
@@ -26,9 +30,18 @@ function mask(raw: string) {
   return [d.slice(0, 2), d.slice(2, 4), d.slice(4)].filter(Boolean).join(".") + (d.length === 2 || d.length === 4 ? "." : "");
 }
 
+/** Local calendar day <-> "YYYY-MM-DD", without a time-zone shift. */
+const parseIso = (iso: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso);
+  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : undefined;
+};
+const formatIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 /**
- * Date field that always reads DD.MM.YYYY, whatever the browser's own locale is. The value handed
- * to the form (and to `onChange`) stays ISO, so the server sees the same format as before.
+ * Date field that always reads DD.MM.YYYY. A click opens a calendar to pick the day from; typing
+ * the date still works from the keyboard. The value handed to the form (and to `onChange`) stays
+ * ISO, so the server sees the same format as before.
  */
 export function EuDateInput({
   value,
@@ -47,8 +60,9 @@ export function EuDateInput({
 }) {
   const { locale } = useI18n();
   const [text, setText] = useState(() => isoToEu(value));
-  const picker = useRef<HTMLInputElement>(null);
+  const [open, setOpen] = useState(false);
   const field = useRef<HTMLInputElement>(null);
+  const wrapper = useRef<HTMLDivElement>(null);
 
   // Follow changes made from outside (for example a restored selection after a language switch).
   useEffect(() => {
@@ -63,46 +77,80 @@ export function EuDateInput({
     el.setCustomValidity(message);
   }, [text, iso, min, locale]);
 
+  const selected = parseIso(iso);
+  const minDate = min ? parseIso(min) : undefined;
+  const startMonth = selected ?? minDate;
+
   return (
-    <div className="relative">
-      <input
-        ref={field}
-        type="text"
-        inputMode="numeric"
-        autoComplete="off"
-        required={required}
-        value={text}
-        placeholder={locale === "de" ? "TT.MM.JJJJ" : "DD.MM.YYYY"}
-        maxLength={10}
-        onChange={(e) => {
-          const next = mask(e.target.value);
-          setText(next);
-          onChange(euToIso(next));
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverAnchor asChild>
+        <div ref={wrapper} className="relative">
+          <input
+            ref={field}
+            type="text"
+            // No on-screen keyboard on phones: the calendar is how you pick. A hardware keyboard
+            // can still type the date.
+            inputMode="none"
+            autoComplete="off"
+            required={required}
+            value={text}
+            placeholder={locale === "de" ? "Datum wählen" : "Choose a date"}
+            maxLength={10}
+            aria-haspopup="dialog"
+            aria-expanded={open}
+            onClick={() => setOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown" || e.key === "Enter") {
+                e.preventDefault();
+                setOpen(true);
+              }
+            }}
+            onChange={(e) => {
+              const next = mask(e.target.value);
+              setText(next);
+              onChange(euToIso(next));
+            }}
+            className={`${className ?? ""} cursor-pointer pr-10`}
+          />
+          {name && <input type="hidden" name={name} value={iso} />}
+          <CalendarDays
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70"
+            aria-hidden
+          />
+        </div>
+      </PopoverAnchor>
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        collisionPadding={12}
+        className="w-auto rounded-2xl border-border/60 p-4 shadow-2xl"
+        // Clicking the field again must not close and reopen the calendar.
+        onInteractOutside={(e) => {
+          if (wrapper.current?.contains(e.target as Node)) e.preventDefault();
         }}
-        className={`${className ?? ""} pr-10`}
-      />
-      {name && <input type="hidden" name={name} value={iso} />}
-      <input
-        ref={picker}
-        type="date"
-        tabIndex={-1}
-        aria-hidden
-        min={min}
-        value={iso}
-        onChange={(e) => {
-          setText(isoToEu(e.target.value));
-          onChange(e.target.value);
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          field.current?.focus();
         }}
-        className="pointer-events-none absolute bottom-0 right-0 h-0 w-0 opacity-0"
-      />
-      <button
-        type="button"
-        aria-label={locale === "de" ? "Kalender öffnen" : "Open calendar"}
-        onClick={() => picker.current?.showPicker?.()}
-        className="absolute right-0 top-1/2 grid -translate-y-1/2 h-8 w-8 place-items-center text-current opacity-70 transition-opacity hover:opacity-100 focus-visible:opacity-100"
       >
-        <CalendarDays className="h-4 w-4" aria-hidden />
-      </button>
-    </div>
+        <Calendar
+          mode="single"
+          autoFocus
+          locale={locale === "de" ? de : enUS}
+          weekStartsOn={1}
+          {...(selected ? { selected } : {})}
+          {...(startMonth ? { defaultMonth: startMonth } : {})}
+          {...(minDate ? { disabled: { before: minDate } } : {})}
+          onSelect={(day) => {
+            if (!day) return;
+            const next = formatIso(day);
+            setText(isoToEu(next));
+            onChange(next);
+            setOpen(false);
+          }}
+          className="p-0"
+        />
+      </PopoverContent>
+    </Popover>
   );
 }

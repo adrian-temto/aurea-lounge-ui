@@ -205,6 +205,22 @@ describe("reservation buttons", () => {
     expect(within(form).getByRole("checkbox", { name: /nächsten Reservierungen/ })).toBeChecked();
   });
 
+  it("opens a calendar when the date field is clicked and fills it from the chosen day", async () => {
+    render(<Page />);
+    await userEvent.click(screen.getByRole("link", { name: "Tisch reservieren" }));
+    const field = screen.getByLabelText("Datum");
+    await userEvent.click(field);
+
+    const days = await screen.findAllByRole("gridcell");
+    const free = days
+      .map((cell) => cell.querySelector("button"))
+      .filter((b): b is HTMLButtonElement => !!b && !b.disabled);
+    await userEvent.click(free.at(-1)!);
+
+    expect((field as HTMLInputElement).value).toMatch(/^\d{2}\.\d{2}\.\d{4}$/);
+    expect(screen.queryByRole("grid")).not.toBeInTheDocument();
+  });
+
   it("keeps the form open with the server's message when booking fails", async () => {
     createReservation.mockResolvedValue({
       ok: false,
