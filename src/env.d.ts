@@ -4,9 +4,7 @@ declare namespace NodeJS {
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
     /** Public site address for canonical and hreflang links; defaults to https://aurealounge.de. */
     NEXT_PUBLIC_SITE_URL?: string;
-    /** Host that serves the dashboard besides any admin.* host, e.g. "team.aurealounge.de". */
-    ADMIN_HOST?: string;
-    /** Dashboard address used in notification emails; defaults to https://admin.aurealounge.de. */
+    /** Site address used in notification emails; defaults to https://www.aurealounge.de. */
     ADMIN_URL?: string;
     /** Supabase secret key (server only). Needed to email the double opt-in link for offers. */
     SUPABASE_SECRET_KEY?: string;

@@ -1,10 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { z } from "zod";
 
-import { ADMIN_URL, isAdminHost } from "@/lib/admin-host";
+import { ADMIN_URL } from "@/lib/admin-host";
 import { getSession } from "@/lib/auth";
 import { sendEmail } from "@/lib/email/send";
 import { adminWelcomeEmail } from "@/lib/email/templates";
@@ -28,17 +27,9 @@ async function authorizeOwner() {
   return { admin, userId: session.user.id };
 }
 
-/**
- * Sign-in page for the email button: the admin address the owner is using right now (so it also
- * works on admin.localhost), but only an admin host, never whatever a request claims to be.
- */
-async function loginUrl() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host");
-  if (!host || !isAdminHost(host)) return `${ADMIN_URL}/login`;
-  const local = /^admin\.localhost(:\d+)?$/i.test(host);
-  const proto = local ? "http" : "https";
-  return `${proto}://${host}/login`;
+/** Sign-in page for the email button. Never built from the request, which could claim any host. */
+function loginUrl() {
+  return `${ADMIN_URL}/login`;
 }
 
 const newAdminSchema = z.object({
@@ -83,7 +74,7 @@ export async function createAdmin(input: { name: string; email: string }): Promi
     if (profile.error) console.error("admin profile name not saved", profile.error);
   }
 
-  const sent = await sendEmail(adminWelcomeEmail({ name, email }, password, await loginUrl()));
+  const sent = await sendEmail(adminWelcomeEmail({ name, email }, password, loginUrl()));
   if (!sent.ok) {
     await admin.auth.admin.deleteUser(user.id);
     return {
@@ -128,7 +119,7 @@ export async function resendLogin(userId: string): Promise<Result> {
   const name =
     typeof user.user_metadata?.["full_name"] === "string" ? user.user_metadata["full_name"] : "";
   const sent = await sendEmail(
-    adminWelcomeEmail({ name, email: user.email }, password, await loginUrl()),
+    adminWelcomeEmail({ name, email: user.email }, password, loginUrl()),
   );
   if (!sent.ok) return { error: `Die E-Mail konnte nicht gesendet werden: ${sent.error}` };
   return {};

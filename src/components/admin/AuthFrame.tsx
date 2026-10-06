@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import lounge from "@/assets/lounge.jpg";
-import { AuthLogo } from "./AuthLogo";
 
 export const authInputCls =
   "mt-3 w-full border-0 border-b border-border bg-transparent pb-3 text-base outline-none transition-colors duration-500 placeholder:text-muted-foreground/50 focus:border-gold";
@@ -39,7 +38,9 @@ export function AuthFrame({
       </div>
 
       <div className="flex flex-col px-6 pb-[max(2rem,env(safe-area-inset-bottom))] pt-8 md:px-16 md:py-12">
-        <AuthLogo />
+        <a href="/" aria-label="Auréa" className="self-start">
+          <img src="/logo.svg" alt="Auréa" width={645} height={167} className="h-10 w-auto" />
+        </a>
 
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-16">
           <p className="eyebrow text-gold">{eyebrow}</p>

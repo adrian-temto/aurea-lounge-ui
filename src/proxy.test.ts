@@ -29,7 +29,6 @@ const request = (
     headers: { host, ...(init.cookie ? { cookie: init.cookie } : {}), ...init.headers },
   });
 };
-const admin = (path: string) => request(path, { host: "admin.aurealounge.de" });
 
 /** What the page will read from headers() after the proxy ran. */
 const localeSeen = (res: Response) => res.headers.get(`x-middleware-request-${LOCALE_HEADER}`);
@@ -114,43 +113,26 @@ describe("proxy", () => {
     expect(redirectedTo(await proxy(request("/en/unbekannt")))).toBe("/unbekannt");
   });
 
-  it("hides the team area on the public site", async () => {
-    for (const path of ["/admin", "/admin/menu", "/login", "/en/login", "/en/admin"]) {
-      const res = await proxy(request(path));
-      expect(redirectedTo(res)).toBeNull();
-      expect(rewrittenTo(res)).toBe("/__not-found");
-    }
+  it("sends English links to the team area to the German page", async () => {
+    expect(redirectedTo(await proxy(request("/en/admin")))).toBe("/admin");
+    expect(redirectedTo(await proxy(request("/en/login")))).toBe("/login");
   });
 });
 
-describe("proxy on the admin host", () => {
-  it("opens the dashboard from the bare host", async () => {
-    expect(redirectedTo(await proxy(admin("/")))).toBe("/admin");
-  });
-
-  it("serves only the dashboard and its login", async () => {
-    expect(redirectedTo(await proxy(admin("/karte")))).toBe("/admin");
-    expect(redirectedTo(await proxy(admin("/en")))).toBe("/admin");
-  });
-
+describe("team area", () => {
   it("asks signed-out visitors to log in", async () => {
-    expect(redirectedTo(await proxy(admin("/admin/menu")))).toBe(
+    expect(redirectedTo(await proxy(request("/admin/menu")))).toBe(
       `/login?next=${encodeURIComponent("/admin/menu")}`,
     );
-    const login = await proxy(admin("/login"));
+    const login = await proxy(request("/login"));
     expect(redirectedTo(login)).toBeNull();
     expect(localeSeen(login)).toBe("de");
   });
 
   it("lets signed-in team members through", async () => {
     signedIn = true;
-    const res = await proxy(admin("/admin"));
+    const res = await proxy(request("/admin"));
     expect(redirectedTo(res)).toBeNull();
     expect(rewrittenTo(res)).toBeNull();
-  });
-
-  it("recognises admin.localhost for development", async () => {
-    const res = await proxy(request("/", { host: "admin.localhost:3000" }));
-    expect(redirectedTo(res)).toBe("/admin");
   });
 });

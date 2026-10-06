@@ -77,28 +77,15 @@ function useLinkTo(onHome: boolean) {
   return (h: string) => (h.startsWith("#") ? (onHome ? h : `${href("/")}${h}`) : href(h));
 }
 
-/**
- * The team login lives on the admin host (lib/admin-host.ts). In development that's
- * admin.localhost on the same port; everywhere else the production dashboard. Not ADMIN_URL:
- * the browser can't read it, so server and client would render different links.
- */
-function useAdminLoginUrl() {
-  const [url, setUrl] = useState("https://admin.aurealounge.de/login");
-  useEffect(() => {
-    const { protocol, hostname, port } = window.location;
-    if (hostname === "localhost" || hostname.endsWith(".localhost"))
-      setUrl(`${protocol}//admin.localhost${port ? `:${port}` : ""}/login`);
-  }, []);
-  return url;
-}
+/** The team login is a page of the site itself. */
+const ADMIN_LOGIN_PATH = "/login";
 
 /** Login as a button under the links of the mobile menu. */
 function MenuLoginButton({ open, delay }: { open: boolean; delay: number }) {
   const { t } = useI18n();
-  const href = useAdminLoginUrl();
   return (
     <a
-      href={href}
+      href={ADMIN_LOGIN_PATH}
       className={`press mt-4 flex w-fit items-center gap-3 border border-foreground px-6 py-3.5 text-[0.7rem] uppercase tracking-[0.25em] transition-[opacity,transform,background-color,color] ease-aurea hover:bg-foreground hover:text-background focus-visible:bg-foreground focus-visible:text-background ${
         open ? "translate-y-0 opacity-100 duration-700" : "translate-y-6 opacity-0 duration-150"
       }`}
@@ -112,10 +99,9 @@ function MenuLoginButton({ open, delay }: { open: boolean; delay: number }) {
 
 function StaffLoginLink({ className = "" }: { className?: string }) {
   const { t } = useI18n();
-  const href = useAdminLoginUrl();
   return (
     <a
-      href={href}
+      href={ADMIN_LOGIN_PATH}
       aria-label={t.nav.staffLogin}
       title={t.nav.staffLogin}
       className={`press flex h-11 w-11 shrink-0 items-center justify-center opacity-70 transition-opacity hover:text-gold hover:opacity-100 focus-visible:opacity-100 ${className}`}

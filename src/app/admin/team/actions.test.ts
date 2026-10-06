@@ -58,8 +58,6 @@ const client = {
 let isOwner = true;
 let secretKey = true;
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-let host = "admin.localhost:3000";
-vi.mock("next/headers", () => ({ headers: async () => new Headers({ host }) }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => (secretKey ? client : null) }));
 const sendEmail = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/email/send", () => ({ sendEmail }));
@@ -80,7 +78,6 @@ const lastMail = () => sendEmail.mock.calls.at(-1)![0] as { to: string; text: st
 beforeEach(() => {
   isOwner = true;
   secretKey = true;
-  host = "admin.localhost:3000";
   createUserError = null;
   users = [
     {
@@ -113,14 +110,7 @@ describe("createAdmin", () => {
     expect(tables["user_roles"]).toContainEqual({ user_id: user.id, role: "admin" });
     expect(lastMail().to).toBe("lena@example.com");
     expect(lastMail().text).toContain(user.password);
-    expect(lastMail().text).toContain("http://admin.localhost:3000/login");
-  });
-
-  it("links to the live admin address when the request host isn't an admin host", async () => {
-    host = "evil.example.com";
-    await actions.createAdmin({ name: "", email: "lena@example.com" });
-    expect(lastMail().text).toContain("https://admin.aurealounge.de/login");
-    expect(lastMail().text).not.toContain("evil");
+    expect(lastMail().text).toContain("https://www.aurealounge.de/login");
   });
 
   it("works without a name", async () => {

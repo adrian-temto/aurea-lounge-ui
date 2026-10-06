@@ -9,7 +9,7 @@ import {
   localizePath,
   splitLocale,
 } from "@/i18n/config";
-import { ADMIN_PATHS, isAdminHost } from "@/lib/admin-host";
+import { ADMIN_PATHS } from "@/lib/admin-host";
 
 const startsWithAny = (path: string, prefixes: string[]) =>
   prefixes.some((p) => path === p || path.startsWith(`${p}/`));
@@ -17,14 +17,10 @@ const startsWithAny = (path: string, prefixes: string[]) =>
 export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
 
-  // The team area has its own host (admin.…); the public site doesn't know it exists.
-  if (isAdminHost(request.headers.get("host"))) return adminProxy(request);
-  if (startsWithAny(splitLocale(pathname).path, ADMIN_PATHS)) {
-    // A path no route matches, so Next renders app/not-found.tsx with status 404.
-    return NextResponse.rewrite(new URL("/__not-found", request.url));
-  }
-
   const { locale, path } = splitLocale(pathname);
+
+  // The team area (/login, /admin) is German only; /en/admin falls through to the redirect below.
+  if (locale === DEFAULT_LOCALE && startsWithAny(path, ADMIN_PATHS)) return adminProxy(request);
 
   // English exists for the public pages only; /en/datenschutz, /en/admin … use the German page.
   if (locale !== DEFAULT_LOCALE && !isLocalizedRoute(path)) {
@@ -53,12 +49,9 @@ export async function proxy(request: NextRequest) {
   return respond();
 }
 
-/** admin.…: only the dashboard and its login, in German, with the Supabase session refreshed. */
+/** /login and /admin: in German, with the Supabase session refreshed. */
 async function adminProxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  if (!startsWithAny(pathname, ADMIN_PATHS)) {
-    return NextResponse.redirect(new URL("/admin", request.url));
-  }
 
   const respond = () => {
     const headers = new Headers(request.headers);

@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import LoginForm from "@/components/admin/LoginForm";
 import { canUseDashboard, getSession } from "@/lib/auth";
 
-/** Team login on the admin host (see lib/admin-host.ts). There is no sign-up: the super admin creates admin accounts in the dashboard. */
+/** Team login at /login. There is no sign-up: the super admin creates admin accounts in the dashboard. */
 export const metadata: Metadata = { title: "Anmelden — Auréa Admin", robots: { index: false } };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
