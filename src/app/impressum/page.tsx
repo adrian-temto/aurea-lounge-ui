@@ -23,6 +23,7 @@ const COPY = {
     titleEm: "sum",
     provider: "Angaben gemäß § 5 DDG",
     country: "",
+    countryLine: "Deutschland",
     represented: "Vertreten durch",
     contact: "Kontakt",
     phone: "Telefon",
@@ -44,6 +45,7 @@ const COPY = {
     titleEm: "notice",
     provider: "Information pursuant to Section 5 DDG (German Digital Services Act)",
     country: ", Germany",
+    countryLine: "Germany",
     represented: "Represented by",
     contact: "Contact",
     phone: "Phone",
@@ -81,7 +83,8 @@ export default async function ImprintPage() {
           {CONTACT.street}
           <br />
           {CONTACT.city}
-          {c.country}
+          <br />
+          {c.countryLine}
         </address>
       </Block>
 
